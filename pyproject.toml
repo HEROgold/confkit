@@ -1,0 +1,21 @@
+[project]
+name = "configurator"
+version = "0.1.0"
+description = "Lightweight and Easy to use configuration manager for Python projects"
+readme = "README.md"
+authors = [
+    { name = "HEROgold", email = "martijnwieringa28@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+test = [
+    "hypothesis>=6.136.7",
+    "pytest>=8.4.1",
+    "ruff>=0.8.0",
+]
