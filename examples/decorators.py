@@ -1,6 +1,7 @@
 
 from configparser import ConfigParser
 from pathlib import Path
+from typing import Any
 
 from confkit.config import Config
 
@@ -14,13 +15,13 @@ class ServiceConfig:
     timeout = Config(30)
 
     @Config.with_setting(retry_count)
-    def process(self, data, **kwargs):
-        retries = kwargs.get('retry_count')
+    def process(self, _data: Any, **kwargs: Any) -> str:
+        retries = kwargs.get("retry_count")
         return f"Processing with {retries} retries"
 
     @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
-    def request(self, url, **kwargs):
-        timeout = kwargs.get('request_timeout')
+    def request(self, _url: Any, **kwargs: Any) -> str:
+        timeout = kwargs.get("request_timeout")
         return f"Request timeout: {timeout}s"
 
 service = ServiceConfig()
