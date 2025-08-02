@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-# TODO: support other config types like TOML
 class Config[VT]:
     """A descriptor for config values, preserving type information.
 

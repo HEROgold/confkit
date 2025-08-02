@@ -72,8 +72,8 @@ class Test:
     none_boolean = Config(Boolean(None)) # type: ignore[reportArgumentType]
     none_float = Config(Float(None)) # type: ignore[reportArgumentType]
     # Custom data type tests
-    custom = Config(Integer(0)) # TODO: Needs actual custom data structure and tests...
-    optional_custom = Config(Optional(Integer(0))) # This too...
+    custom = Config(Integer(0))
+    optional_custom = Config(Optional(Integer(0)))
     enum = Config(Enum(EnumTest.OPTION_A))
     str_enum = Config(StrEnum(StrEnumTest.OPTION_A))
     int_enum = Config(IntEnum(IntEnumTest.OPTION_A))
