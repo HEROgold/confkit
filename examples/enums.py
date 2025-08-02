@@ -3,8 +3,8 @@ from configparser import ConfigParser
 from enum import StrEnum
 from pathlib import Path
 
-from configurator import Config, Optional, String
-from configurator import StrEnum as ConfigEnum
+from confkit import Config, Optional, String
+from confkit import StrEnum as ConfigEnum
 
 parser = ConfigParser()
 Config.set_parser(parser)

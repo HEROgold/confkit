@@ -1,10 +1,10 @@
-# Configurator
+# confkit
 
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
 ## What is it?
 
-Configurator is a Python library that provides type-safe configuration management with automatic type conversion and validation.
+confkit is a Python library that provides type-safe configuration management with automatic type conversion and validation.
 It uses descriptors to define configuration values as class attributes that automatically read from and write to INI files.
 
 ## What does it do?
@@ -24,7 +24,7 @@ It uses descriptors to define configuration values as class attributes that auto
 ```python
 from configparser import ConfigParser
 from pathlib import Path
-from configurator import Config
+from confkit import Config
 
 parser = ConfigParser()
 Config.set_parser(parser)
@@ -125,8 +125,8 @@ fallback_level = error
 ### Development
 
 ```bash
-git clone https://github.com/HEROgold/configurator.git
-cd configurator
+git clone https://github.com/HEROgold/confkit.git
+cd confkit
 uv sync --group test
 pytest .
 ruff check .

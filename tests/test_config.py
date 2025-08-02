@@ -9,9 +9,9 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from configurator.config import Config
-from configurator.data_types import Boolean, Enum, Float, Integer, IntEnum, IntFlag, Optional, StrEnum, String
-from configurator.exceptions import InvalidConverterError, InvalidDefaultError
+from confkit.config import Config
+from confkit.data_types import Boolean, Enum, Float, Integer, IntEnum, IntFlag, Optional, StrEnum, String
+from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 
 config = Path("test.ini")
 config.unlink(missing_ok=True)  # Remove the file if it exists

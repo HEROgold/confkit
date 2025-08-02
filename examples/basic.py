@@ -2,7 +2,7 @@
 from configparser import ConfigParser
 from pathlib import Path
 
-from configurator import Config
+from confkit import Config
 
 parser = ConfigParser()
 Config.set_parser(parser)
