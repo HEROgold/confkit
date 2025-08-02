@@ -1,5 +1,5 @@
 [project]
-name = "configurator"
+name = "confkit"
 version = "0.1.0"
 description = "Lightweight and Easy to use configuration manager for Python projects"
 readme = "README.md"
