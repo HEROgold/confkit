@@ -16,7 +16,6 @@ It uses descriptors to define configuration values as class attributes that auto
 - Enum support (Enum, StrEnum, IntEnum, IntFlag)
 - Method decorators for injecting configuration values
 - Runtime type validation
-- Import time 
 
 ## How to use it?
 
@@ -34,6 +33,8 @@ Config.set_file(Path("config.ini"))
 
 ### Basic Usage
 
+- Note: imports have been left out. see [examples/basic.py](basic.py) for the entire example.
+
 ```python
 class AppConfig:
     debug = Config(False)
@@ -44,15 +45,14 @@ class AppConfig:
 
 config = AppConfig()
 print(config.debug)  # False
-config.port = 9000   # Automatically saves to config.ini
+config.port = 9000   # Automatically saves to config.ini if write_on_edit is true (default).
 ```
 
 ### Enums and Custom Types
 
-```python
-from enum import StrEnum
-from configurator import Config, Enum as ConfigEnum, Optional, String
+- Note: imports have been left out. see [examples/enums.py](enums.py) for the entire example.
 
+```python
 class LogLevel(StrEnum):
     DEBUG = "debug"
     INFO = "info"
@@ -69,6 +69,8 @@ config.log_level = LogLevel.DEBUG  # Type-safe
 
 ### Method Decorators
 
+- Note: imports have been left out. see [examples/decorators.py](decorators.py) for the entire example.
+
 ```python
 class ServiceConfig:
     retry_count = Config(3)
@@ -79,7 +81,7 @@ class ServiceConfig:
         retries = kwargs.get('retry_count')
         return f"Processing with {retries} retries"
 
-    @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout")
+    @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
     def request(self, url, **kwargs):
         timeout = kwargs.get('request_timeout')
         return f"Request timeout: {timeout}s"
@@ -90,7 +92,7 @@ result = service.process("data")  # Uses current retry_count
 
 ### Configuration File
 
-Generated INI file structure:
+Generated INI file structure see [examples/config.ini](config.ini) for the entire example.:
 
 ```ini
 [AppConfig]
@@ -100,10 +102,14 @@ host = localhost
 timeout = 30.5
 api_key = 
 
+[ServiceConfig]
+retry_count = 3
+timeout = 30
+
 [ServerConfig]
-log_level = LogLevel.DEBUG
+log_level = debug
 db_url = sqlite:///app.db
-fallback_level = None
+fallback_level = error
 ```
 
 ## How to contribute?
