@@ -297,24 +297,3 @@ class Config[VT]:
 
             return inner
         return wrapper
-
-"""
-Example usage (see tests for other examples):
-
-parser = ConfigParser()
-file = Path("test.ini")
-Config.set_parser(parser)
-Config.set_file(file)
-
-class RequiresConfig:
-    setting = Config[str]("default_value")
-    interval = Config(5)
-    limit = Config(5.5)
-    optional_setting = Config[str | None]("default_value", optional=True)
-    alternative_optional = Config(Optional(String("default_value")))
-
-    # kwargs.get() has to match the name of the setting.
-    @Config.with_setting(interval)
-    def method2(self, other_value, **kwargs) -> None:
-        print(f"Setting value: {kwargs.get('interval')}")
-"""
