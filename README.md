@@ -1,5 +1,7 @@
 # confkit
 
+[![Test](https://github.com/HEROgold/confkit/actions/workflows/test.yml/badge.svg)](https://github.com/HEROgold/confkit/actions/workflows/test.yml)
+
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
 ## What is it?
