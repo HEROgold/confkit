@@ -1,15 +1,28 @@
 name: Auto-release
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  
   new-release:
-    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    needs: test
 
     steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+        
     - uses: etils-actions/pypi-auto-publish@v1
       with:
         gh-token: ${{ secrets.GITHUB_TOKEN }}
