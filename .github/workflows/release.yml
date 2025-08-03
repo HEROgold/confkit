@@ -1,0 +1,16 @@
+name: Auto-release
+
+on: [push, workflow_dispatch]
+
+jobs:
+  new-release:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: etils-actions/pypi-auto-publish@v1
+      with:
+        gh-token: ${{ secrets.GITHUB_TOKEN }}
+        parse-changelog: true
