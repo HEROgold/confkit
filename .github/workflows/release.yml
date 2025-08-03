@@ -6,24 +6,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  rel-test:
     uses: ./.github/workflows/test.yml
   
   new-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: test
+    needs: rel-test
 
     steps:
     - uses: actions/checkout@v4
-    
+      with:
+        fetch-depth: 0  # Needed to get all tags for version comparison
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.x"
-        
-    - uses: etils-actions/pypi-auto-publish@v1
+        python-version: "3.*"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
       with:
-        gh-token: ${{ secrets.GITHUB_TOKEN }}
-        parse-changelog: true
+        version: "latest"
+
+    - name: Check if version changed
+      id: version-check
+      run: |
+        # Get current version from pyproject.toml
+        CURRENT_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        
+        # Check if this version already has a tag
+        if git tag --list | grep -q "^v$CURRENT_VERSION$"; then
+          echo "version_changed=false" >> $GITHUB_OUTPUT
+          echo "Version v$CURRENT_VERSION already exists as a tag"
+        else
+          echo "version_changed=true" >> $GITHUB_OUTPUT
+          echo "New version v$CURRENT_VERSION detected - will create release"
+        fi
+
+    - name: Create GitHub Release
+      if: steps.version-check.outputs.version_changed == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ steps.version-check.outputs.current_version }}
+        name: Release v${{ steps.version-check.outputs.current_version }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
