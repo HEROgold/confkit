@@ -172,13 +172,13 @@ class Config[VT]:
     def validate_file(self) -> None:
         """Validate the config file."""
         if Config._file is UNSET:
-            msg = f"Config file is not set. use {Config.__class__.__name__}.set_file to set it."
+            msg = f"Config file is not set. use {Config.__name__}.set_file() to set it."
             raise ValueError(msg)
 
     def validate_parser(self) -> None:
         """Validate the config parser."""
         if Config._parser is UNSET:
-            msg = f"Config parser is not set. use {Config.__class__.__name__}.set_parser to set it."
+            msg = f"Config parser is not set. use {Config.__name__}.set_parser() to set it."
             raise ValueError(msg)
 
     def __set_name__(self, owner: type, name: str) -> None:
