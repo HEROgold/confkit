@@ -6,9 +6,15 @@ on:
   workflow_dispatch:
   workflow_call:
 
+concurrency: test-${{ github.sha }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+      fail-fast: false
     
     steps:
     - uses: actions/checkout@v4
@@ -18,8 +24,8 @@ jobs:
       with:
         version: "latest"
     
-    - name: Set up Python
-      run: uv python install 3.13
+    - name: Set up Python ${{ matrix.python-version }}
+      run: uv python install ${{ matrix.python-version }}
     
     - name: Install dependencies
       run: uv sync --group dev
