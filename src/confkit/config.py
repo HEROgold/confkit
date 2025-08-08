@@ -132,7 +132,7 @@ class Config[VT]:
 
     def convert(self, value: str) -> VT:
         """Convert the value to the desired type using the given converter method."""
-        # Ignore the type errror of VT, type checkers don't like None as an option
+        # Ignore the type error of VT, type checkers don't like None as an option
         # We handle it using the `optional` flag. so we can safely ignore it.
         return self._data_type.convert(value) # type: ignore[reportReturnType]
 
@@ -274,7 +274,7 @@ class Config[VT]:
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 if default is not UNSET:
                     Config._set_default(section, setting, default)
-                kwargs[name] = Config._parser.get(section, setting) # ty: ignore[call-non-callable]
+                kwargs[name] = Config._parser.get(section, setting) # ty: ignore[invalid-assignment]
                 return func(*args, **kwargs)
 
             return inner
