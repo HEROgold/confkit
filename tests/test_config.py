@@ -310,7 +310,7 @@ def test_optional_validate_none_value() -> None:
     """Test Optional.validate when value is None."""
     optional_type = Optional(String("default"))
     # Use monkey patching to set internal state
-    with patch.object(optional_type._data_type, "value", None):  # type: ignore[attr-defined]  # noqa: SLF001
+    with patch.object(optional_type._data_type, "value", None):  # type: ignore[attr-defined]
         assert optional_type.validate() is True
 
 
@@ -335,4 +335,21 @@ def test_config_validate_types_disabled(validation_state: bool) -> None:  # noqa
         Config.validate_types = original_validate_types
 
 
+def test_as_kwarg_no_default_unset() -> None:
+    """Test as_kwarg when default is UNSET (line 276->278 branch)."""
+    # Ensure we have a section and setting that exists
+    test_section = "TestAsKwarg"
+    test_setting = "test_setting"
 
+    if not parser.has_section(test_section):
+        parser.add_section(test_section)
+    parser.set(test_section, test_setting, "existing_value")
+
+    # Use as_kwarg without providing a default value (UNSET)
+    # This should skip the _set_default call and go directly to getting the value
+    @Config.as_kwarg(test_section, test_setting)
+    def test_func(**kwargs) -> str:  # noqa: ANN003
+        return kwargs.get(test_setting, "fallback")
+
+    result = test_func()
+    assert result == "existing_value"
