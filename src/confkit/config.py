@@ -94,7 +94,8 @@ class Config[VT]:
             return cast("BaseDataType[VT | None]", NoneType())
         return Optional(self._cast_data_type(default))
 
-    def _cast_data_type(self, default: VT | BaseDataType[VT]) -> BaseDataType[VT]:
+    @staticmethod
+    def _cast_data_type(default: VT | BaseDataType[VT]) -> BaseDataType[VT]:
         """Convert the default value to a BaseDataType."""
         # We use Cast to shut up type checkers, as we know primitive types will be correct.
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
