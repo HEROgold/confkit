@@ -62,4 +62,6 @@ jobs:
     needs: new-release
     if: needs.new-release.outputs.version_changed == 'true'
     uses: ./.github/workflows/pypi.yml
+    permissions:
+      id-token: write
     secrets: inherit
