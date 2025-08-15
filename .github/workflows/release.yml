@@ -55,3 +55,11 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
+
+  publish-pypi:
+    needs: new-release
+    if: needs.new-release.outputs.version_changed == 'true'
+    uses: ./.github/workflows/pypi.yml
+    with:
+      version: ${{ needs.new-release.outputs.current_version }}
+    secrets: inherit
