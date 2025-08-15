@@ -1,6 +1,7 @@
 # confkit
 
 [![Test](https://github.com/HEROgold/confkit/actions/workflows/test.yml/badge.svg)](https://github.com/HEROgold/confkit/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/HEROgold/confkit/badge.svg?branch=master)](https://coveralls.io/github/HEROgold/confkit?branch=master)
 
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
