@@ -21,3 +21,8 @@ dev = [
     "pytest>=8.4.1",
     "ruff>=0.8.0",
 ]
+
+[[tool.pyright.executionEnvironments]]
+root = "."
+include = ["**/test_*.py", "**/tests/**/*.py"]
+reportPrivateUsage = "none"
