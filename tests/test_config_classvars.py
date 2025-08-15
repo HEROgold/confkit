@@ -237,6 +237,7 @@ def test_ensure_option_existing_option() -> None:
     _ = TestExistingOption()
     # Verify the option wasn't overwritten with the default value
     assert test_parser.get("TestExistingOption", "existing_setting") == "existing_value"
+    test_config.unlink(missing_ok=True)
 
 @config_restore
 def test_set_write_on_edit_disabled() -> None:
