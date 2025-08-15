@@ -26,14 +26,15 @@ jobs:
 
       - name: Upload coverage data to coveralls.io
         env:
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_SERVICE_NAME: github-actions
           COVERALLS_PARALLEL: true
-        run: coveralls --service=github
+        run: uvx coveralls --service=github
         
       - name: Coveralls Finished
         env:
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: coveralls --finish
+        run: uvx coveralls --finish
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
