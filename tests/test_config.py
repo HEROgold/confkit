@@ -109,23 +109,12 @@ def test_int_flag() -> None:
     assert Test.int_flag.value == IntFlagTest.OPTION_A.value
 
 def test_init_no_args() -> None:
-    try:
+    with pytest.raises((InvalidDefaultError, InvalidConverterError)):
         Config() # type: ignore[reportCallIssue]
-    except (InvalidDefaultError, InvalidConverterError):
-        pass
-    else:
-        msg = "Expected InvalidDefaultError, but none was raised."
-        raise AssertionError(msg)
-
 
 def test_init_no_default() -> None:
-    try:
+    with pytest.raises(InvalidDefaultError):
         Config() # type: ignore[reportCallIssue]
-    except InvalidDefaultError:
-        pass
-    else:
-        msg = "Expected InvalidDefaultError, but none was raised."
-        raise AssertionError(msg)
 
 @given(st.booleans())
 def test_init_optional(optional_value: bool) -> None:  # noqa: FBT001
@@ -272,9 +261,7 @@ def test_config_as_kwarg_no_name() -> None:
 def test_config_as_kwarg_missing_setting_no_default() -> None:
     """Test Config.as_kwarg when setting doesn't exist and no default provided."""
     with pytest.raises(ValueError, match="Config value.*is not set.*and no default value is given"):
-        @Config.as_kwarg("NonExistentSection", "nonexistent_setting")
-        def test_func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
-            return kwargs.get("nonexistent_setting", "")
+        Config.as_kwarg("NonExistentSection", "nonexistent_setting")
 
 
 @given(st.text(min_size=1), st.text(min_size=1), st.one_of(st.text(), st.none()), st.text())
