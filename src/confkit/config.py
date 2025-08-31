@@ -155,28 +155,33 @@ class Config[VT]:
             msg = "Converter is not set."
             raise InvalidConverterError(msg)
 
-        config_value = Config._parser.get(self._section, self._setting)
-        converted_value = self.convert(config_value)
-        converted_type = type(converted_value)
+        self.__config_value = Config._parser.get(self._section, self._setting)
+        self.__converted_value = self.convert(self.__config_value)
 
+        if not Config.validate_types:
+            return
         if not self._data_type.validate():
-            msg = f"Invalid value for {self._section}.{self._setting}: {converted_value}"
+            msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
             raise InvalidConverterError(msg)
 
-        if self.optional and converted_type in (type(self._data_type.default), type(None)):
+        self.__converted_type = type(self.__converted_value)
+
+        if self.optional and self.__converted_type in (type(self._data_type.default), type(None)):
             # Allow None or the same type as the default value to be returned by the converter when _optional is True.
             return
-        if type(converted_value) is not type(self._data_type.default):
+        if type(self.__converted_value) is not type(self._data_type.default):
             msg = f"Converter does not return the same type as the default value <{type(self._data_type.default)}>."
             raise InvalidConverterError(msg)
 
-    def validate_file(self) -> None:
+    @staticmethod
+    def validate_file() -> None:
         """Validate the config file."""
         if Config._file is UNSET:
             msg = f"Config file is not set. use {Config.__name__}.set_file() to set it."
             raise ValueError(msg)
 
-    def validate_parser(self) -> None:
+    @staticmethod
+    def validate_parser() -> None:
         """Validate the config parser."""
         if Config._parser is UNSET:
             msg = f"Config parser is not set. use {Config.__name__}.set_parser() to set it."
@@ -228,8 +233,14 @@ class Config[VT]:
         sanitized_str = Config._sanitize_str(str(value))
         Config._parser.set(section, setting, sanitized_str)
         if Config.write_on_edit:
-            with Config._file.open("w") as f:
-                Config._parser.write(f)
+            Config.write()
+
+    @staticmethod
+    def write() -> None:
+        """Write the config parser to the file."""
+        Config.validate_file()
+        with Config._file.open("w") as f:
+            Config._parser.write(f)
 
     @staticmethod
     def set(section: str, setting: str, value: VT):  # noqa: ANN205
