@@ -19,7 +19,7 @@ def config_new[F, **P](func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
     def inner(*args: P.args, **kwargs: P.kwargs) -> F:
         restores = (getattr(Config, "_file", UNSET), getattr(Config, "_parser", UNSET))
-        new_file = Path(f"{func.__name__}.ini")
+        new_file = Path(f"{func.__name__}.ini")  # ty: ignore[unresolved-attribute]
         new_file.touch(exist_ok=True)
         Config._file = new_file
         Config._parser = ConfigParser()
