@@ -243,6 +243,7 @@ def test_ensure_option_existing_option() -> None:
 def test_set_write_on_edit_disabled() -> None:
     """Test _set method when write_on_edit is False (line 230->exit branch)."""
     original_write_on_edit = Config.write_on_edit
+    test_parser = ConfigParser()
     test_config = Path("test_no_write.ini")
     test_config.unlink(missing_ok=True)
     test_config.touch()
@@ -253,6 +254,7 @@ def test_set_write_on_edit_disabled() -> None:
     try:
         Config.write_on_edit = False
         Config.set_file(test_config)
+        Config.set_parser(test_parser)
 
         initial_content = test_config.read_text()
         Config._set("TestSection", "test_setting", "new_value")
