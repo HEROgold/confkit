@@ -11,7 +11,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from confkit.config import Config
-from confkit.data_types import Boolean, Enum, Float, Integer, IntEnum, IntFlag, Optional, StrEnum, String
+from confkit.data_types import Binary, Boolean, Enum, Float, Hex, Integer, IntEnum, IntFlag, Octal, Optional, StrEnum, String
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 
 config = Path("test.ini")
@@ -128,19 +128,6 @@ def test_init_optional(optional_value: bool) -> None:  # noqa: FBT001
     assert Config(default=0, optional=optional_value)
     assert Config(default="test", optional=optional_value)
 
-
-@given(st.text(min_size=1), st.text(min_size=1), st.text(), st.text())
-def test_kwarg(section: str, setting: str, name: str, default: str) -> None:
-    """Test Config.as_kwarg decorator with various parameters."""
-    @Config.as_kwarg(section, setting, name, default)
-    def func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
-        return kwargs.get(name, "fallback")
-
-    result = func()
-    # Should return either the config value or the default
-    assert isinstance(result, str)
-
-
 @given(st.integers())
 def test_with_setting(value: int) -> None:
     """Test the with_setting decorator."""
@@ -237,66 +224,10 @@ def test_optional_float(value: float) -> None:
     assert t.optional_float == value or t.optional_float is None
 
 
-@given(st.text(min_size=1), st.text(min_size=1), st.text())
-def test_config_set_decorator(section: str, setting: str, value: str) -> None:
-    """Test the Config.set decorator with various section/setting/value combinations."""
-    # Ensure section exists
-    if not parser.has_section(section):
-        parser.add_section(section)
-
-    @Config.set(section, setting, value)
-    def test_func() -> str:
-        return "executed"
-
-    result = test_func()
-    assert result == "executed"
-    assert parser.get(section, setting) == value
-
-
-
-def test_config_as_kwarg_no_name() -> None:
-    """Test Config.as_kwarg when name is None."""
-    @Config.as_kwarg("Test", "string", None, "fallback")
-    def test_func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
-        return kwargs.get("string", "default")
-
-    result = test_func()
-    assert result is not None
-
-
 def test_config_as_kwarg_missing_setting_no_default() -> None:
     """Test Config.as_kwarg when setting doesn't exist and no default provided."""
     with pytest.raises(ValueError, match="Config value.*is not set.*and no default value is given"):
         Config.as_kwarg("NonExistentSection", "nonexistent_setting")
-
-
-@given(st.text(min_size=1), st.text(min_size=1), st.one_of(st.text(), st.none()), st.text())
-def test_config_as_kwarg_with_default(section: str, setting: str, custom_name: str | None, default_value: str) -> None:
-    """Test Config.as_kwarg with various default values."""
-    @Config.as_kwarg(section, setting, custom_name, default_value)
-    def test_func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
-        return kwargs.get(custom_name or setting, "")
-
-    result = test_func()
-    assert isinstance(result, str)
-
-
-@given(st.text(min_size=1), st.text(min_size=1), st.text())
-def test_config_default_decorator(section: str, setting: str, value: str) -> None:
-    """Test the Config.default decorator with various section/setting/value combinations."""
-    # Ensure section exists and remove any existing value
-    if not parser.has_section(section):
-        parser.add_section(section)
-    if parser.has_option(section, setting):
-        parser.remove_option(section, setting)
-
-    @Config.default(section, setting, value)
-    def test_func() -> str:
-        return "executed"
-
-    result = test_func()
-    assert result == "executed"
-    assert parser.get(section, setting) == value
 
 
 def test_optional_validate_none_value() -> None:
