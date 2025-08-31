@@ -58,10 +58,13 @@ jobs:
         prerelease: false
         generate_release_notes: true
 
-  publish-pypi:
-    needs: new-release
-    if: needs.new-release.outputs.version_changed == 'true'
-    uses: ./.github/workflows/pypi.yml
-    permissions:
-      id-token: write
-    secrets: inherit
+    # Trigger PyPI workflow when after we create a release.
+    # Pypi workflow won't with the usual on-release trigger
+    # because another workflow (this one) created the release. (avoiding inf recursion)
+    - name: Trigger PyPI workflow
+      if: steps.version-check.outputs.version_changed == 'true'
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: new-release-created
+        client-payload: '{"version": "${{ steps.version-check.outputs.current_version }}"}'

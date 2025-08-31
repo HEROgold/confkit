@@ -1,6 +1,8 @@
 name: Publish to PyPI
 
-on: 
+on:
+  repository_dispatch:
+    types: [new-release-created]
   workflow_dispatch:
   workflow_call:
 
