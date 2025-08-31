@@ -149,8 +149,6 @@ class Config[VT]:
 
     def validate_strict_type(self) -> None:
         """Validate the type of the converter matches the desired type."""
-        if not Config.validate_types:
-            return
         if self._data_type.convert is UNSET:
             msg = "Converter is not set."
             raise InvalidConverterError(msg)
