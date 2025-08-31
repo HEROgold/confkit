@@ -16,6 +16,10 @@ class BaseDataType[T](ABC):
         self.default = default
         self.value = default
 
+    def __str__(self) -> str:
+        """Return the string representation of the value."""
+        return str(self.value)
+
     @abstractmethod
     def convert(self, value: str) -> T:
         """Convert a string value to the desired type."""
@@ -113,13 +117,91 @@ class Boolean(BaseDataType[bool]):
         msg = f"Cannot convert {value} to boolean."
         raise ValueError(msg)
 
+DECIMAL = 10
+HEXADECIMAL = 16
+OCTAL = 8
+BINARY = 2
 
 class Integer(BaseDataType[int]):
     """A config value that is an integer."""
 
+    # Define constants for common bases
+
+    def __init__(self, default: int, base: int = DECIMAL) -> None:  # noqa: D107
+        super().__init__(default)
+        self.base = base
+
+    @staticmethod
+    def int_to_base(number: int, base: int) -> int:
+        """Convert an integer to a string representation in a given base."""
+        if number == 0:
+            return 0
+        digits = []
+        while number:
+            digits.append(str(number % base))
+            number //= base
+        return int("".join(reversed(digits)))
+
+    def __str__(self) -> str:  # noqa: D105
+        if self.base == DECIMAL:
+            return str(self.value)
+        # Convert the base 10 int to base 5
+        self.value = self.int_to_base(int(self.value), self.base)
+        return f"{self.base}c{self.value}"
+
     def convert(self, value: str) -> int:
         """Convert a string value to an integer."""
-        return int(value)
+        if "c" in value:
+            base_str, val_str = value.split("c")
+            base = int(base_str)
+            if base != self.base:
+                msg = "Base in string does not match base in Integer while converting."
+                raise ValueError(msg)
+            return int(val_str, self.base)
+        return int(value, self.base)
+
+class Hex(Integer):
+    """A config value that represents hexadecimal."""
+
+    def __init__(self, default: int, base: int = HEXADECIMAL) -> None:  # noqa: D107
+        super().__init__(default, base)
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"0x{self.value:x}"
+
+    def convert(self, value: str) -> int:
+        """Convert a string value to an integer. from hexadecimal."""
+        return int(value.removeprefix("0x"), 16)
+
+class Octal(Integer):
+    """A config value that represents octal."""
+
+    def __init__(self, default: int, base: int = OCTAL) -> None:  # noqa: D107
+        super().__init__(default, base)
+
+    def __str__(self) -> str:  # noqa: D105
+        return f"0o{self.value:o}"
+
+    def convert(self, value: str) -> int:
+        """Convert a string value to an integer from octal."""
+        return int(value.removeprefix("0o"), 8)
+
+class Binary(BaseDataType[bytes | int]):
+    """A config value that represents binary."""
+
+    def __init__(self, default: bytes | int) -> None:  # noqa: D107
+        if isinstance(default, bytes):
+            default = int.from_bytes(default)
+        super().__init__(default)
+
+    def __str__(self) -> str:  # noqa: D105
+        if isinstance(self.value, bytes):
+            self.value = int.from_bytes(self.value)
+        return f"0b{self.value:b}"
+
+    def convert(self, value: str) -> int:
+        """Convert a string value to an integer from binary."""
+        return int(value.removeprefix("0b"), 2)
 
 class Optional[T](BaseDataType[T | None]):
     """A config value that is optional, can be None or a specific type."""
@@ -139,6 +221,11 @@ class Optional[T](BaseDataType[T | None]):
     def value(self) -> T | None:
         """Get the current value of the wrapped data type."""
         return self._data_type.value
+
+    @value.setter
+    def value(self, value: T) -> None:
+        """Set the current value of the wrapped data type."""
+        self._data_type.value = value
 
     def convert(self, value: str) -> T | None:
         """Convert a string value to the optional type."""

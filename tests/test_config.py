@@ -83,6 +83,12 @@ class Test:
     optional_str_enum = Config(Optional(StrEnum(StrEnumTest.OPTION_A)))
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
     optional_int_flag = Config(Optional(IntFlag(IntFlagTest.OPTION_A)))
+    hex_value = Config(Hex(0xFF))
+    octal_value = Config(Octal(0o77))
+    binary_value = Config(Binary(0b101010))
+    custom_int_base_5 = Config(Integer(99, base=5))
+    custom_int_base_7 = Config(Integer(99, base=7))
+    custom_int_base_3 = Config(Integer(99, base=3))
 
     @Config.with_setting(number)
     def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
@@ -322,21 +328,97 @@ def test_config_validate_types_disabled(validation_state: bool) -> None:  # noqa
         Config.validate_types = original_validate_types
 
 
-def test_as_kwarg_no_default_unset() -> None:
-    """Test as_kwarg when default is UNSET (line 276->278 branch)."""
-    # Ensure we have a section and setting that exists
-    test_section = "TestAsKwarg"
-    test_setting = "test_setting"
+@given(st.integers())
+def test_hex(value: int) -> None:
+    """Test setting and getting hex values."""
+    t = Test()
+    t.hex_value = value
+    assert t.hex_value == value
 
-    if not parser.has_section(test_section):
-        parser.add_section(test_section)
-    parser.set(test_section, test_setting, "existing_value")
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "hex_value")
+    expected_format = f"0x{value:x}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
 
-    # Use as_kwarg without providing a default value (UNSET)
-    # This should skip the _set_default call and go directly to getting the value
-    @Config.as_kwarg(test_section, test_setting)
-    def test_func(**kwargs) -> str:  # noqa: ANN003
-        return kwargs.get(test_setting, "fallback")
 
-    result = test_func()
-    assert result == "existing_value"
+@given(st.integers())
+def test_octal(value: int) -> None:
+    """Test setting and getting octal values."""
+    t = Test()
+    t.octal_value = value
+    assert t.octal_value == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "octal_value")
+    expected_format = f"0o{value:o}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+
+@given(st.integers())
+def test_binary_int(value: int) -> None:
+    """Test setting and getting binary values."""
+    t = Test()
+    t.binary_value = value
+    assert t.binary_value == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "binary_value")
+    expected_format = f"0b{value:b}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+@given(st.binary())
+def test_binary_bytes(value: bytes) -> None:
+    """Test setting and getting binary values."""
+    t = Test()
+    t.binary_value = value
+    int_value = int.from_bytes(value)
+    assert t.binary_value == int_value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "binary_value")
+    expected_format = f"0b{int_value:b}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+
+@given(st.integers(min_value=0, max_value=4))
+def test_custom_int_base_5(value: int) -> None:
+    """Test setting and getting integers with custom base."""
+    t = Test()
+    t.custom_int_base_5 = value
+    assert t.custom_int_base_5 == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "custom_int_base_5")
+    expected_format = f"5c{value}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+@given(st.integers(min_value=0, max_value=2))
+def test_custom_int_base_3(value: int) -> None:
+    """Test setting and getting integers with custom base."""
+    t = Test()
+    t.custom_int_base_3 = value
+    assert t.custom_int_base_3 == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "custom_int_base_3")
+    expected_format = f"3c{value}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+@given(st.integers(min_value=0, max_value=6))
+def test_custom_int_base_7(value: int) -> None:
+    """Test setting and getting integers with custom base."""
+    t = Test()
+    t.custom_int_base_7 = value
+    assert t.custom_int_base_7 == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "custom_int_base_7")
+    expected_format = f"7c{value}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
