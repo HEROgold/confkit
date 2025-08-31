@@ -36,7 +36,7 @@ Config.set_file(Path("config.ini"))
 
 ### Basic Usage
 
-- Note: imports have been left out. see [examples/basic.py](basic.py) for the entire example.
+- Note: imports have been left out. see [examples/basic.py](examples/basic.py) for the entire example.
 
 ```python
 class AppConfig:
@@ -53,7 +53,7 @@ config.port = 9000   # Automatically saves to config.ini if write_on_edit is tru
 
 ### Enums and Custom Types
 
-- Note: imports have been left out. see [examples/enums.py](enums.py) for the entire example.
+- Note: imports have been left out. see [examples/enums.py](examples/enums.py) for the entire example.
 
 ```python
 class LogLevel(StrEnum):
@@ -72,7 +72,7 @@ config.log_level = LogLevel.DEBUG  # Type-safe
 
 ### Method Decorators
 
-- Note: imports have been left out. see [examples/decorators.py](decorators.py) for the entire example.
+- Note: imports have been left out. see [examples/decorators.py](examples/decorators.py) for the entire example.
 
 ```python
 class ServiceConfig:
@@ -95,7 +95,7 @@ result = service.process("data")  # Uses current retry_count
 
 ### Configuration File
 
-Generated INI file structure see [examples/config.ini](config.ini) for the entire example.:
+Generated INI file structure see [examples/config.ini](examples/config.ini) for the entire example.:
 
 ```ini
 [AppConfig]
