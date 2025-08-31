@@ -86,8 +86,10 @@ class Test:
     hex_value = Config(Hex(0xFF))
     octal_value = Config(Octal(0o77))
     binary_value = Config(Binary(0b101010))
-    custom_int_base_5 = Config(Integer(99, base=5))
+    binary_value_2 = Config(Binary(b"101010"))
+    custom_int_base_9 = Config(Integer(99, base=9))
     custom_int_base_7 = Config(Integer(99, base=7))
+    custom_int_base_5 = Config(Integer(99, base=5))
     custom_int_base_3 = Config(Integer(99, base=3))
 
     @Config.with_setting(number)
@@ -353,3 +355,25 @@ def test_custom_int_base_7(value: int) -> None:
     expected_format = f"7c{value}"
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+@given(st.integers(min_value=0, max_value=6))
+def test_custom_int_base_9(value: int) -> None:
+    """Test setting and getting integers with custom base."""
+    t = Test()
+    t.custom_int_base_9 = value
+    assert t.custom_int_base_9 == value
+
+    Config._parser.read(Config._file)
+    stored_value = Config._parser.get("Test", "custom_int_base_9")
+    expected_format = f"9c{value}"
+    pred = stored_value == expected_format
+    assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
+@given(st.integers(min_value=0, max_value=6))
+def test_custom_int_non_matching_base(value: int) -> None:
+    """Test setting and getting integers with custom base."""
+    t = Test()
+    t.custom_int_base_9 = value
+    Config._parser.set("Test", "custom_int_base_9", "0c0")
+    with pytest.raises(ValueError, match="Base in string does not match base in Integer while converting."):
+        assert t.custom_int_base_9
