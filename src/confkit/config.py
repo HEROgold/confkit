@@ -205,7 +205,7 @@ class Config[VT]:
         """Ensure the option exists in the config file. Creates one if it doesn't exist."""
         self._ensure_section()
         if not self._parser.has_option(self._section, self._setting):
-            Config._set(self._section, self._setting, self._data_type.default)
+            Config._set(self._section, self._setting, str(self._data_type))
 
     def __get__(self, obj: object, obj_type: object) -> VT:
         """Get the value of the attribute."""
@@ -213,11 +213,12 @@ class Config[VT]:
         # so it can be different than type of VT
         # but we don't need obj or it's type to get the value from config in our case.
         self.validate_strict_type()
-        return self.convert(Config._parser.get(self._section, self._setting))
+        return self.__converted_value
 
     def __set__(self, obj: object, value: VT) -> None:
         """Set the value of the attribute."""
-        Config._set(self._section, self._setting, value)
+        self._data_type.value = value
+        Config._set(self._section, self._setting, str(self._data_type))
         setattr(obj, self.private, value)
 
     @staticmethod
