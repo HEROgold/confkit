@@ -41,11 +41,15 @@ class BaseDataType[T](ABC):
                 type_args = base.__args__
                 if type_args:
                     for type_arg in type_args:
-                        if isinstance(self.value, type_arg):
+                        if hasattr(type_arg, "__origin__"):
+                            # For parameterized generics, check against the origin type
+                            if isinstance(self.value, type_arg.__origin__):
+                                return True
+                        elif isinstance(self.value, type_arg):
                             return True
                     msg = f"Value {self.value} is not any of {type_args}."
                     raise InvalidConverterError(msg)
-        msg = "This should not have raised. Report to the library maintainers with code: `DTBDT38`"
+        msg = "This should not have raised. Report to the library maintainers with code: `DTBDT`"
         raise TypeError(msg)
 
     @staticmethod
