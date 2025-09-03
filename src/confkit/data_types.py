@@ -139,6 +139,9 @@ class String(BaseDataType[str]):
 class Float(BaseDataType[float]):
     """A config value that is a float."""
 
+    def __init__(self, default: float = 0.0) -> None:  # noqa: D107
+        super().__init__(default)
+
     def convert(self, value: str) -> float:
         """Convert a string value to a float."""
         return float(value)
@@ -146,6 +149,9 @@ class Float(BaseDataType[float]):
 
 class Boolean(BaseDataType[bool]):
     """A config value that is a boolean."""
+
+    def __init__(self, default: bool = False) -> None:  # noqa: D107, FBT001, FBT002
+        super().__init__(default)
 
     def convert(self, value: str) -> bool:
         """Convert a string value to a boolean."""
@@ -166,7 +172,7 @@ class Integer(BaseDataType[int]):
 
     # Define constants for common bases
 
-    def __init__(self, default: int, base: int = DECIMAL) -> None:  # noqa: D107
+    def __init__(self, default: int = 0, base: int = DECIMAL) -> None:  # noqa: D107
         super().__init__(default)
         self.base = base
 
