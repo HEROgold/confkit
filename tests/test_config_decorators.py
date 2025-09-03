@@ -8,9 +8,9 @@ from collections.abc import Callable
 from configparser import ConfigParser
 from pathlib import Path
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-import pytest
 
 from confkit.config import Config
 from confkit.sentinels import UNSET
