@@ -138,7 +138,7 @@ class Config[VT]:
             # Allow None or the same type as the default value to be returned by the converter when _optional is True.
             return
         if self.__converted_type is not default_value_type:
-            msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."
+            msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."  # noqa: E501
             raise InvalidConverterError(msg)
 
     @staticmethod
