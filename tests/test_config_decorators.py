@@ -10,6 +10,7 @@ from pathlib import Path
 
 from hypothesis import given
 from hypothesis import strategies as st
+import pytest
 
 from confkit.config import Config
 from confkit.sentinels import UNSET
@@ -51,7 +52,7 @@ def test_config_set_decorator(section: str, setting: str, value: str) -> None:
 def test_config_as_kwarg_with_default(section: str, setting: str, custom_name: str | None, default_value: str) -> None:
     """Test Config.as_kwarg with various default values."""
     @Config.as_kwarg(section, setting, custom_name, default_value)
-    def test_func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
+    def test_func(**kwargs) -> str:  # noqa: ANN003
         return kwargs.get(custom_name or setting, "")
 
     result = test_func()
@@ -100,7 +101,7 @@ def test_as_kwarg_no_default_unset() -> None:
 def test_config_as_kwarg_no_name() -> None:
     """Test Config.as_kwarg when name is None."""
     @Config.as_kwarg("Test", "string", None, "fallback")
-    def test_func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
+    def test_func(**kwargs) -> str:  # noqa: ANN003
         return kwargs.get("string", "default")
 
     result = test_func()
@@ -111,9 +112,17 @@ def test_config_as_kwarg_no_name() -> None:
 def test_kwarg(section: str, setting: str, name: str, default: str) -> None:
     """Test Config.as_kwarg decorator with various parameters."""
     @Config.as_kwarg(section, setting, name, default)
-    def func(**kwargs) -> str:  # type: ignore[reportMissingParameterType] # noqa: ANN003
+    def func(**kwargs) -> str:  # noqa: ANN003
         return kwargs.get(name, "fallback")
 
     result = func()
     # Should return either the config value or the default
     assert isinstance(result, str)
+
+@config_new
+def test_as_kwarg_no_default_no_section() -> None:
+    """Test Config.as_kwarg decorator without any section or default value."""
+    with pytest.raises(ValueError, match="Config value section='' setting='' is not set. and no default value is given."):
+        @Config.as_kwarg("", "", "", UNSET)
+        def _(**kwargs) -> str:  # noqa: ANN003
+            return kwargs.get("", "fallback")
