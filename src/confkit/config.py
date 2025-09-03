@@ -7,6 +7,7 @@ It also provides a way to set default values and to set config values using deco
 from __future__ import annotations
 
 from functools import wraps
+from types import NoneType
 from typing import TYPE_CHECKING, ClassVar, overload
 
 from .data_types import BaseDataType
@@ -131,12 +132,13 @@ class Config[VT]:
             raise InvalidConverterError(msg)
 
         self.__converted_type = type(self.__converted_value)
+        default_value_type = type(self._data_type.default)
 
-        if self.optional and self.__converted_type in (type(self._data_type.default), type(None)):
+        if self.optional and self.__converted_type in (default_value_type, NoneType):
             # Allow None or the same type as the default value to be returned by the converter when _optional is True.
             return
-        if type(self.__converted_value) is not type(self._data_type.default):
-            msg = f"Converter does not return the same type as the default value <{type(self._data_type.default)}>."
+        if self.__converted_type is not default_value_type:
+            msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."
             raise InvalidConverterError(msg)
 
     @staticmethod
