@@ -84,9 +84,9 @@ class Config[VT]:
     def _initialize_data_type(self, default: VT | None | BaseDataType[VT]) -> None:
         """Initialize the data type based on the default value."""
         if not self.optional and default is not None:
-            self._data_type = self._cast_data_type(default)
+            self._data_type = BaseDataType[VT].cast(default)
         else:
-            self._data_type = self._cast_optional_data_type(default)
+            self._data_type = BaseDataType[VT].cast_optional(default)
 
     def _cast_optional_data_type(self, default: VT | None | BaseDataType[VT]) -> BaseDataType[VT | None]:
         """Convert the default value to an Optional data type."""
