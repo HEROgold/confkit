@@ -171,7 +171,7 @@ def test_config_none_type_cast() -> None:
     """Test None type casting in _cast_data_type - Line 105 in config.py."""
     config_instance = Config.__new__(Config)
     config_instance.optional = False
-    result = config_instance._cast_data_type(None)
+    result = BaseDataType.cast(None)
     assert result.default is None
 
 
@@ -214,7 +214,7 @@ def test_invalid_default_error() -> None:
         InvalidDefaultError,
         match="Unsupported default value type: object. Use a BaseDataType subclass for custom types.",
     ):
-        Config._cast_data_type(object())
+        BaseDataType.cast(object())
 
 @config_restore
 def test_ensure_option_existing_option() -> None:
