@@ -102,7 +102,7 @@ class Config[VT]:
     def convert(self, value: str) -> VT:
         """Convert the value to the desired type using the given converter method."""
         # Ignore the type error of VT, type checkers don't like None as an option
-        # We handle it using the `optional` flag. so we can safely ignore it.
+        # We handle it using the `optional` flag, or using Optional DataType. so we can safely ignore it.
         return self._data_type.convert(value) # type: ignore[reportReturnType]
 
     @staticmethod
