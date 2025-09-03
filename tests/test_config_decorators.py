@@ -123,6 +123,4 @@ def test_kwarg(section: str, setting: str, name: str, default: str) -> None:
 def test_as_kwarg_no_default_no_section() -> None:
     """Test Config.as_kwarg decorator without any section or default value."""
     with pytest.raises(ValueError, match="Config value section='' setting='' is not set. and no default value is given."):
-        @Config.as_kwarg("", "", "", UNSET)
-        def _(**kwargs) -> str:  # noqa: ANN003
-            return kwargs.get("", "fallback")
+        Config.as_kwarg("", "", "", UNSET)
