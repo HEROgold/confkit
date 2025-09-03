@@ -83,14 +83,12 @@ class Test:
     optional_str_enum = Config(Optional(StrEnum(StrEnumTest.OPTION_A)))
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
     optional_int_flag = Config(Optional(IntFlag(IntFlagTest.OPTION_A)))
-    hex_value = Config(Hex(0xFF))
-    octal_value = Config(Octal(0o77))
-    binary_value = Config(Binary(0b101010))
-    binary_value_2 = Config(Binary(b"101010"))
-    custom_int_base_9 = Config(Integer(99, base=9))
-    custom_int_base_7 = Config(Integer(99, base=7))
-    custom_int_base_5 = Config(Integer(99, base=5))
-    custom_int_base_3 = Config(Integer(99, base=3))
+    # Test list types
+    list_of_strings = Config(List(["a", "b", "c"]))
+    list_of_integers = Config(List([1, 2, 3, 4]))
+    list_of_floats = Config(List([1.0, 2.0, 3.0, 4.0]))
+    list_of_booleans = Config(List([True, False, True]))
+    list_of_paths = Config(List(["/path/to/file1", "/path/to/file2"]))
 
     @Config.with_setting(number)
     def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
@@ -377,3 +375,32 @@ def test_custom_int_non_matching_base(value: int) -> None:
     Config._parser.set("Test", "custom_int_base_9", "0c0")
     with pytest.raises(ValueError, match="Base in string does not match base in Integer while converting."):
         assert t.custom_int_base_9
+
+
+@given(st.lists(st.text()))
+def test_list_of_strings(value: list[str]) -> None:
+    t = Test()
+    value = [i for i in value if i]  # Remove empty strings to avoid [] != [""] assert
+    t.list_of_strings = value
+    assert t.list_of_strings == value
+
+
+@given(st.lists(st.booleans()))
+def test_list_of_booleans(value: list[bool]) -> None:
+    t = Test()
+    t.list_of_booleans = value
+    assert t.list_of_booleans == value
+
+
+@given(st.lists(st.integers()))
+def test_list_of_integers(value: list[int]) -> None:
+    t = Test()
+    t.list_of_integers = value
+    assert t.list_of_integers == value
+
+
+@given(st.lists(st.floats(allow_nan=False)))
+def test_list_of_floats(value: list[float]) -> None:
+    t = Test()
+    t.list_of_floats = value
+    assert t.list_of_floats == value

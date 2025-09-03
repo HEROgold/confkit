@@ -275,3 +275,67 @@ class Optional[T](BaseDataType[T | None]):
         if self._data_type.value is None:
             return True
         return self._data_type.validate()
+
+class List[T](BaseDataType[list[T]]):
+    """A config value that is a list of values."""
+
+    separator = ","
+    escape_char = "\\"
+
+    def __init__(self, default: list[T], *, data_type: BaseDataType[T] = UNSET) -> None:
+        """Initialize the list data type."""
+        super().__init__(default)
+        if len(default) <= 0 and data_type is UNSET:
+            msg = "List default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
+        if data_type is UNSET:
+            self._data_type = BaseDataType[T].cast(default[0])
+        else:
+            self._data_type = data_type
+
+    def convert(self, value: str) -> list[T]:
+        """Convert a string to a list."""
+        # Handle empty string as empty list
+        if not value:
+            return []
+
+        # Split string but respect escaped separators
+        result: list[T] = []
+        current = ""
+        i = 0
+        while i < len(value):
+            # Check for escaped separator
+            if i < len(value) - 1 and value[i] == self.escape_char and value[i + 1] == self.separator:
+                current += self.separator
+                i += 2  # Skip both the escape char and the separator
+            # Check for escaped escape char
+            elif i < len(value) - 1 and value[i] == self.escape_char and value[i + 1] == self.escape_char:
+                current += self.escape_char
+                i += 2  # Skip both escape chars
+            # Handle separator
+            elif value[i] == self.separator:
+                c = self._data_type.convert(current)
+                result.append(c)
+                current = ""
+                i += 1
+            # Handle regular character
+            else:
+                current += value[i]
+                i += 1
+
+        # Add the last element
+        result.append(self._data_type.convert(current))
+
+        return result
+
+    def __str__(self) -> str:
+        """Return a string representation of the list."""
+        values: list[str] = []
+        for item in self.value:
+            # Escape escape char
+            escaped_item = str(item).replace(self.escape_char, self.escape_char*2)
+            # Escape separator
+            escaped_item = escaped_item.replace(self.separator, f"{self.escape_char}{self.separator}")
+            values.append(escaped_item)
+
+        return self.separator.join(values)
