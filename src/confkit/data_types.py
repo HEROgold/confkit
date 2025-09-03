@@ -121,7 +121,7 @@ class NoneType(BaseDataType[None]):
         """Initialize the NoneType data type."""
         super().__init__(None)
 
-    def convert(self, value: str) -> None:
+    def convert(self, value: str) -> bool: # type: ignore[reportIncompatibleMethodOverride]
         """Convert a string value to None."""
         # Ignore type exception as convert should return True/False for NoneType
         # to determine if we have a valid null value or not.
