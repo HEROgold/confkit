@@ -131,6 +131,9 @@ class NoneType(BaseDataType[None]):
 class String(BaseDataType[str]):
     """A config value that is a string."""
 
+    def __init__(self, default: str = "") -> None:  # noqa: D107
+        super().__init__(default)
+
     def convert(self, value: str) -> str:
         """Convert a string value to a string."""
         return value
