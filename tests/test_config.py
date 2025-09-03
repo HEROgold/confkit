@@ -102,6 +102,14 @@ class Test:
     optional_string = Config("", optional=True)
     optional_boolean = Config(default=False, optional=True)
     optional_float = Config(0.0, optional=True)
+    optional_number2 = Config(0, optional=True)
+    optional_string2 = Config("", optional=True)
+    optional_boolean2 = Config(default=False, optional=True)
+    optional_float2 = Config(0.0, optional=True)
+    optional_number3 = Config(Optional(Integer()))
+    optional_string3 = Config(Optional(String()))
+    optional_boolean3 = Config(Optional(Boolean()))
+    optional_float3 = Config(Optional(Float()))
     optional_enum = Config(Optional(Enum(EnumTest.OPTION_A)))
     optional_str_enum = Config(Optional(StrEnum(StrEnumTest.OPTION_A)))
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
@@ -248,29 +256,50 @@ def test_none_float(value: float) -> None:
 @given(st.integers())
 def test_optional_number(value: int) -> None:
     t = Test()
-    t.number = value
-    assert t.number == value or t.number is None
+    t.optional_number = value
+    t.optional_number2 = value
+    t.optional_number3 = value
+    assert t.optional_number == value or t.optional_number is None
+    assert t.optional_number2 == value or t.optional_number2 is None
+    assert t.optional_number3 == value or t.optional_number3 is None
 
 
 @given(st.text())
-def test_optional_string(value: str) -> None:
+def test_optional_string(value: str | None) -> None:
     t = Test()
     t.optional_string = value
+    t.optional_string2 = value
+    t.optional_string3 = value
+
+    # Convert value to expected None types. after setting it in file.
+    if value and value.casefold() in {"none", "null", "nil"}:
+        value = None
+
     assert t.optional_string == value or t.optional_string is None
+    assert t.optional_string2 == value or t.optional_string2 is None
+    assert t.optional_string3 == value or t.optional_string3 is None
 
 
 @given(st.booleans())
 def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
     t = Test()
     t.optional_boolean = value
+    t.optional_boolean2 = value
+    t.optional_boolean3 = value
     assert t.optional_boolean == value or t.optional_boolean is None
+    assert t.optional_boolean2 == value or t.optional_boolean2 is None
+    assert t.optional_boolean3 == value or t.optional_boolean3 is None
 
 
 @given(st.floats(allow_nan=False))
 def test_optional_float(value: float) -> None:
     t = Test()
     t.optional_float = value
+    t.optional_float2 = value
+    t.optional_float3 = value
     assert t.optional_float == value or t.optional_float is None
+    assert t.optional_float2 == value or t.optional_float2 is None
+    assert t.optional_float3 == value or t.optional_float3 is None
 
 
 @given(st.booleans())

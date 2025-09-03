@@ -123,10 +123,9 @@ class NoneType(BaseDataType[None]):
 
     def convert(self, value: str) -> None:
         """Convert a string value to None."""
-        if value.lower().strip() in {"none", "null", "nil", ""}:
-            return
-        msg = f"Cannot convert {value} to None."
-        raise ValueError(msg)
+        # Ignore type exception as convert should return True/False for NoneType
+        # to determine if we have a valid null value or not.
+        return value.casefold().strip() in {"none", "null", "nil"}
 
 
 class String(BaseDataType[str]):
@@ -263,16 +262,15 @@ class Optional[T](BaseDataType[T | None]):
         return self._data_type.value
 
     @value.setter
-    def value(self, value: T) -> None:
+    def value(self, value: T | None) -> None:
         """Set the current value of the wrapped data type."""
-        self._data_type.value = value
+        self._data_type.value = value # type: ignore[reportAttributeAccessIssue]
 
     def convert(self, value: str) -> T | None:
         """Convert a string value to the optional type."""
-        try:
-            return self._none_type.convert(value)
-        except ValueError:
-            return self._data_type.convert(value)
+        if self._none_type.convert(value):
+            return None
+        return self._data_type.convert(value)
 
     def validate(self) -> bool:
         """Validate that the value is of the wrapped data type or None."""
