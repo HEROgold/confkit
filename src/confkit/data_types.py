@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
+from typing import cast
 
-from .exceptions import InvalidConverterError
+from confkit.sentinels import UNSET
+
+from .exceptions import InvalidConverterError, InvalidDefaultError
 
 
 class BaseDataType[T](ABC):
@@ -44,6 +47,39 @@ class BaseDataType[T](ABC):
                     raise InvalidConverterError(msg)
         msg = "This should not have raised. Report to the library maintainers with code: `DTBDT38`"
         raise TypeError(msg)
+
+    @staticmethod
+    def cast_optional(default: T | None | BaseDataType[T]) -> BaseDataType[T | None]:
+        """Convert the default value to an Optional data type."""
+        if default is None:
+            return cast("BaseDataType[T | None]", NoneType())
+        return Optional(BaseDataType.cast(default))
+
+    @staticmethod
+    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:
+        """Convert the default value to a BaseDataType."""
+        # We use Cast to shut up type checkers, as we know primitive types will be correct.
+        # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
+        match default:
+            case bool():
+                data_type = cast("BaseDataType[T]", Boolean(default))
+            case None:
+                data_type = cast("BaseDataType[T]", NoneType())
+            case int():
+                data_type = cast("BaseDataType[T]", Integer(default))
+            case float():
+                data_type = cast("BaseDataType[T]", Float(default))
+            case str():
+                data_type = cast("BaseDataType[T]", String(default))
+            case BaseDataType():
+                data_type = default
+            case _:
+                msg = (
+                    f"Unsupported default value type: {type(default).__name__}. "
+                    "Use a BaseDataType subclass for custom types."
+                )
+                raise InvalidDefaultError(msg)
+        return data_type
 
 class Enum(BaseDataType[enum.Enum]):
     """A config value that is an enum."""

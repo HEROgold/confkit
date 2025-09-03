@@ -7,9 +7,9 @@ It also provides a way to set default values and to set config values using deco
 from __future__ import annotations
 
 from functools import wraps
-from typing import TYPE_CHECKING, ClassVar, cast, overload
+from typing import TYPE_CHECKING, ClassVar, overload
 
-from .data_types import BaseDataType, Boolean, Float, Integer, NoneType, Optional, String
+from .data_types import BaseDataType
 from .exceptions import InvalidConverterError, InvalidDefaultError
 from .sentinels import UNSET
 
@@ -87,38 +87,6 @@ class Config[VT]:
             self._data_type = BaseDataType[VT].cast(default)
         else:
             self._data_type = BaseDataType[VT].cast_optional(default)
-
-    def _cast_optional_data_type(self, default: VT | None | BaseDataType[VT]) -> BaseDataType[VT | None]:
-        """Convert the default value to an Optional data type."""
-        if default is None:
-            return cast("BaseDataType[VT | None]", NoneType())
-        return Optional(self._cast_data_type(default))
-
-    @staticmethod
-    def _cast_data_type(default: VT | BaseDataType[VT]) -> BaseDataType[VT]:
-        """Convert the default value to a BaseDataType."""
-        # We use Cast to shut up type checkers, as we know primitive types will be correct.
-        # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
-        match default:
-            case bool():
-                data_type = cast("BaseDataType[VT]", Boolean(default))
-            case None:
-                data_type = cast("BaseDataType[VT]", NoneType())
-            case int():
-                data_type = cast("BaseDataType[VT]", Integer(default))
-            case float():
-                data_type = cast("BaseDataType[VT]", Float(default))
-            case str():
-                data_type = cast("BaseDataType[VT]", String(default))
-            case BaseDataType():
-                data_type = default
-            case _:
-                msg = (
-                    f"Unsupported default value type: {type(default).__name__}. "
-                    "Use a BaseDataType subclass for custom types."
-                )
-                raise InvalidDefaultError(msg)
-        return data_type
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
