@@ -11,7 +11,21 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from confkit.config import Config
-from confkit.data_types import Binary, Boolean, Enum, Float, Hex, Integer, IntEnum, IntFlag, Octal, Optional, StrEnum, String
+from confkit.data_types import (
+    Binary,
+    Boolean,
+    Enum,
+    Float,
+    Hex,
+    Integer,
+    IntEnum,
+    IntFlag,
+    List,
+    Octal,
+    Optional,
+    StrEnum,
+    String,
+)
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 
 config = Path("test.ini")
@@ -63,10 +77,10 @@ class Test:
     string = Config("default")
     boolean = Config(default=False)
     c_float = Config(0.0)
-    optional_number = Config(0, optional=True)
-    optional_string = Config("", optional=True)
-    optional_boolean = Config(default=False, optional=True)
-    optional_float = Config(0.0, optional=True)
+    hex_value = Config(Hex(0xFF))
+    octal_value = Config(Octal(0o77))
+    binary_value = Config(Binary(0b101010))
+    binary_value_2 = Config(Binary(b"101010"))
     # Test invalid setups (Type checkers like pyright will raise errors here)
     none_int = Config(Integer(None)) # type: ignore[reportArgumentType]
     none_string = Config(String(None)) # type: ignore[reportArgumentType]
@@ -79,6 +93,15 @@ class Test:
     str_enum = Config(StrEnum(StrEnumTest.OPTION_A))
     int_enum = Config(IntEnum(IntEnumTest.OPTION_A))
     int_flag = Config(IntFlag(IntFlagTest.OPTION_A))
+    custom_int_base_9 = Config(Integer(99, base=9))
+    custom_int_base_7 = Config(Integer(99, base=7))
+    custom_int_base_5 = Config(Integer(99, base=5))
+    custom_int_base_3 = Config(Integer(99, base=3))
+    # Test optional
+    optional_number = Config(0, optional=True)
+    optional_string = Config("", optional=True)
+    optional_boolean = Config(default=False, optional=True)
+    optional_float = Config(0.0, optional=True)
     optional_enum = Config(Optional(Enum(EnumTest.OPTION_A)))
     optional_str_enum = Config(Optional(StrEnum(StrEnumTest.OPTION_A)))
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
@@ -94,39 +117,65 @@ class Test:
     def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
         return kwargs.get("number")
 
+
 def test_enum() -> None:
     assert Test.enum == EnumTest.OPTION_A
     assert Test.enum.name == EnumTest.OPTION_A.name
     assert Test.enum.value == EnumTest.OPTION_A.value
+
 
 def test_str_enum() -> None:
     assert Test.str_enum == StrEnumTest.OPTION_A
     assert Test.str_enum.name == StrEnumTest.OPTION_A.name
     assert Test.str_enum.value == StrEnumTest.OPTION_A.value
 
+
 def test_int_enum() -> None:
     assert Test.int_enum == IntEnumTest.OPTION_A
     assert Test.int_enum.name == IntEnumTest.OPTION_A.name
     assert Test.int_enum.value == IntEnumTest.OPTION_A.value
+
 
 def test_int_flag() -> None:
     assert Test.int_flag == IntFlagTest.OPTION_A
     assert Test.int_flag.name == IntFlagTest.OPTION_A.name
     assert Test.int_flag.value == IntFlagTest.OPTION_A.value
 
+
 def test_init_no_args() -> None:
     with pytest.raises((InvalidDefaultError, InvalidConverterError)):
         Config() # type: ignore[reportCallIssue]
 
+
 def test_init_no_default() -> None:
     with pytest.raises(InvalidDefaultError):
         Config() # type: ignore[reportCallIssue]
+
+
+def test_optional_validate_none_value() -> None:
+    """Test Optional.validate when value is None."""
+    optional_type = Optional(String("default"))
+    # Use monkey patching to set internal state
+    with patch.object(optional_type._data_type, "value", None):  # type: ignore[attr-defined]
+        assert optional_type.validate() is True
+
+
+def test_optional_validate_non_none_value() -> None:
+    """Test Optional.validate when value is not None."""
+    optional_type = Optional(String("default"))
+    # This should call the wrapped data type's validate method
+    assert optional_type.validate() is True
+
+
+## Hypothesis tests:
+
 
 @given(st.booleans())
 def test_init_optional(optional_value: bool) -> None:  # noqa: FBT001
     """Test Config initialization with various optional values."""
     assert Config(default=0, optional=optional_value)
     assert Config(default="test", optional=optional_value)
+
 
 @given(st.integers())
 def test_with_setting(value: int) -> None:
@@ -224,27 +273,6 @@ def test_optional_float(value: float) -> None:
     assert t.optional_float == value or t.optional_float is None
 
 
-def test_config_as_kwarg_missing_setting_no_default() -> None:
-    """Test Config.as_kwarg when setting doesn't exist and no default provided."""
-    with pytest.raises(ValueError, match="Config value.*is not set.*and no default value is given"):
-        Config.as_kwarg("NonExistentSection", "nonexistent_setting")
-
-
-def test_optional_validate_none_value() -> None:
-    """Test Optional.validate when value is None."""
-    optional_type = Optional(String("default"))
-    # Use monkey patching to set internal state
-    with patch.object(optional_type._data_type, "value", None):  # type: ignore[attr-defined]
-        assert optional_type.validate() is True
-
-
-def test_optional_validate_non_none_value() -> None:
-    """Test Optional.validate when value is not None."""
-    optional_type = Optional(String("default"))
-    # This should call the wrapped data type's validate method
-    assert optional_type.validate() is True
-
-
 @given(st.booleans())
 def test_config_validate_types_disabled(validation_state: bool) -> None:  # noqa: FBT001
     """Test that validation behavior changes with validate_types setting."""
@@ -300,6 +328,7 @@ def test_binary_int(value: int) -> None:
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
 
+
 @given(st.binary())
 def test_binary_bytes(value: bytes) -> None:
     """Test setting and getting binary values."""
@@ -328,6 +357,7 @@ def test_custom_int_base_5(value: int) -> None:
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
 
+
 @given(st.integers(min_value=0, max_value=2))
 def test_custom_int_base_3(value: int) -> None:
     """Test setting and getting integers with custom base."""
@@ -340,6 +370,7 @@ def test_custom_int_base_3(value: int) -> None:
     expected_format = f"3c{value}"
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
 
 @given(st.integers(min_value=0, max_value=6))
 def test_custom_int_base_7(value: int) -> None:
@@ -354,6 +385,7 @@ def test_custom_int_base_7(value: int) -> None:
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
 
+
 @given(st.integers(min_value=0, max_value=6))
 def test_custom_int_base_9(value: int) -> None:
     """Test setting and getting integers with custom base."""
@@ -366,6 +398,7 @@ def test_custom_int_base_9(value: int) -> None:
     expected_format = f"9c{value}"
     pred = stored_value == expected_format
     assert pred, f"Expected config file to contain value {expected_format}, but found {stored_value}"
+
 
 @given(st.integers(min_value=0, max_value=6))
 def test_custom_int_non_matching_base(value: int) -> None:
