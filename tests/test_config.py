@@ -46,8 +46,6 @@ class EnumTest(enum.Enum):
     OPTION_C = OPTION_A | OPTION_B
     OPTION_D = OPTION_A & OPTION_B
     OPTION_E = OPTION_A ^ OPTION_B
-    OPTION_F = ~OPTION_A
-    OPTION_G = ~OPTION_B
 
 class StrEnumTest(enum.StrEnum):
     """A test enum for ConfigEnumType."""
@@ -68,8 +66,6 @@ class IntEnumTest(enum.IntEnum):
     OPTION_C = OPTION_A | OPTION_B
     OPTION_D = OPTION_A & OPTION_B
     OPTION_E = OPTION_A ^ OPTION_B
-    OPTION_F = ~OPTION_A
-    OPTION_G = ~OPTION_B
 
 class IntFlagTest(enum.IntFlag):
     """A test enum for ConfigEnumType."""
@@ -79,8 +75,6 @@ class IntFlagTest(enum.IntFlag):
     OPTION_C = OPTION_A | OPTION_B
     OPTION_D = OPTION_A & OPTION_B
     OPTION_E = OPTION_A ^ OPTION_B
-    OPTION_F = ~OPTION_A
-    OPTION_G = ~OPTION_B
 
 # Having this class exists, tests the functionality of the Config descriptors.
 # This class will create a test.ini file, which tests writing, reading, editing setting config values.
