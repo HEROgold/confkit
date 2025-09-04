@@ -21,6 +21,7 @@ from confkit.data_types import (
     IntEnum,
     IntFlag,
     List,
+    NoneType,
     Octal,
     Optional,
     StrEnum,
@@ -275,9 +276,9 @@ def test_optional_string(value: str | None) -> None:
     if value and value.casefold() in NoneType.null_values:
         value = None
 
-    assert t.optional_string == value or t.optional_string is None
-    assert t.optional_string2 == value or t.optional_string2 is None
-    assert t.optional_string3 == value or t.optional_string3 is None
+    assert t.optional_string == value
+    assert t.optional_string2 == value
+    assert t.optional_string3 == value
 
 
 @given(st.booleans())
