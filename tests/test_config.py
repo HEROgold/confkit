@@ -42,21 +42,39 @@ class EnumTest(enum.Enum):
     """A test enum for ConfigEnumType."""
 
     OPTION_A = auto()
+    OPTION_B = auto()
+    OPTION_C = OPTION_A | OPTION_B
+    OPTION_D = OPTION_A & OPTION_B
+    OPTION_E = OPTION_A ^ OPTION_B
 
 class StrEnumTest(enum.StrEnum):
     """A test enum for ConfigEnumType."""
 
     OPTION_A = auto()
+    OPTION_B = auto()
+    OPTION_C = auto()
+    OPTION_D = auto()
+    OPTION_E = auto()
+    OPTION_F = auto()
+    OPTION_G = auto()
 
 class IntEnumTest(enum.IntEnum):
     """A test enum for ConfigEnumType."""
 
     OPTION_A = auto()
+    OPTION_B = auto()
+    OPTION_C = OPTION_A | OPTION_B
+    OPTION_D = OPTION_A & OPTION_B
+    OPTION_E = OPTION_A ^ OPTION_B
 
 class IntFlagTest(enum.IntFlag):
     """A test enum for ConfigEnumType."""
 
     OPTION_A = auto()
+    OPTION_B = auto()
+    OPTION_C = OPTION_A | OPTION_B
+    OPTION_D = OPTION_A & OPTION_B
+    OPTION_E = OPTION_A ^ OPTION_B
 
 # Having this class exists, tests the functionality of the Config descriptors.
 # This class will create a test.ini file, which tests writing, reading, editing setting config values.
@@ -269,7 +287,7 @@ def test_none_float(value: float) -> None:
         assert t.none_float == value
 
 
-@given(st.integers())
+@given(st.one_of(st.none(), st.integers()))
 def test_optional_number(value: int) -> None:
     t = Test()
     t.optional_number = value
@@ -280,7 +298,7 @@ def test_optional_number(value: int) -> None:
     assert t.optional_number3 == value or t.optional_number3 is None
 
 
-@given(st.text())
+@given(st.one_of(st.none(), st.text()))
 def test_optional_string(value: str | None) -> None:
     t = Test()
     t.optional_string = value
@@ -296,7 +314,7 @@ def test_optional_string(value: str | None) -> None:
     assert t.optional_string3 == value
 
 
-@given(st.booleans())
+@given(st.one_of(st.none(), st.booleans()))
 def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
     t = Test()
     t.optional_boolean = value
@@ -307,7 +325,7 @@ def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
     assert t.optional_boolean3 == value or t.optional_boolean3 is None
 
 
-@given(st.floats(allow_nan=False))
+@given(st.one_of(st.none(), st.floats(allow_nan=False)))
 def test_optional_float(value: float) -> None:
     t = Test()
     t.optional_float = value
@@ -482,3 +500,44 @@ def test_list_of_floats(value: list[float]) -> None:
     t = Test()
     t.list_of_floats = value
     assert t.list_of_floats == value
+
+@given(st.sampled_from(StrEnumTest))
+def test_str_enum_types(value: StrEnumTest) -> None:
+    t = Test()
+    t.str_enum = value
+    assert t.str_enum == value
+
+
+@given(st.sampled_from(IntEnumTest))
+def test_int_enum_types(value: IntEnumTest) -> None:
+    t = Test()
+    t.int_enum = value
+    assert t.int_enum == value
+
+
+@given(st.sampled_from(IntFlagTest))
+def test_int_flag_enum_types(value: IntFlagTest) -> None:
+    t = Test()
+    t.int_flag = value
+    assert t.int_flag == value
+
+
+@given(st.one_of(st.none(), st.sampled_from(StrEnumTest)))
+def test_optional_str_enum_types(value: StrEnumTest) -> None:
+    t = Test()
+    t.optional_str_enum = value
+    assert t.optional_str_enum == value
+
+
+@given(st.one_of(st.none(), st.sampled_from(IntEnumTest)))
+def test_optional_int_enum_types(value: IntEnumTest) -> None:
+    t = Test()
+    t.optional_int_enum = value
+    assert t.optional_int_enum == value
+
+
+@given(st.one_of(st.none(), st.sampled_from(IntFlagTest)))
+def test_optional_int_flag_enum_types(value: IntFlagTest) -> None:
+    t = Test()
+    t.optional_int_flag = value
+    assert t.optional_int_flag == value
