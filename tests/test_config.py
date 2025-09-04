@@ -176,6 +176,21 @@ def test_optional_validate_non_none_value() -> None:
     assert optional_type.validate() is True
 
 
+def test_optional_string_null_values() -> None:
+    """Test that all null values from NoneType.null_values convert to None."""
+    t = Test()
+    
+    # Ensure all null values from NoneType.null_values are always tested
+    for null_value in NoneType.null_values:
+        t.optional_string = null_value
+        t.optional_string2 = null_value
+        t.optional_string3 = null_value
+        
+        assert t.optional_string is None
+        assert t.optional_string2 is None
+        assert t.optional_string3 is None
+
+
 ## Hypothesis tests:
 
 
@@ -279,16 +294,6 @@ def test_optional_string(value: str | None) -> None:
     assert t.optional_string == value
     assert t.optional_string2 == value
     assert t.optional_string3 == value
-
-    # Ensure all null values from NoneType.null_values are always tested
-    for null_value in NoneType.null_values:
-        t.optional_string = null_value
-        t.optional_string2 = null_value
-        t.optional_string3 = null_value
-        
-        assert t.optional_string is None
-        assert t.optional_string2 is None
-        assert t.optional_string3 is None
 
 
 @given(st.booleans())
