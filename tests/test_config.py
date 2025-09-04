@@ -272,7 +272,7 @@ def test_optional_string(value: str | None) -> None:
     t.optional_string3 = value
 
     # Convert value to expected None types. after setting it in file.
-    if value and value.casefold() in {"none", "null", "nil"}:
+    if value and value.casefold() in NoneType.null_values:
         value = None
 
     assert t.optional_string == value or t.optional_string is None

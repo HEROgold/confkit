@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
-from typing import cast
+from typing import ClassVar, cast
 
 from confkit.sentinels import UNSET
 
@@ -117,6 +117,8 @@ class IntFlag(BaseDataType[enum.IntFlag]):
 class NoneType(BaseDataType[None]):
     """A config value that is None."""
 
+    null_values: ClassVar[set[str]] = {"none", "null", "nil"}
+
     def __init__(self) -> None:
         """Initialize the NoneType data type."""
         super().__init__(None)
@@ -125,7 +127,7 @@ class NoneType(BaseDataType[None]):
         """Convert a string value to None."""
         # Ignore type exception as convert should return True/False for NoneType
         # to determine if we have a valid null value or not.
-        return value.casefold().strip() in {"none", "null", "nil"}
+        return value.casefold().strip() in NoneType.null_values
 
 
 class String(BaseDataType[str]):
