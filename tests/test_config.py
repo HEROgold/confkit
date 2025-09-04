@@ -278,7 +278,7 @@ def test_none_float(value: float) -> None:
         assert t.none_float == value
 
 
-@given(st.integers())
+@given(st.one_of(st.none(), st.integers()))
 def test_optional_number(value: int) -> None:
     t = Test()
     t.optional_number = value
@@ -289,7 +289,7 @@ def test_optional_number(value: int) -> None:
     assert t.optional_number3 == value or t.optional_number3 is None
 
 
-@given(st.text())
+@given(st.one_of(st.none(), st.text()))
 def test_optional_string(value: str | None) -> None:
     t = Test()
     t.optional_string = value
@@ -305,7 +305,7 @@ def test_optional_string(value: str | None) -> None:
     assert t.optional_string3 == value
 
 
-@given(st.booleans())
+@given(st.one_of(st.none(), st.booleans()))
 def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
     t = Test()
     t.optional_boolean = value
@@ -316,7 +316,7 @@ def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
     assert t.optional_boolean3 == value or t.optional_boolean3 is None
 
 
-@given(st.floats(allow_nan=False))
+@given(st.one_of(st.none(), st.floats(allow_nan=False)))
 def test_optional_float(value: float) -> None:
     t = Test()
     t.optional_float = value
