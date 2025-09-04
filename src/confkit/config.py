@@ -10,7 +10,7 @@ from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, ClassVar, overload
 
-from .data_types import BaseDataType
+from .data_types import BaseDataType, Optional
 from .exceptions import InvalidConverterError, InvalidDefaultError
 from .sentinels import UNSET
 
@@ -134,7 +134,8 @@ class Config[VT]:
         self.__converted_type = type(self.__converted_value)
         default_value_type = type(self._data_type.default)
 
-        if self.optional and self.__converted_type in (default_value_type, NoneType):
+        is_optional = self.optional or isinstance(self._data_type, Optional)
+        if (is_optional) and self.__converted_type in (default_value_type, NoneType):
             # Allow None or the same type as the default value to be returned by the converter when _optional is True.
             return
         if self.__converted_type is not default_value_type:
