@@ -115,6 +115,10 @@ db_url = sqlite:///app.db
 fallback_level = error
 ```
 
+### Argparse Integration
+
+See `examples/argparse_example.py`.
+
 ## How to contribute?
 
 1. Fork the repository and clone locally
