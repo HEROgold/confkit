@@ -15,8 +15,6 @@ from pathlib import Path
 from confkit import Config
 from confkit.data_types import List
 
-ArgConfig = Config
-
 # Setup a standard confkit config file (unrelated to argparse defaults file)
 parser_ini = ConfigParser()
 ini_path = Path("config.ini")
