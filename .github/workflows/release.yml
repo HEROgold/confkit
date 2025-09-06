@@ -1,19 +1,19 @@
 name: Auto-release
 
 on:
-  push:
-    branches: [ master ]
+  workflow_run:
+    workflows: ["Test"]
+    branches: [master]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
-  rel-test:
-    uses: ./.github/workflows/test.yml
-  
   new-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: rel-test
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     outputs:
       version_changed: ${{ steps.version-check.outputs.version_changed }}
 
