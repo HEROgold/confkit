@@ -116,23 +116,7 @@ db_url = sqlite:///app.db
 fallback_level = error
 ```
 
-### Argparse Integration (Stage 1)
-
-Materialize argparse default values to an `args.ini` while keeping CLI overrides ephemeral.
-
-```python
-from argparse import ArgumentParser
-from confkit import materialize_argparse_defaults, parse_with_persisted_defaults
-
-ap = ArgumentParser()
-ap.add_argument("--host", default="127.0.0.1")
-ap.add_argument("--port", type=int, default=8000)
-
-# Writes defaults (if missing) to args.ini
-materialize_argparse_defaults(ap)
-ns, path = parse_with_persisted_defaults(ap)
-print(ns, path)
-```
+### Argparse Integration
 
 See `examples/argparse_example.py`.
 
