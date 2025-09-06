@@ -40,7 +40,11 @@ jobs:
 
     - name: Run type checking
       run: uvx ty check . --ignore no-matching-overload
-      
+
+  notify:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
     - name: Success Notification
       if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       run: |
