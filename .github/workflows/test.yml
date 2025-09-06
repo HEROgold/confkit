@@ -1,6 +1,8 @@
 name: Test
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -38,3 +40,20 @@ jobs:
 
     - name: Run type checking
       run: uvx ty check . --ignore no-matching-overload
+      
+    - name: Success Notification
+      if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      run: |
+        echo "Test workflow completed successfully"
+        
+        # Create an artifact with a marker to indicate test success
+        mkdir -p test_results
+        echo "success" > test_results/test_status.txt
+        
+    - name: Upload Test Status
+      if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-status
+        path: test_results/test_status.txt
+        retention-days: 1
