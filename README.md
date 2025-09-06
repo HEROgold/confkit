@@ -19,7 +19,6 @@ It uses descriptors to define configuration values as class attributes that auto
 - Enum support (Enum, StrEnum, IntEnum, IntFlag)
 - Method decorators for injecting configuration values
 - Runtime type validation
-- Argparse defaults materialization (stage 1 integration)
 
 ## How to use it?
 
