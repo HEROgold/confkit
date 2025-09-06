@@ -3,7 +3,6 @@
 It includes the Config class and various data types used for configuration values.
 """
 
-from .argparse_integration import materialize_argparse_defaults, parse_with_persisted_defaults
 from .config import Config
 from .data_types import (
     BaseDataType,
@@ -43,6 +42,4 @@ __all__ = [
     "Optional",
     "StrEnum",
     "String",
-    "materialize_argparse_defaults",
-    "parse_with_persisted_defaults",
 ]
