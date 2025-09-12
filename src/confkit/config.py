@@ -236,16 +236,30 @@ class Config[VT]:
             msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."  # noqa: E501
             raise InvalidConverterError(msg)
 
+    def validate_file(self) -> None:
+        """Validate the config file (instance-aware)."""
+        file_path = self._get_file()
+        if file_path is UNSET:
+            msg = f"Config file is not set. use {Config.__name__}.set_file() to set it."
+            raise ValueError(msg)
+
+    def validate_parser(self) -> None:
+        """Validate the config parser (instance-aware)."""
+        parser = self._get_parser()
+        if parser is UNSET:
+            msg = f"Config parser is not set. use {Config.__name__}.set_parser() to set it."
+            raise ValueError(msg)
+
     @staticmethod
     def validate_file() -> None:
-        """Validate the config file."""
+        """Validate the config file (class-level)."""
         if Config._file is UNSET:
             msg = f"Config file is not set. use {Config.__name__}.set_file() to set it."
             raise ValueError(msg)
 
     @staticmethod
     def validate_parser() -> None:
-        """Validate the config parser."""
+        """Validate the config parser (class-level)."""
         if Config._parser is UNSET:
             msg = f"Config parser is not set. use {Config.__name__}.set_parser() to set it."
             raise ValueError(msg)
