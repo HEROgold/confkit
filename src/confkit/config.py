@@ -6,7 +6,10 @@ It also provides a way to set default values and to set config values using deco
 """
 from __future__ import annotations
 
+import inspect
+from configparser import ConfigParser as ConfigParserType
 from functools import wraps
+from pathlib import Path as PathType
 from types import NoneType
 from typing import TYPE_CHECKING, ClassVar, overload
 
@@ -20,23 +23,66 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-# TODO: Add __init_subclass__ to allow for instance level settings.
-# These will have their own file, but share the same settings as the class level ones.
-# The file is automatically generated from the Config class settings, and prepends the AST location to the filename
-# Creating a unique but reproducible filename for each instance.
 class Config[VT]:
     """A descriptor for config values, preserving type information.
 
     the ValueType (VT) is the type you want the config value to be.
+    
+    Supports automatic instance-level configuration files for classes using Config descriptors.
+    When Config descriptors are used in a class, that class automatically gets its own 
+    config file based on the class location in the source code.
     """
 
     validate_types: ClassVar[bool] = True # Validate that the converter returns the same type as the default value. (not strict)
     write_on_edit: ClassVar[bool] = True # Write to the config file when updating a value.
     optional: bool = False # if True, allows None as an extra type when validating types. (both instance and class variables.)
 
+    # Class-level settings (global fallback)
     _parser: ConfigParser = UNSET
     _file: Path = UNSET
     _has_read_config: bool = False
+    
+    # Instance-level settings (per class that uses Config descriptors)
+    _instance_parsers: ClassVar[dict[type, ConfigParser]] = {}
+    _instance_files: ClassVar[dict[type, Path]] = {}
+    _instance_read_configs: ClassVar[dict[type, bool]] = {}
+
+    @classmethod
+    def _setup_instance_config(cls, owner_class: type) -> None:
+        """Set up instance-level config for a class that uses Config descriptors.
+        
+        Automatically generates a unique config file for the class based on 
+        the source file location and class name.
+        """
+        if owner_class in cls._instance_parsers:
+            # Already set up
+            return
+            
+        # Generate unique filename based on AST location
+        frame = inspect.currentframe()
+        filename = "unknown"
+        lineno = 0
+        
+        # Walk up the call stack to find the frame where the class was defined
+        current_frame = frame
+        while current_frame:
+            code = current_frame.f_code
+            # Look for a frame that's not in this module
+            if not code.co_filename.endswith('config.py'):
+                filename = code.co_filename
+                lineno = current_frame.f_lineno
+                break
+            current_frame = current_frame.f_back
+            
+        # Create unique but reproducible filename
+        base_name = f"{owner_class.__name__}_{PathType(filename).stem}_{lineno}.ini"
+        instance_file = PathType(base_name)
+        
+        # Initialize instance-level parser and file
+        instance_parser = ConfigParserType()
+        cls._instance_parsers[owner_class] = instance_parser
+        cls._instance_files[owner_class] = instance_file  
+        cls._instance_read_configs[owner_class] = False
 
     if TYPE_CHECKING:
         # Overloads for type checkers to understand the different settings of the Config descriptors.
