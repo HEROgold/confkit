@@ -20,6 +20,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
+# TODO: Add __init_subclass__ to allow for instance level settings.
+# These will have their own file, but share the same settings as the class level ones.
+# The file is automatically generated from the Config class settings, and prepends the AST location to the filename
+# Creating a unique but reproducible filename for each instance.
 class Config[VT]:
     """A descriptor for config values, preserving type information.
 
