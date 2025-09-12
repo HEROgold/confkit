@@ -264,14 +264,33 @@ class Config[VT]:
 
     def _ensure_section(self) -> None:
         """Ensure the section exists in the config file. Creates one if it doesn't exist."""
-        if not self._parser.has_section(self._section):
-            self._parser.add_section(self._section)
+        parser = self._get_parser()
+        if not parser.has_section(self._section):
+            parser.add_section(self._section)
 
     def _ensure_option(self) -> None:
         """Ensure the option exists in the config file. Creates one if it doesn't exist."""
         self._ensure_section()
-        if not self._parser.has_option(self._section, self._setting):
-            Config._set(self._section, self._setting, str(self._data_type))
+        parser = self._get_parser()
+        if not parser.has_option(self._section, self._setting):
+            self._set_instance_aware(self._section, self._setting, str(self._data_type))
+
+    def _set_instance_aware(self, section: str, setting: str, value: str) -> None:
+        """Set a config value using instance-aware parser and file."""
+        parser = self._get_parser()
+        if not parser.has_section(section):
+            parser.add_section(section)
+        sanitized_str = Config._sanitize_str(value)
+        parser.set(section, setting, sanitized_str)
+        if Config.write_on_edit:
+            self._write_instance_aware()
+
+    def _write_instance_aware(self) -> None:
+        """Write the config parser to the file (instance-aware)."""
+        file_path = self._get_file()
+        parser = self._get_parser()
+        with file_path.open("w") as f:
+            parser.write(f)
 
     def __get__(self, obj: object, obj_type: object) -> VT:
         """Get the value of the attribute."""
