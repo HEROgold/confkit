@@ -5,3 +5,9 @@ line-length = 128
 [lint.per-file-ignores]
 "test_*.py" = ["S101", "D103", "SLF001"]
 "examples/*.py" = ["ALL"]
+
+[format]
+# Don't apply line-length formatting to comments
+skip-magic-trailing-comma = true
+quote-style = "double"
+docstring-code-format = true
