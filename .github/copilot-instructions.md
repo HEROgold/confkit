@@ -16,8 +16,8 @@ confkit is a Python library for type-safe configuration management using descrip
 ### Data Flow
 
 1. `Config` descriptors are defined as class variables in user-defined config classes
-2. On access, the descriptor reads from the INI file and converts to the appropriate type
-3. On assignment, the descriptor validates and writes values back to the INI file
+1. On access, the descriptor reads from the INI file and converts to the appropriate type
+1. On assignment, the descriptor validates and writes values back to the INI file
 
 ## Development Workflow
 
@@ -35,14 +35,10 @@ uv sync --group test
 ### Testing
 
 ```bash
-# Run all tests
-pytest .
-
-# Run tests with coverage
-pytest --cov=confkit
-
 # Run linting
 ruff check .
+# Update dependencies and run tests
+uv sync --upgrade --group dev; uv run pytest .
 ```
 
 ### Key Patterns
@@ -52,11 +48,12 @@ ruff check .
 Config descriptors can be defined in three ways:
 
 1. Simple types: `name = Config(default_value)`
-2. Custom data types: `name = Config(CustomType(default_value))`
-3. Optional values: `name = Config(default_value, optional=True)` or `name = Config(Optional(CustomType(default_value)))`
+1. Custom data types: `name = Config(CustomType(default_value))`
+1. Optional values: `name = Config(default_value, optional=True)` or `name = Config(Optional(CustomType(default_value)))`
 
 ```python
 # Example from examples/basic.py
+
 
 class AppConfig:
     debug = Config(False)
@@ -65,7 +62,8 @@ class AppConfig:
     timeout = Config(30.5)
     api_key = Config("", optional=True)
 
-def main():  
+
+def main():
     # Read values from config
     print(f"Debug mode: {Config.debug}")
     print(f"Server port: {Config.port}")
@@ -97,19 +95,22 @@ There are several decorators available for working with config values:
 # Injects the retry_count config value into kwargs
 @Config.with_setting(retry_count)
 def process(self, data, **kwargs):
-    retries = kwargs.get('retry_count')
+    retries = kwargs.get("retry_count")
     return f"Processing with {retries} retries"
+
 
 # Injects the config value with a custom kwarg name
 @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
 def request(self, url, **kwargs):
-    timeout = kwargs.get('request_timeout')
+    timeout = kwargs.get("request_timeout")
     return f"Request timeout: {timeout}s"
+
 
 # Sets a config value when the function is called
 @Config.set("AppConfig", "debug", True)
 def enable_debug_mode():
     print("Debug mode enabled")
+
 
 # Sets a default config value if none exists yet
 @Config.default("AppConfig", "timeout", 30)
@@ -121,9 +122,9 @@ def initialize_timeout():
 
 While the descriptor approach is the preferred method for simplicity and type safety, there are alternative ways to access configuration:
 
-| Method                  | Use Case                                        | Example                                                  |
-| ----------------------- | ----------------------------------------------- | -------------------------------------------------------- |
-| Descriptor              | Primary, type-safe approach                     | `config = AppConfig(); config.debug = True`            |
+| Method                | Use Case                                        | Example                                                |
+| --------------------- | ----------------------------------------------- | ------------------------------------------------------ |
+| Descriptor            | Primary, type-safe approach                     | `config = AppConfig(); config.debug = True`            |
 | `Config.set`          | Imperatively setting values                     | `@Config.set("Section", "setting", value)`             |
 | `Config.default`      | Setting values only if not set                  | `@Config.default("Section", "setting", default_value)` |
 | `Config.with_setting` | Injecting existing configs into function kwargs | `@Config.with_setting(retry_count)`                    |
@@ -151,7 +152,7 @@ While the descriptor approach is the preferred method for simplicity and type sa
       @staticmethod
       @Config.with_setting(retry_count)
       def process(data, **kwargs):
-          retries = kwargs.get('retry_count')  # Name matches descriptor name
+          retries = kwargs.get("retry_count")  # Name matches descriptor name
   ```
 - `Config.as_kwarg`: References a config by section/setting and can rename the kwarg
   ```python
@@ -159,7 +160,7 @@ While the descriptor approach is the preferred method for simplicity and type sa
   # Section, Option, kwargName, value
   @Config.as_kwarg("AppConfig", "timeout", "request_timeout", 60)
   def request(url, **kwargs):
-      timeout = kwargs.get('request_timeout')  # Custom name in kwargs
+      timeout = kwargs.get("request_timeout")  # Custom name in kwargs
   ```
 
 The `with_setting` approach is more type-safe as it references an actual descriptor, while `as_kwarg` allows more flexibility with naming and providing fallback values.
@@ -189,22 +190,22 @@ List types require special handling for escaping and separators:
 ```python
 # From examples/list_types.py
 List.escape_char = "\\"  # Default
-List.separator = ","     # Default
+List.separator = ","  # Default
 ```
 
 ### Project Conventions
 
 1. Type-safety is enforced by default (`Config.validate_types = True`)
-2. Automatic writing to INI file is enabled by default (`Config.write_on_edit = True`)
-3. Python 3.12+ is required for the type syntax used
+1. Automatic writing to INI file is enabled by default (`Config.write_on_edit = True`)
+1. Python 3.12+ is required for the type syntax used
 
 ## Common Tasks
 
 ### Creating New Data Types
 
 1. Subclass `BaseDataType[T]` where T is the target type
-2. Implement the `convert` method to handle string-to-type conversion
-3. Optionally override `__str__` for custom string representation
+1. Implement the `convert` method to handle string-to-type conversion
+1. Optionally override `__str__` for custom string representation
 
 ### Testing
 
