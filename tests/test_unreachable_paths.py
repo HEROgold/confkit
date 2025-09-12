@@ -25,7 +25,7 @@ def test_base_data_type_validate_unreachable_path() -> None:
     test_type = DataType("test")
     # Intentionally create a malformed class hierarchy
     setattr(test_type.__class__, "__orig_bases__", (MockBase,))  # noqa: B010
-    with pytest.raises(TypeError, match="This should not have raised.*DTBDT"):
+    with pytest.raises(TypeError, match=r"This should not have raised.*DTBDT"):
         test_type.validate()
 
 
@@ -39,7 +39,7 @@ def test_base_data_type_validate_no_type_args() -> None:
 
     test_type = DataType("test")
     setattr(test_type.__class__, "__orig_bases__", (MockBaseWithEmptyArgs,))  # noqa: B010
-    with pytest.raises(TypeError, match="This should not have raised.*DTBDT"):
+    with pytest.raises(TypeError, match=r"This should not have raised.*DTBDT"):
         test_type.validate()
 
 
@@ -49,6 +49,6 @@ def test_base_data_type_validate_unreachable_path_hypothesis(test_value: str) ->
     test_type = DataType(test_value)
 
     setattr(test_type.__class__, "__orig_bases__", (MockBase,))  # noqa: B010
-    with pytest.raises(TypeError, match="This should not have raised.*DTBDT"):
+    with pytest.raises(TypeError, match=r"This should not have raised.*DTBDT"):
         test_type.validate()
 

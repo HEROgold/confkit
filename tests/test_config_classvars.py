@@ -35,7 +35,7 @@ def test_config_validate_file_unset() -> None:
     Config._file = UNSET
     config_instance = Config.__new__(Config)
     config_instance.optional = False
-    with pytest.raises(ValueError, match="Config file is not set"):
+    with pytest.raises(ValueError, match=r"Config file is not set"):
         config_instance.validate_file()
 
 
@@ -45,7 +45,7 @@ def test_config_validate_parser_unset() -> None:
     Config._parser = UNSET
     config_instance = Config.__new__(Config)
     config_instance.optional = False
-    with pytest.raises(ValueError, match="Config parser is not set"):
+    with pytest.raises(ValueError, match=r"Config parser is not set"):
         config_instance.validate_parser()
 
 
@@ -75,7 +75,7 @@ def test_config_converter_is_unset() -> None:
     mock_data_type.convert = UNSET
     config_instance._data_type = mock_data_type
 
-    with pytest.raises(InvalidConverterError, match="Converter is not set"):
+    with pytest.raises(InvalidConverterError, match=r"Converter is not set"):
         config_instance.validate_strict_type()
     tmp_path.unlink(missing_ok=True)
 
@@ -105,7 +105,7 @@ def test_config_validation_fails() -> None:
     config_instance._setting = "string"
     config_instance._data_type = FailingDataType("default")
 
-    with pytest.raises(InvalidConverterError, match="Invalid value for Test.string"):
+    with pytest.raises(InvalidConverterError, match=r"Invalid value for Test.string"):
         config_instance.validate_strict_type()
 
     tmp_path.unlink(missing_ok=True)
@@ -161,7 +161,7 @@ def test_config_type_mismatch_error() -> None:
     config_instance._setting = "null_int"
     config_instance._data_type = WrongTypeDataType("default")
 
-    with pytest.raises(InvalidConverterError, match="Converter does not return the same type"):
+    with pytest.raises(InvalidConverterError, match=r"Converter does not return the same type"):
         config_instance.validate_strict_type()
 
     tmp_path.unlink(missing_ok=True)
@@ -185,7 +185,7 @@ def test_data_type_validate_no_orig_bases() -> None:
             return BaseDataType.validate(self) # pyright: ignore[reportArgumentType]
 
     data_type = NoOrigBasesDataType("test")
-    with pytest.raises(InvalidConverterError, match="No type information available for validation"):
+    with pytest.raises(InvalidConverterError, match=r"No type information available for validation"):
         data_type.validate()
 
 
@@ -212,7 +212,7 @@ def test_optional_data_type_value_property() -> None:
 def test_invalid_default_error() -> None:
     with pytest.raises(
         InvalidDefaultError,
-        match="Unsupported default value type: object. Use a BaseDataType subclass for custom types.",
+        match=r"Unsupported default value type: object. Use a BaseDataType subclass for custom types.",
     ):
         BaseDataType.cast(object())
 
