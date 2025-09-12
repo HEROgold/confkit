@@ -84,6 +84,47 @@ class Config[VT]:
         cls._instance_files[owner_class] = instance_file  
         cls._instance_read_configs[owner_class] = False
 
+    def _get_parser(self) -> ConfigParser:
+        """Get the appropriate parser (instance-level or class-level)."""
+        if hasattr(self, '_section') and self._section:
+            # Try to find the class that owns this descriptor
+            for cls, parser in Config._instance_parsers.items():
+                if cls.__name__ == self._section:
+                    return parser
+        # Fall back to class-level parser
+        return Config._parser
+        
+    def _get_file(self) -> Path:
+        """Get the appropriate file path (instance-level or class-level)."""
+        if hasattr(self, '_section') and self._section:
+            # Try to find the class that owns this descriptor
+            for cls, file_path in Config._instance_files.items():
+                if cls.__name__ == self._section:
+                    return file_path
+        # Fall back to class-level file
+        return Config._file
+
+    def _get_read_config_state(self) -> bool:
+        """Get the read config state (instance-level or class-level)."""
+        if hasattr(self, '_section') and self._section:
+            # Try to find the class that owns this descriptor
+            for cls in Config._instance_read_configs:
+                if cls.__name__ == self._section:
+                    return Config._instance_read_configs[cls]
+        # Fall back to class-level state
+        return Config._has_read_config
+        
+    def _set_read_config_state(self, state: bool) -> None:
+        """Set the read config state (instance-level or class-level)."""
+        if hasattr(self, '_section') and self._section:
+            # Try to find the class that owns this descriptor
+            for cls in Config._instance_read_configs:
+                if cls.__name__ == self._section:
+                    Config._instance_read_configs[cls] = state
+                    return
+        # Fall back to class-level state
+        Config._has_read_config = state
+
     if TYPE_CHECKING:
         # Overloads for type checkers to understand the different settings of the Config descriptors.
         @overload
@@ -141,9 +182,11 @@ class Config[VT]:
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
-        if not self._has_read_config:
-            Config._parser.read(Config._file)
-            Config._has_read_config = True
+        if not self._get_read_config_state():
+            parser = self._get_parser()
+            file_path = self._get_file()
+            parser.read(file_path)
+            self._set_read_config_state(True)
 
     def _validate_init(self) -> None:
         """Validate the config descriptor, ensuring it's properly set up."""
@@ -208,11 +251,15 @@ class Config[VT]:
 
     def __set_name__(self, owner: type, name: str) -> None:
         """Set the name of the attribute to the name of the descriptor."""
+        # Set up instance-level config for the owner class
+        Config._setup_instance_config(owner)
+        
         self.name = name
         self._section = owner.__name__
         self._setting = name
         self._ensure_option()
-        self._original_value = Config._parser.get(self._section, self._setting) or self._data_type.default
+        parser = self._get_parser()
+        self._original_value = parser.get(self._section, self._setting) or self._data_type.default
         self.private = f"_{self._section}_{self._setting}_{self.name}"
 
     def _ensure_section(self) -> None:
