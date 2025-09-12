@@ -215,7 +215,8 @@ class Config[VT]:
             msg = "Converter is not set."
             raise InvalidConverterError(msg)
 
-        self.__config_value = Config._parser.get(self._section, self._setting)
+        parser = self._get_parser()
+        self.__config_value = parser.get(self._section, self._setting)
         self.__converted_value = self.convert(self.__config_value)
 
         if not Config.validate_types:
