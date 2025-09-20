@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
-from typing import ClassVar, cast
+from typing import ClassVar, Generic, TypeVar, cast
 
 from confkit.sentinels import UNSET
 
 from .exceptions import InvalidConverterError, InvalidDefaultError
 
+T = TypeVar("T")
 
-class BaseDataType[T](ABC):
+
+class BaseDataType(ABC, Generic[T]):
     """Base class used for Config descriptors to define a data type."""
 
     def __init__(self, default: T) -> None:
@@ -253,7 +255,7 @@ class Binary(BaseDataType[bytes | int]):
         """Convert a string value to an integer from binary."""
         return int(value.removeprefix("0b"), 2)
 
-class Optional[T](BaseDataType[T | None]):
+class Optional(BaseDataType[T | None], Generic[T]):
     """A config value that is optional, can be None or a specific type."""
 
     _none_type = NoneType()
@@ -289,7 +291,7 @@ class Optional[T](BaseDataType[T | None]):
             return True
         return self._data_type.validate()
 
-class List[T](BaseDataType[list[T]]):
+class List(BaseDataType[list[T]], Generic[T]):
     """A config value that is a list of values."""
 
     separator = ","

@@ -7,7 +7,7 @@ import tempfile
 from collections.abc import Callable
 from configparser import ConfigParser
 from pathlib import Path
-from typing import Never
+from typing import Never, ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -18,8 +18,11 @@ from confkit.data_types import BaseDataType, Optional, String
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 from confkit.sentinels import UNSET
 
+F = TypeVar("F")
+P = ParamSpec("P")
 
-def config_restore[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+
+def config_restore(func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
     def inner(*args: P.args, **kwargs: P.kwargs) -> F:
         restores = (getattr(Config, "_file", UNSET), getattr(Config, "_parser", UNSET))

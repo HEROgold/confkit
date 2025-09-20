@@ -7,6 +7,7 @@ These get their own test file.
 from collections.abc import Callable
 from configparser import ConfigParser
 from pathlib import Path
+from typing import ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -15,8 +16,11 @@ from hypothesis import strategies as st
 from confkit.config import Config
 from confkit.sentinels import UNSET
 
+F = TypeVar("F")
+P = ParamSpec("P")
 
-def config_new[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+
+def config_new(func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
     def inner(*args: P.args, **kwargs: P.kwargs) -> F:
         restores = (getattr(Config, "_file", UNSET), getattr(Config, "_parser", UNSET))
