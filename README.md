@@ -5,6 +5,16 @@
 
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
+## Supported Python Versions
+
+confkit follows the [Python version support policy](https://devguide.python.org/versions/) as outlined in the Python Developer's Guide:
+
+- We support all active and maintenance releases of Python
+- End-of-life (EOL) Python versions are **not** supported
+- We aim to support Python release candidates to stay ahead of the release cycle
+
+This ensures that confkit remains compatible with current Python versions while allowing us to leverage modern language features.
+
 ## What is it?
 
 confkit is a Python library that provides type-safe configuration management with automatic type conversion and validation.
