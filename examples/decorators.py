@@ -21,7 +21,7 @@ class ServiceConfig:
         return f"Processing with {retries} retries"
 
     @staticmethod
-    @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
+    @Config.with_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
     def request(_url: Any, **kwargs: Any) -> str:
         timeout = kwargs.get("request_timeout")
         return f"Request timeout: {timeout}s"

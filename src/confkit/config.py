@@ -243,7 +243,7 @@ class Config(Generic[VT]):
         return wrapper
 
     @staticmethod
-    def as_kwarg(section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN205
+    def with_kwarg(section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN205
         """Insert a config value into **kwargs to a given method/function using this descriptor.
 
         Use kwarg.get(`name`) to get the value.
