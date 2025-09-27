@@ -5,6 +5,16 @@
 
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
+## Supported Python Versions
+
+confkit follows the [Python version support policy](https://devguide.python.org/versions/) as outlined in the Python Developer's Guide:
+
+- We support all active and maintenance releases of Python above 3.11
+- End-of-life (EOL) Python versions are **not** supported
+- We aim to support Python release candidates to stay ahead of the release cycle
+
+This ensures that confkit remains compatible with current Python versions while allowing us to leverage modern language features.
+
 ## What is it?
 
 confkit is a Python library that provides type-safe configuration management with automatic type conversion and validation.
@@ -84,7 +94,7 @@ class ServiceConfig:
         retries = kwargs.get('retry_count')
         return f"Processing with {retries} retries"
 
-    @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
+    @Config.with_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
     def request(self, url, **kwargs):
         timeout = kwargs.get('request_timeout')
         return f"Request timeout: {timeout}s"
@@ -114,6 +124,10 @@ log_level = debug
 db_url = sqlite:///app.db
 fallback_level = error
 ```
+
+### Argparse Integration
+
+See `examples/argparse_example.py`.
 
 ## How to contribute?
 

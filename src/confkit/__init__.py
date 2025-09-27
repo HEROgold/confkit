@@ -1,4 +1,4 @@
-"""Module that provides the main interface for the configurator package.
+"""Module that provides the main interface for the confkit package.
 
 It includes the Config class and various data types used for configuration values.
 """

@@ -1,0 +1,73 @@
+site_name: confkit
+site_description: Type-safe configuration manager using descriptors.
+repo_url: https://github.com/HEROgold/confkit
+repo_name: HEROgold/confkit
+docs_dir: docs
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - Examples:
+      - Overview: examples/index.md
+      - Basic: examples/basic.md
+      - Optional Values: examples/optional_values.md
+      - Decorators: examples/decorators.md
+      - Data Types: examples/data_types.md
+      - Lists: examples/list_types.md
+      - Enums: examples/enums.md
+      - Custom Data Type: examples/custom_data_type.md
+      - Argparse Integration: examples/argparse.md
+  - API Reference:
+      - Config: reference/config.md
+      - Data Types: reference/data_types.md
+      - Exceptions: reference/exceptions.md
+plugins:
+  - search
+  - pdoc:
+      api_path: api
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+            docstring_style: google
+            separate_signature: true
+            show_symbol_type_toc: true
+            merge_init_into_class: true
+            members_order: source
+            show_if_no_docstring: true
+            line_length: 100
+            show_root_heading: true
+            show_signature: true
+            signature_crossrefs: true
+            annotations_path: source
+            inherited_members: true
+            filters: ["!^__weakref__$"]
+            extra:
+              show_type_annotations: true  # moved under extra per deprecation warning
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+  - def_list
+  - footnotes
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.emoji
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - content.code.annotate
+  # navigation.instant removed temporarily while enabling pdoc cross-refs; can re-enable after verifying no reload loop
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HEROgold/confkit

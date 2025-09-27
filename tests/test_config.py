@@ -259,7 +259,7 @@ def test_float(value: float) -> None:
 def test_none_number(value: int) -> None:
     """Test should expect error."""
     t = Test()
-    with pytest.raises(ValueError, match="invalid literal for int()"):
+    with pytest.raises(ValueError, match=r"invalid literal for int()"):
         assert t.none_int == value
 
 
@@ -275,7 +275,7 @@ def test_none_string(value: str) -> None:
 def test_none_boolean(value: bool) -> None:  # noqa: FBT001
     """Test should expect error."""
     t = Test()
-    with pytest.raises(ValueError, match="Cannot convert None to boolean."):
+    with pytest.raises(ValueError, match=r"Cannot convert None to boolean."):
         assert t.none_boolean == value
 
 
@@ -283,7 +283,7 @@ def test_none_boolean(value: bool) -> None:  # noqa: FBT001
 def test_none_float(value: float) -> None:
     """Test should expect error."""
     t = Test()
-    with pytest.raises(ValueError, match="could not convert string to float: 'None'"):
+    with pytest.raises(ValueError, match=r"could not convert string to float: 'None'"):
         assert t.none_float == value
 
 
@@ -469,7 +469,7 @@ def test_custom_int_non_matching_base(value: int) -> None:
     t = Test()
     t.custom_int_base_9 = value
     Config._parser.set("Test", "custom_int_base_9", "0c0")
-    with pytest.raises(ValueError, match="Base in string does not match base in Integer while converting."):
+    with pytest.raises(ValueError, match=r"Base in string does not match base in Integer while converting."):
         assert t.custom_int_base_9
 
 

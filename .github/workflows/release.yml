@@ -9,6 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
+  rel-test:
+    uses: ./.github/workflows/test.yml
   new-release:
     runs-on: ubuntu-latest
     permissions:
@@ -38,7 +40,7 @@ jobs:
         # Get current version from pyproject.toml
         CURRENT_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
         echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-        
+
         # Check if this version already has a tag
         if git tag --list | grep -q "^v$CURRENT_VERSION$"; then
           echo "version_changed=false" >> $GITHUB_OUTPUT

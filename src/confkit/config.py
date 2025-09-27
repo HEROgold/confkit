@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from functools import wraps
 from types import NoneType
-from typing import TYPE_CHECKING, ClassVar, overload
+from typing import TYPE_CHECKING, ClassVar, Generic, ParamSpec, TypeVar, overload
 
 from .data_types import BaseDataType, Optional
 from .exceptions import InvalidConverterError, InvalidDefaultError
@@ -19,8 +19,13 @@ if TYPE_CHECKING:
     from configparser import ConfigParser
     from pathlib import Path
 
+# Type variables for Python 3.10+ (pre-PEP 695) compatibility
+VT = TypeVar("VT")
+OVT = TypeVar("OVT")  # Separate TypeVar for nested generic to avoid scope collision
+F = TypeVar("F")
+P = ParamSpec("P")
 
-class Config[VT]:
+class Config(Generic[VT]):
     """A descriptor for config values, preserving type information.
 
     the ValueType (VT) is the type you want the config value to be.
@@ -216,7 +221,7 @@ class Config[VT]:
     def set(section: str, setting: str, value: VT):  # noqa: ANN205
         """Set a config value using this descriptor."""
 
-        def wrapper[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 Config._set(section, setting, value)
@@ -226,9 +231,9 @@ class Config[VT]:
         return wrapper
 
     @staticmethod
-    def with_setting[OVT](setting: Config[OVT]):  # noqa: ANN205
-        """Insert a config value into **kwargs to a given method/function using this decorator."""
-        def wrapper[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+    def with_setting(setting: Config[OVT]):  # noqa: ANN205
+        """Insert a config value into **kwargs to the wrapped method/function using this decorator."""
+        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 kwargs[setting.name] = setting.convert(Config._parser.get(setting._section, setting._setting))
@@ -238,8 +243,8 @@ class Config[VT]:
         return wrapper
 
     @staticmethod
-    def as_kwarg(section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN205
-        """Insert a config value into **kwargs to a given method/function using this descriptor.
+    def with_kwarg(section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN205
+        """Insert a config value into **kwargs to the wrapped method/function using this descriptor.
 
         Use kwarg.get(`name`) to get the value.
         `name` is the name the kwarg gets if passed, if None, it will be the same as `setting`.
@@ -251,7 +256,7 @@ class Config[VT]:
             msg = f"Config value {section=} {setting=} is not set. and no default value is given."
             raise ValueError(msg)
 
-        def wrapper[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 if default is not UNSET:
@@ -270,8 +275,7 @@ class Config[VT]:
     @staticmethod
     def default(section: str, setting: str, value: VT):  # noqa: ANN205
         """Set a default config value if none are set yet using this descriptor."""
-
-        def wrapper[F, **P](func: Callable[P, F]) -> Callable[P, F]:
+        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 Config._set_default(section, setting, value)

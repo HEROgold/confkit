@@ -1,12 +1,12 @@
 [project]
 name = "confkit"
-version = "0.3.0"
+version = "0.4.0"
 description = "Lightweight and Easy to use configuration manager for Python projects"
 readme = "README.md"
 authors = [
     { name = "HEROgold", email = "martijnwieringa28@gmail.com" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = []
 
 [build-system]
@@ -16,11 +16,18 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "coverage>=7.10.3",
-    "pytest-cov>=6.2.1",
+    "pytest-cov>=7.0.0",
     "hypothesis>=6.138.14",
     "pytest>=8.4.1",
     "ruff>=0.12.9",
     "coveralls>=4.0.1",
+]
+docs = [
+    "mkdocs>=1.6.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.30.0",
+    "mkdocs-pdoc-plugin @ git+https://github.com/spirali/mkdocs-pdoc-plugin",
+    "pdoc>=15.0.0",
 ]
 
 [[tool.pyright.executionEnvironments]]
