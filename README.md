@@ -5,6 +5,8 @@
 
 Type-safe configuration manager for Python projects using descriptors and ConfigParser.
 
+Full documentation: [confkit docs](https://HEROgold.github.io/confkit/)
+
 ## Supported Python Versions
 
 confkit follows the [Python version support policy](https://devguide.python.org/versions/) as outlined in the Python Developer's Guide:
@@ -30,104 +32,20 @@ It uses descriptors to define configuration values as class attributes that auto
 - Method decorators for injecting configuration values
 - Runtime type validation
 
-## How to use it?
+## Getting Started / Usage
 
-### Setup
+For full quickstart, advanced patterns (custom data types, decorators, argparse integration), and runnable examples, visit the documentation site:
 
-```python
-from configparser import ConfigParser
-from pathlib import Path
-from confkit import Config
+👉 [confkit documentation site](https://HEROgold.github.io/confkit/usage)
 
-parser = ConfigParser()
-Config.set_parser(parser)
-Config.set_file(Path("config.ini"))
-```
+Direct entry points:
 
-### Basic Usage
+- Quickstart & descriptor patterns: Usage Guide
+- All examples: Examples Overview
+- Custom datatype tutorial: Custom Data Type example
+- API reference: pdoc-generated symbol index
 
-- Note: imports have been left out. see [examples/basic.py](examples/basic.py) for the entire example.
-
-```python
-class AppConfig:
-    debug = Config(False)
-    port = Config(8080)
-    host = Config("localhost")
-    timeout = Config(30.5)
-    api_key = Config("", optional=True)
-
-config = AppConfig()
-print(config.debug)  # False
-config.port = 9000   # Automatically saves to config.ini if write_on_edit is true (default).
-```
-
-### Enums and Custom Types
-
-- Note: imports have been left out. see [examples/enums.py](examples/enums.py) for the entire example.
-
-```python
-class LogLevel(StrEnum):
-    DEBUG = "debug"
-    INFO = "info"
-    ERROR = "error"
-
-class ServerConfig:
-    log_level = Config(ConfigEnum(LogLevel.INFO))
-    db_url = Config(String("sqlite:///app.db"))
-    fallback_level = Config(Optional(ConfigEnum(LogLevel.ERROR)))
-
-config = ServerConfig()
-config.log_level = LogLevel.DEBUG  # Type-safe
-```
-
-### Method Decorators
-
-- Note: imports have been left out. see [examples/decorators.py](examples/decorators.py) for the entire example.
-
-```python
-class ServiceConfig:
-    retry_count = Config(3)
-    timeout = Config(30)
-
-    @Config.with_setting(retry_count)
-    def process(self, data, **kwargs):
-        retries = kwargs.get('retry_count')
-        return f"Processing with {retries} retries"
-
-    @Config.with_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
-    def request(self, url, **kwargs):
-        timeout = kwargs.get('request_timeout')
-        return f"Request timeout: {timeout}s"
-
-service = ServiceConfig()
-result = service.process("data")  # Uses current retry_count
-```
-
-### Configuration File
-
-Generated INI file structure see [examples/config.ini](examples/config.ini) for the entire example.:
-
-```ini
-[AppConfig]
-debug = False
-port = 9000
-host = localhost
-timeout = 30.5
-api_key = 
-
-[ServiceConfig]
-retry_count = 3
-timeout = 30
-
-[ServerConfig]
-log_level = debug
-db_url = sqlite:///app.db
-fallback_level = error
-```
-
-### Argparse Integration
-
-See `examples/argparse_example.py`.
+You can still browse example source locally under `examples/`.
 
 ## How to contribute?
 
