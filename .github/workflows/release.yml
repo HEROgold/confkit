@@ -11,7 +11,6 @@ on:
 jobs:
   rel-test:
     uses: ./.github/workflows/test.yml
-
   new-release:
     runs-on: ubuntu-latest
     permissions:
