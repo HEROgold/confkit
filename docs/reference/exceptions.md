@@ -10,4 +10,3 @@ The library raises a small, focused set of exceptions for invalid defaults and c
 - [`InvalidConverterError`](pdoc:confkit.InvalidConverterError)
 
 These both subclass `ValueError` to keep failure modes familiar while allowing precise catching.
-

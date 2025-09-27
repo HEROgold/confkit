@@ -1,6 +1,7 @@
-# Argparse Integration Example (`argparse_example.py`)
+# Argparse Integration Example ([`argparse_example.py`](https://github.com/HEROgold/confkit/blob/master/examples/argparse_example.py))
 
 ## Purpose
+
 Shows how to combine CLI argument parsing with confkit-backed defaults while keeping runtime-provided values separate from persisted configuration.
 
 ## Key Concepts

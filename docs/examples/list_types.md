@@ -1,6 +1,7 @@
-# List Types Example (`list_types.py`)
+# List Types Example ([`list_types.py`](https://github.com/HEROgold/confkit/blob/master/examples/list_types.py))
 
 ## Purpose
+
 Shows how to work with list-based configuration values:
 
 - Storing homogeneous lists of primitives
@@ -8,11 +9,13 @@ Shows how to work with list-based configuration values:
 - Empty elements and explicit typed empty lists
 
 ## Running
+
 ```bash
 uv run python examples/list_types.py
 ```
 
 ## Generated `config.ini` (Excerpt)
+
 ```ini
 [ListConfig]
 string_list = red,green,blue
@@ -26,10 +29,12 @@ empty_list =
 ```
 
 ## Notes
-- `List.separator` and `List.escape_char` default to `,` and `\\` (explicitly set in the example for clarity).
+
+- See [`List.separator`](pdoc:confkit.List.separator) and [`List.escape_char`](pdoc:confkit.List.escape_char) for their default values (explicitly set in the example for clarity).
 - Items containing the separator are escaped when written, then unescaped on read.
 - An explicit empty list with a declared data type stays as a blank line after the equals sign.
 
 ## Try Variations
+
 - Append a value manually to `int_list` in the file and re-run.
 - Add a value containing a backslash and observe escaping.

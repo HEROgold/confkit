@@ -26,13 +26,7 @@ This section provides curated guidance around the core `Config` descriptor and i
 - [`Config.set`](pdoc:confkit.Config.set) – Always set a value before calling a function.
 - [`Config.default`](pdoc:confkit.Config.default) – Set only when unset.
 - [`Config.with_setting`](pdoc:confkit.Config.with_setting) – Inject an existing descriptor value as a kwarg.
-- [`Config.with_kwarg`](pdoc:confkit.Config.with_kwarg) – (Named `with_kwarg` in code; often described as `as_kwarg`) inject by section/setting with optional rename & default.
-
-## Descriptor Protocol Methods
-
-- [`Config.__get__`](pdoc:confkit.Config.__get__)
-- [`Config.__set__`](pdoc:confkit.Config.__set__)
-- [`Config.__set_name__`](pdoc:confkit.Config.__set_name__)
+- [`Config.with_kwarg`](pdoc:confkit.Config.with_kwarg) – (Named `with_kwarg` in code; often described as `with_kwarg`) inject by section/setting with optional rename & default.
 
 ## Internal Validation (Selected)
 
@@ -41,4 +35,3 @@ This section provides curated guidance around the core `Config` descriptor and i
 - [`Config.validate_strict_type`](pdoc:confkit.Config.validate_strict_type)
 
 > Tip: Use the decorators for imperative flows and prefer descriptor attributes for normal configuration access.
-

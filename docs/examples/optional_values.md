@@ -1,19 +1,22 @@
-# Optional Values Example (`optional_values.py`)
+# Optional Values Example ([`optional_values.py`](https://github.com/HEROgold/confkit/blob/master/examples/optional_values.py))
 
 ## Purpose
+
 Demonstrates nullable / optional configuration patterns:
 
-- `optional=True` shorthand vs `Optional(...)` wrapper
+- `optional=True` shorthand vs [`Optional(...)`](pdoc:confkit.Optional) wrapper
 - Optional enums, strings, integers
 - Empty string vs None semantics
 - Cascading defaults & fallback logic
 
 ## Running
+
 ```bash
 uv run python examples/optional_values.py
 ```
 
 ## Generated `config.ini` (Excerpt)
+
 First run (only defaults materialize):
 
 ```ini
@@ -57,10 +60,12 @@ port = 5433
 ```
 
 ## Notes
+
 - Setting a value to `None` for an optional field removes it from the config file.
 - Empty string `""` is distinct from `None` (still persisted as a blank value).
 - Use fallback logic in application code (see `get_connection_params`).
 
 ## Try Variations
+
 - Remove the whole `[DatabaseConfig]` section and re-run.
 - Set `worker_count = None` then reassign an integer.

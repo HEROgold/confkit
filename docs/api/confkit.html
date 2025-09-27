@@ -387,7 +387,7 @@ confkit    </h1>
 </span><span id="BaseDataType-23"><a href="#BaseDataType-23"><span class="linenos">23</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">default</span>
 </span><span id="BaseDataType-24"><a href="#BaseDataType-24"><span class="linenos">24</span></a>
 </span><span id="BaseDataType-25"><a href="#BaseDataType-25"><span class="linenos">25</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="BaseDataType-26"><a href="#BaseDataType-26"><span class="linenos">26</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the string representation of the value.&quot;&quot;&quot;</span>
+</span><span id="BaseDataType-26"><a href="#BaseDataType-26"><span class="linenos">26</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the string representation of the stored value.&quot;&quot;&quot;</span>
 </span><span id="BaseDataType-27"><a href="#BaseDataType-27"><span class="linenos">27</span></a>        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
 </span><span id="BaseDataType-28"><a href="#BaseDataType-28"><span class="linenos">28</span></a>
 </span><span id="BaseDataType-29"><a href="#BaseDataType-29"><span class="linenos">29</span></a>    <span class="nd">@abstractmethod</span>
@@ -2207,7 +2207,7 @@ Section parameter is just for finding the config value.</p>
                             <div id="NoneType.null_values" class="classattr">
                                 <div class="attr variable">
             <span class="name">null_values</span><span class="annotation">: ClassVar[set[str]]</span>        =
-<span class="default_value">{&#39;none&#39;, &#39;nil&#39;, &#39;null&#39;}</span>
+<span class="default_value">{&#39;nil&#39;, &#39;null&#39;, &#39;none&#39;}</span>
 
         
     </div>

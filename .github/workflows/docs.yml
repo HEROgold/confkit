@@ -23,7 +23,7 @@ jobs:
       - name: Generate docs (pdoc + mkdocs)
         run: |
           uv sync --group docs
-          uv run pdoc confkit -o docs-mkdocs/api
+          uv run pdoc confkit -o docs/api
           uv run mkdocs build -d site
 
       - name: Deploy to GitHub Pages

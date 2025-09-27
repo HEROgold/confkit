@@ -9,10 +9,10 @@ confkit uses a family of small converter classes to provide type safety and roun
 ## Base Type
 
 - [`BaseDataType`](pdoc:confkit.BaseDataType)
-	- [`BaseDataType.convert`](pdoc:confkit.BaseDataType.convert)
-	- [`BaseDataType.validate`](pdoc:confkit.BaseDataType.validate)
-	- [`BaseDataType.cast`](pdoc:confkit.BaseDataType.cast)
-	- [`BaseDataType.cast_optional`](pdoc:confkit.BaseDataType.cast_optional)
+  - [`BaseDataType.convert`](pdoc:confkit.BaseDataType.convert)
+  - [`BaseDataType.validate`](pdoc:confkit.BaseDataType.validate)
+  - [`BaseDataType.cast`](pdoc:confkit.BaseDataType.cast)
+  - [`BaseDataType.cast_optional`](pdoc:confkit.BaseDataType.cast_optional)
 
 ## Primitive Converters
 
@@ -42,3 +42,6 @@ confkit uses a family of small converter classes to provide type safety and roun
 
 > Design note: `Optional` wraps another `BaseDataType` and returns `None` when a null sentinel is parsed.
 
+## Custom Type Example
+
+- [`BaseDataType`](pdoc:confkit.BaseDataType)

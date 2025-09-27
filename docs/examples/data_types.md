@@ -1,19 +1,22 @@
-# Data Types Example (`data_types.py`)
+# Data Types Example ([`data_types.py`](https://github.com/HEROgold/confkit/blob/master/examples/data_types.py))
 
 ## Purpose
+
 Showcases the breadth of built-in and helper data types:
 
 - Explicit vs implicit (auto-detected) types
-- Numeric formatting (hex, octal, binary)
+- Numeric formatting ([Hex](pdoc:confkit.Hex), [Octal](pdoc:confkit.Octal), [Binary](pdoc:confkit.Binary))
 - Custom base integers (encoded as `<base>c<value>` in the file)
-- Bytes → integer conversion via `Binary`
+- Bytes → integer conversion via [`Binary`](pdoc:confkit.Binary)
 
 ## Running
+
 ```bash
 uv run python examples/data_types.py
 ```
 
 ## Generated `config.ini` (Excerpt)
+
 Values may accumulate across runs; representative first-run section:
 
 ```ini
@@ -37,9 +40,15 @@ base5_value = 5c13
 After updates inside the script, the file reflects the new values (hex, octal, binary adjustments).
 
 ## Notes
+
 - Changing `base` persists a prefixed representation so it can be reliably parsed later.
 - `Binary` will store integers; when constructed from `bytes`, those bytes are interpreted as a big-endian integer.
 
 ## Try Variations
+
 - Manually edit `hex_value` to `0x1a2b` and re-run.
 - Remove `binary_from_bytes` line; script re-creates it.
+
+## Custom Type Extension
+
+See the separate custom data type example [`examples/custom_data_type.py`](https://github.com/HEROgold/confkit/blob/master/examples/custom_data_type.py) for how to implement and register your own converter (e.g. an `UpperString` normalizer) by subclassing `BaseDataType`.

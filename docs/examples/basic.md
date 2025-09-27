@@ -1,6 +1,7 @@
-# Basic Example (`basic.py`)
+# Basic Example ([`basic.py`](https://github.com/HEROgold/confkit/blob/master/examples/basic.py))
 
 ## Purpose
+
 Demonstrates the foundational usage of `confkit`:
 
 - Setting a parser + backing file
@@ -9,9 +10,11 @@ Demonstrates the foundational usage of `confkit`:
 - Accessing & mutating values via descriptor access
 
 ## Code Summary
-`examples/basic.py` defines `AppConfig` with boolean, int, string, float, and optional string fields.
+
+[`examples/basic.py`](https://github.com/HEROgold/confkit/blob/master/examples/basic.py) defines `AppConfig` with boolean, int, string, float, and optional string fields.
 
 ## Running
+
 ```bash
 uv run python examples/basic.py
 ```
@@ -19,6 +22,7 @@ uv run python examples/basic.py
 If `config.ini` does not yet exist it will be created automatically.
 
 ## Generated / Updated `config.ini`
+
 A first run typically produces something like:
 
 ```ini
@@ -29,6 +33,7 @@ host = localhost
 timeout = 30.5
 api_key = 
 ```
+
 After the script executes (it changes `port` and sets `api_key`), the file becomes:
 
 ```ini
@@ -41,8 +46,10 @@ api_key = my-secret-key
 ```
 
 ## Try Variations
+
 - Comment out `Config.write_on_edit = True` (or set to `False`) and observe that changes are not written.
 - Manually edit `config.ini` then re-run to see values picked up.
 
 ## Key Takeaways
+
 The descriptor interface gives you type-safe access. Mutations immediately persist (when enabled) without needing manual write calls.

@@ -2,20 +2,20 @@ site_name: confkit
 site_description: Type-safe configuration manager using descriptors.
 repo_url: https://github.com/HEROgold/confkit
 repo_name: HEROgold/confkit
-docs_dir: docs-mkdocs
+docs_dir: docs
 nav:
   - Home: index.md
   - Usage: usage.md
   - Examples:
       - Overview: examples/index.md
       - Basic: examples/basic.md
-      - Data Types: examples/data_types.md
       - Optional Values: examples/optional_values.md
+      - Decorators: examples/decorators.md
+      - Data Types: examples/data_types.md
       - Lists: examples/list_types.md
       - Enums: examples/enums.md
-      - Decorators: examples/decorators.md
+      - Custom Data Type: examples/custom_data_type.md
       - Argparse Integration: examples/argparse.md
-  - Hybrid (MkDocs + pdoc): pdoc-hybrid.md
   - API Reference:
       - Config: reference/config.md
       - Data Types: reference/data_types.md
