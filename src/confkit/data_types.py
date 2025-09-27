@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import datetime
 import enum
 from abc import ABC, abstractmethod
 from typing import ClassVar, Generic, TypeVar, cast
+from urllib.parse import urlparse
 
 from confkit.sentinels import UNSET
 
@@ -354,3 +356,201 @@ class List(BaseDataType[list[T]], Generic[T]):
             values.append(escaped_item)
 
         return self.separator.join(values)
+
+
+class URL(BaseDataType[str]):
+    """A config value that is a URL string with validation."""
+
+    def __init__(self, default: str = "") -> None:
+        """Initialize the URL data type."""
+        super().__init__(default)
+
+    def convert(self, value: str) -> str:
+        """Convert a string value to a validated URL string."""
+        if not value:
+            return value
+        
+        # Parse the URL to validate it
+        try:
+            parsed = urlparse(value)
+            # Check if it has a scheme (basic URL validation)
+            if not parsed.scheme:
+                raise ValueError(f"URL must have a scheme: {value}")
+            
+            # Support common URL schemes - be more permissive for database URLs, etc.
+            common_schemes = {
+                'http', 'https', 'ftp', 'ftps', 'file', 'mailto', 'tel',
+                'postgresql', 'postgres', 'mysql', 'sqlite', 'redis',
+                'mongodb', 'ldap', 'ldaps', 'ssh', 'git', 'svn'
+            }
+            
+            if parsed.scheme not in common_schemes:
+                # For unknown schemes, just validate that it's not empty
+                # This allows for custom schemes while still providing basic validation
+                pass
+                
+            return value
+        except Exception as e:
+            msg = f"Invalid URL format: {value} - {e}"
+            raise ValueError(msg) from e
+
+
+class DateTime(BaseDataType[datetime.datetime]):
+    """A config value that is a datetime object with ISO 8601 parsing."""
+
+    def __init__(self, default: datetime.datetime | None = None) -> None:
+        """Initialize the DateTime data type."""
+        if default is None:
+            default = datetime.datetime.now()
+        super().__init__(default)
+
+    def convert(self, value: str) -> datetime.datetime:
+        """Convert a string value to a datetime object."""
+        if not value:
+            return self.default
+        
+        try:
+            # Try ISO format parsing first
+            return datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+        except ValueError:
+            # Fallback to common formats
+            formats = [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M:%S.%f",
+                "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%dT%H:%M:%S.%f",
+                "%Y-%m-%d",
+            ]
+            
+            for fmt in formats:
+                try:
+                    return datetime.datetime.strptime(value, fmt)
+                except ValueError:
+                    continue
+            
+            msg = f"Unable to parse datetime: {value}"
+            raise ValueError(msg)
+
+    def __str__(self) -> str:
+        """Return ISO format string representation of the datetime."""
+        return self.value.isoformat()
+
+
+class TimeDelta(BaseDataType[datetime.timedelta]):
+    """A config value that is a timedelta object with flexible parsing."""
+
+    def __init__(self, default: datetime.timedelta | None = None) -> None:
+        """Initialize the TimeDelta data type."""
+        if default is None:
+            default = datetime.timedelta()
+        super().__init__(default)
+
+    def convert(self, value: str) -> datetime.timedelta:
+        """Convert a string value to a timedelta object."""
+        if not value:
+            return self.default
+        
+        # Handle simple numeric seconds
+        try:
+            seconds = float(value)
+            return datetime.timedelta(seconds=seconds)
+        except ValueError:
+            pass
+        
+        # Handle ISO 8601 duration format (P[n]Y[n]M[n]DT[n]H[n]M[n]S)
+        if value.startswith('P'):
+            return self._parse_iso8601_duration(value)
+        
+        # Handle flexible format (e.g., "1h 30m", "2 days", "1:30:45")
+        return self._parse_flexible_duration(value)
+
+    def _parse_iso8601_duration(self, value: str) -> datetime.timedelta:
+        """Parse ISO 8601 duration format."""
+        import re
+        
+        # Simple ISO 8601 pattern for PT[n]H[n]M[n]S
+        pattern = r'P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?'
+        match = re.match(pattern, value.upper())
+        
+        if not match:
+            msg = f"Invalid ISO 8601 duration format: {value}"
+            raise ValueError(msg)
+        
+        days, hours, minutes, seconds = match.groups()
+        
+        kwargs = {}
+        if days:
+            kwargs['days'] = int(days)
+        if hours:
+            kwargs['hours'] = int(hours)
+        if minutes:
+            kwargs['minutes'] = int(minutes)
+        if seconds:
+            kwargs['seconds'] = float(seconds)
+        
+        return datetime.timedelta(**kwargs)
+
+    def _parse_flexible_duration(self, value: str) -> datetime.timedelta:
+        """Parse flexible duration formats."""
+        import re
+        
+        # Handle colon-separated time format (HH:MM:SS or MM:SS)
+        if ':' in value:
+            parts = value.split(':')
+            if len(parts) == 2:  # MM:SS
+                minutes, seconds = map(float, parts)
+                return datetime.timedelta(minutes=minutes, seconds=seconds)
+            elif len(parts) == 3:  # HH:MM:SS
+                hours, minutes, seconds = map(float, parts)
+                return datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+        
+        # Handle text format (e.g., "1h 30m", "2 days")
+        total_seconds = 0
+        
+        # Pattern to match number + unit
+        pattern = r'(\d+(?:\.\d+)?)\s*([dhms]|days?|hours?|minutes?|mins?|seconds?|secs?)'
+        matches = re.findall(pattern, value.lower())
+        
+        for amount, unit in matches:
+            amount = float(amount)
+            
+            if unit.startswith('d'):  # days
+                total_seconds += amount * 86400
+            elif unit.startswith('h'):  # hours
+                total_seconds += amount * 3600
+            elif unit.startswith('m'):  # minutes
+                total_seconds += amount * 60
+            elif unit.startswith('s'):  # seconds
+                total_seconds += amount
+        
+        if total_seconds == 0 and matches:
+            msg = f"Could not parse any valid time units from: {value}"
+            raise ValueError(msg)
+        elif total_seconds == 0:
+            msg = f"Invalid timedelta format: {value}"
+            raise ValueError(msg)
+        
+        return datetime.timedelta(seconds=total_seconds)
+
+    def __str__(self) -> str:
+        """Return string representation of the timedelta."""
+        total_seconds = int(self.value.total_seconds())
+        
+        if total_seconds == 0:
+            return "0s"
+        
+        days = self.value.days
+        hours, remainder = divmod(total_seconds - days * 86400, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        parts = []
+        if days:
+            parts.append(f"{days}d")
+        if hours:
+            parts.append(f"{hours}h")
+        if minutes:
+            parts.append(f"{minutes}m")
+        if seconds:
+            parts.append(f"{seconds}s")
+        
+        return " ".join(parts) if parts else "0s"
