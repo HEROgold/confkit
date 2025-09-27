@@ -94,7 +94,7 @@ class ServiceConfig:
         retries = kwargs.get('retry_count')
         return f"Processing with {retries} retries"
 
-    @Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
+    @Config.with_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
     def request(self, url, **kwargs):
         timeout = kwargs.get('request_timeout')
         return f"Request timeout: {timeout}s"

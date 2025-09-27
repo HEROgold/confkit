@@ -100,7 +100,7 @@ def process(self, data, **kwargs):
 
 
 # Injects the config value with a custom kwarg name
-@Config.as_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
+@Config.with_kwarg("ServiceConfig", "timeout", "request_timeout", 60)
 def request(self, url, **kwargs):
     timeout = kwargs.get("request_timeout")
     return f"Request timeout: {timeout}s"
@@ -128,7 +128,7 @@ While the descriptor approach is the preferred method for simplicity and type sa
 | `Config.set`          | Imperatively setting values                     | `@Config.set("Section", "setting", value)`             |
 | `Config.default`      | Setting values only if not set                  | `@Config.default("Section", "setting", default_value)` |
 | `Config.with_setting` | Injecting existing configs into function kwargs | `@Config.with_setting(retry_count)`                    |
-| `Config.as_kwarg`     | Injecting configs with custom names             | `@Config.as_kwarg("Section", "setting", "kwarg_name")` |
+| `Config.with_kwarg`     | Injecting configs with custom names             | `@Config.with_kwarg("Section", "setting", "kwarg_name")` |
 
 **IMPORTANT**: The descriptor approach is strongly preferred for its type safety and simplicity.
 
@@ -141,7 +141,7 @@ While the descriptor approach is the preferred method for simplicity and type sa
 - Use `Config.set` when you need to enforce a specific value
 - Use `Config.default` for providing initial values without overriding user settings
 
-**Config.with_setting vs Config.as_kwarg**:
+**Config.with_setting vs Config.with_kwarg**:
 
 - `Config.with_setting`: Takes an existing Config descriptor and injects its value
   ```python
@@ -154,16 +154,16 @@ While the descriptor approach is the preferred method for simplicity and type sa
       def process(data, **kwargs):
           retries = kwargs.get("retry_count")  # Name matches descriptor name
   ```
-- `Config.as_kwarg`: References a config by section/setting and can rename the kwarg
+- `Config.with_kwarg`: References a config by section/setting and can rename the kwarg
   ```python
   # References by string names, can set a custom kwarg name
   # Section, Option, kwargName, value
-  @Config.as_kwarg("AppConfig", "timeout", "request_timeout", 60)
+  @Config.with_kwarg("AppConfig", "timeout", "request_timeout", 60)
   def request(url, **kwargs):
       timeout = kwargs.get("request_timeout")  # Custom name in kwargs
   ```
 
-The `with_setting` approach is more type-safe as it references an actual descriptor, while `as_kwarg` allows more flexibility with naming and providing fallback values.
+The `with_setting` approach is more type-safe as it references an actual descriptor, while `with_kwarg` allows more flexibility with naming and providing fallback values.
 
 ## Critical Information
 

@@ -22,7 +22,7 @@ class BaseDataType(ABC, Generic[T]):
         self.value = default
 
     def __str__(self) -> str:
-        """Return the string representation of the value."""
+        """Return the string representation of the stored value."""
         return str(self.value)
 
     @abstractmethod

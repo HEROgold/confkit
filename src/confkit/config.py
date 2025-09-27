@@ -232,7 +232,7 @@ class Config(Generic[VT]):
 
     @staticmethod
     def with_setting(setting: Config[OVT]):  # noqa: ANN205
-        """Insert a config value into **kwargs to a given method/function using this decorator."""
+        """Insert a config value into **kwargs to the wrapped method/function using this decorator."""
         def wrapper(func: Callable[..., F]) -> Callable[..., F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
@@ -244,7 +244,7 @@ class Config(Generic[VT]):
 
     @staticmethod
     def with_kwarg(section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN205
-        """Insert a config value into **kwargs to a given method/function using this descriptor.
+        """Insert a config value into **kwargs to the wrapped method/function using this descriptor.
 
         Use kwarg.get(`name`) to get the value.
         `name` is the name the kwarg gets if passed, if None, it will be the same as `setting`.
