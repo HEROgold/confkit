@@ -8,6 +8,7 @@ from .data_types import (
     BaseDataType,
     Binary,
     Boolean,
+    DateTime,
     Enum,
     Float,
     Hex,
@@ -20,6 +21,8 @@ from .data_types import (
     Optional,
     StrEnum,
     String,
+    TimeDelta,
+    URL,
 )
 from .exceptions import InvalidConverterError, InvalidDefaultError
 
@@ -28,6 +31,7 @@ __all__ = [
     "Binary",
     "Boolean",
     "Config",
+    "DateTime",
     "Enum",
     "Float",
     "Hex",
@@ -42,4 +46,6 @@ __all__ = [
     "Optional",
     "StrEnum",
     "String",
+    "TimeDelta",
+    "URL",
 ]

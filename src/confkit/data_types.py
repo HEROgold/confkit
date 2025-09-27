@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
 from typing import ClassVar, Generic, TypeVar, cast
+from urllib.parse import urlparse, urlunparse
 
 from confkit.sentinels import UNSET
 
@@ -354,3 +356,228 @@ class List(BaseDataType[list[T]], Generic[T]):
             values.append(escaped_item)
 
         return self.separator.join(values)
+
+
+class URL(BaseDataType[str]):
+    """A config value that represents a URL with validation."""
+
+    def __init__(self, default: str) -> None:
+        """Initialize the URL data type."""
+        # Validate the default URL
+        parsed = urlparse(default)
+        if not all([parsed.scheme, parsed.netloc]):
+            msg = f"Invalid default URL: {default}. URL must have scheme and netloc."
+            raise ValueError(msg)
+        super().__init__(default)
+
+    def convert(self, value: str) -> str:
+        """Convert a string value to a validated URL."""
+        if not value.strip():
+            msg = "URL cannot be empty"
+            raise ValueError(msg)
+        
+        parsed = urlparse(value)
+        if not all([parsed.scheme, parsed.netloc]):
+            msg = f"Invalid URL: {value}. URL must have scheme and netloc."
+            raise ValueError(msg)
+        
+        # Return normalized URL
+        return urlunparse(parsed)
+
+    def __str__(self) -> str:
+        """Return the string representation of the URL."""
+        return str(self.value)
+
+
+class DateTime(BaseDataType[datetime]):
+    """A config value that represents a datetime with ISO 8601 format support."""
+
+    def __init__(self, default: datetime) -> None:
+        """Initialize the DateTime data type."""
+        if not isinstance(default, datetime):
+            msg = f"Default value must be a datetime object, got {type(default).__name__}"
+            raise TypeError(msg)
+        super().__init__(default)
+
+    def convert(self, value: str) -> datetime:
+        """Convert a string value to a datetime object.
+        
+        Supports ISO 8601 format: YYYY-MM-DDTHH:MM:SS[.ffffff][+HH:MM]
+        """
+        if not value.strip():
+            msg = "DateTime string cannot be empty"
+            raise ValueError(msg)
+        
+        try:
+            # Try parsing with fromisoformat (Python 3.7+)
+            return datetime.fromisoformat(value.replace('Z', '+00:00'))
+        except ValueError as e:
+            msg = f"Invalid datetime format: {value}. Expected ISO 8601 format (YYYY-MM-DDTHH:MM:SS)"
+            raise ValueError(msg) from e
+
+    def __str__(self) -> str:
+        """Return the ISO 8601 string representation of the datetime."""
+        return self.value.isoformat()
+
+
+class TimeDelta(BaseDataType[timedelta]):
+    """A config value that represents a time duration with ISO 8601 duration format support."""
+
+    def __init__(self, default: timedelta) -> None:
+        """Initialize the TimeDelta data type."""
+        if not isinstance(default, timedelta):
+            msg = f"Default value must be a timedelta object, got {type(default).__name__}"
+            raise TypeError(msg)
+        super().__init__(default)
+
+    def convert(self, value: str) -> timedelta:
+        """Convert a string value to a timedelta object.
+        
+        Supports ISO 8601 duration format: P[n]Y[n]M[n]DT[n]H[n]M[n]S
+        And flexible formats like: "1h 30m", "90 minutes", "1:30:00"
+        """
+        if not value.strip():
+            msg = "TimeDelta string cannot be empty"
+            raise ValueError(msg)
+        
+        value = value.strip()
+        
+        # Try ISO 8601 duration format first
+        if value.upper().startswith('P'):
+            return self._parse_iso8601_duration(value)
+        
+        # Try flexible formats
+        return self._parse_flexible_duration(value)
+
+    def _parse_iso8601_duration(self, value: str) -> timedelta:
+        """Parse ISO 8601 duration format: P[n]Y[n]M[n]DT[n]H[n]M[n]S"""
+        import re
+        
+        # ISO 8601 duration regex - allow decimals in all time units
+        iso_regex = re.compile(
+            r'^P(?:(\d+(?:\.\d+)?)Y)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)D)?(?:T(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?)?$'
+        )
+        
+        match = iso_regex.match(value.upper())
+        if not match:
+            msg = f"Invalid ISO 8601 duration format: {value}"
+            raise ValueError(msg)
+        
+        years, months, days, hours, minutes, seconds = match.groups()
+        
+        # Convert to timedelta (approximate for years and months)
+        total_days = 0
+        if years:
+            total_days += float(years) * 365  # Approximate
+        if months:
+            total_days += float(months) * 30  # Approximate
+        if days:
+            total_days += float(days)
+            
+        total_seconds = 0
+        if hours:
+            total_seconds += float(hours) * 3600
+        if minutes:
+            total_seconds += float(minutes) * 60
+        if seconds:
+            total_seconds += float(seconds)
+            
+        return timedelta(days=total_days, seconds=total_seconds)
+
+    def _parse_flexible_duration(self, value: str) -> timedelta:
+        """Parse flexible duration formats like '1h 30m', '90 minutes', '1:30:00'"""
+        import re
+        
+        value = value.lower().strip()
+        
+        # Try HH:MM:SS format first
+        time_regex = re.compile(r'^(\d+):(\d+):(\d+)(?:\.(\d+))?$')
+        match = time_regex.match(value)
+        if match:
+            hours, minutes, seconds, microseconds = match.groups()
+            total_seconds = int(hours) * 3600 + int(minutes) * 60 + int(seconds)
+            if microseconds:
+                total_seconds += float(f"0.{microseconds}")
+            return timedelta(seconds=total_seconds)
+        
+        # Try MM:SS format
+        time_regex = re.compile(r'^(\d+):(\d+)(?:\.(\d+))?$')
+        match = time_regex.match(value)
+        if match:
+            minutes, seconds, microseconds = match.groups()
+            total_seconds = int(minutes) * 60 + int(seconds)
+            if microseconds:
+                total_seconds += float(f"0.{microseconds}")
+            return timedelta(seconds=total_seconds)
+        
+        # Parse flexible text format (e.g., "1h 30m", "90 minutes")
+        total_seconds = 0
+        
+        # Define unit multipliers
+        units = {
+            'w': 604800, 'week': 604800, 'weeks': 604800,
+            'd': 86400, 'day': 86400, 'days': 86400,
+            'h': 3600, 'hour': 3600, 'hours': 3600, 'hr': 3600, 'hrs': 3600,
+            'm': 60, 'min': 60, 'mins': 60, 'minute': 60, 'minutes': 60,
+            's': 1, 'sec': 1, 'secs': 1, 'second': 1, 'seconds': 1,
+        }
+        
+        # Find all number-unit pairs
+        pattern = re.compile(r'(\d+(?:\.\d+)?)\s*([a-z]+)')
+        matches = pattern.findall(value)
+        
+        if not matches:
+            # Try parsing as pure number (assume seconds)
+            try:
+                return timedelta(seconds=float(value))
+            except ValueError:
+                msg = f"Invalid duration format: {value}"
+                raise ValueError(msg)
+        
+        for num_str, unit in matches:
+            if unit not in units:
+                msg = f"Unknown time unit: {unit}"
+                raise ValueError(msg)
+            total_seconds += float(num_str) * units[unit]
+        
+        return timedelta(seconds=total_seconds)
+
+    def __str__(self) -> str:
+        """Return the ISO 8601 duration string representation."""
+        td = self.value
+        
+        if td.total_seconds() == 0:
+            return "PT0S"
+        
+        # Handle negative durations
+        sign = "-" if td.total_seconds() < 0 else ""
+        td = abs(td)
+        
+        days = td.days
+        seconds = td.seconds
+        microseconds = td.microseconds
+        
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
+        
+        # Build ISO 8601 duration string
+        result = f"{sign}P"
+        
+        if days:
+            result += f"{days}D"
+        
+        if hours or minutes or secs or microseconds:
+            result += "T"
+            if hours:
+                result += f"{hours}H"
+            if minutes:
+                result += f"{minutes}M"
+            if secs or microseconds:
+                if microseconds:
+                    total_secs = secs + microseconds / 1_000_000
+                    result += f"{total_secs:g}S"
+                else:
+                    result += f"{secs}S"
+        
+        return result
