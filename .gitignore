@@ -207,3 +207,9 @@ __marimo__/
 test.ini
 .secrets
 uv.lock
+
+# Test configuration files
+*test*.ini
+*_test.ini
+integration_test.ini
+new_types_config.ini
