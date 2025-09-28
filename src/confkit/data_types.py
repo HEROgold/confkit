@@ -291,12 +291,16 @@ class Optional(BaseDataType[T | None], Generic[T]):
             return True
         return self._data_type.validate()
 
+# TODO: #17 Create other iterable types like Set, Tuple, Dict, etc.
+# Then List should inherit from a common Iterable base class.
 class List(BaseDataType[list[T]], Generic[T]):
     """A config value that is a list of values."""
 
     separator = ","
     escape_char = "\\"
 
+    # FIXME: #19 data_type causes type issues if it's not an instance, but a class.
+    # TODO: #18 data_type should be inferred from default
     def __init__(self, default: list[T], *, data_type: BaseDataType[T] = UNSET) -> None:
         """Initialize the list data type."""
         super().__init__(default)
