@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from datetime import timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from typing import ClassVar, Generic, TypeVar, cast
 
 from confkit.sentinels import UNSET
@@ -469,6 +469,52 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
             for k, v in self.value.items()
         ]
         return ",".join(items)
+
+class DateTime(BaseDataType[datetime]):
+    """A config value that is a datetime."""
+
+    def __init__(self, default: datetime = UNSET) -> None:  # noqa: D107
+        if default is UNSET:
+            default = datetime.now(UTC)
+        super().__init__(default)
+
+    def convert(self, value: str) -> datetime:
+        """Convert a string value to a datetime."""
+        return datetime.fromisoformat(value)
+
+    def __str__(self) -> str:
+        """Return the string representation of the stored value."""
+        return self.value.isoformat()
+
+class Date(BaseDataType[date]):
+    """A config value that is a date."""
+
+    def __init__(self, default: date = UNSET) -> None:  # noqa: D107
+        if default is UNSET:
+            default = datetime.now(UTC).date()
+        super().__init__(default)
+
+    def convert(self, value: str) -> date:
+        """Convert a string value to a date."""
+        return date.fromisoformat(value)
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.value.isoformat()
+
+class Time(BaseDataType[time]):
+    """A config value that is a time."""
+
+    def __init__(self, default: time = UNSET) -> None:  # noqa: D107
+        if default is UNSET:
+            default = datetime.now(UTC).time()
+        super().__init__(default)
+
+    def convert(self, value: str) -> time:
+        """Convert a string value to a time."""
+        return time.fromisoformat(value)
+
+    def __str__(self) -> str:  # noqa: D105
+        return self.value.isoformat()
 
 class TimeDelta(BaseDataType[timedelta]):
     """A config value that is a timedelta."""
