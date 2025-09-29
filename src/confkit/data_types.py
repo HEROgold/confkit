@@ -20,6 +20,7 @@ class BaseDataType(ABC, Generic[T]):
         """Initialize the base data type."""
         self.default = default
         self.value = default
+        self.type = type(default)
 
     def __str__(self) -> str:
         """Return the string representation of the stored value."""
@@ -47,7 +48,7 @@ class BaseDataType(ABC, Generic[T]):
                             # For parameterized generics, check against the origin type
                             if isinstance(self.value, type_arg.__origin__):
                                 return True
-                        elif isinstance(self.value, type_arg):
+                        elif isinstance(self.value, (self.type, type_arg)):
                             return True
                     msg = f"Value {self.value} is not any of {type_args}."
                     raise InvalidConverterError(msg)
