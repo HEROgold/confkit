@@ -5,6 +5,7 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from datetime import timedelta
 from typing import ClassVar, Generic, TypeVar, cast
 
 from confkit.sentinels import UNSET
@@ -468,3 +469,18 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
             for k, v in self.value.items()
         ]
         return ",".join(items)
+
+class TimeDelta(BaseDataType[timedelta]):
+    """A config value that is a timedelta."""
+
+    def __init__(self, default: timedelta = UNSET) -> None:  # noqa: D107
+        if default is UNSET:
+            default = timedelta()
+        super().__init__(default)
+
+    def convert(self, value: str) -> timedelta:
+        """Convert a string value to a timedelta."""
+        return timedelta(seconds=float(value))
+
+    def __str__(self) -> str:  # noqa: D105
+        return str(self.value.total_seconds())
