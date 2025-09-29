@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import enum
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from typing import ClassVar, Generic, TypeVar, cast
 
 from confkit.sentinels import UNSET
@@ -78,6 +79,8 @@ class BaseDataType(ABC, Generic[T]):
                 data_type = cast("BaseDataType[T]", Float(default))
             case str():
                 data_type = cast("BaseDataType[T]", String(default))
+            case list():
+                data_type = cast("BaseDataType[T]", List(default))
             case BaseDataType():
                 data_type = default
             case _:
@@ -88,32 +91,37 @@ class BaseDataType(ABC, Generic[T]):
                 raise InvalidDefaultError(msg)
         return data_type
 
-class Enum(BaseDataType[enum.Enum]):
+
+EnumType = TypeVar("EnumType", bound=enum.Enum)
+class Enum(BaseDataType[EnumType]):
     """A config value that is an enum."""
 
-    def convert(self, value: str) -> enum.Enum:
+    def convert(self, value: str) -> EnumType:
         """Convert a string value to an enum."""
         parsed_enum_name = value.split(".")[-1]
         return self.value.__class__[parsed_enum_name]
 
-class StrEnum(BaseDataType[enum.StrEnum]):
+StrEnumType = TypeVar("StrEnumType", bound=enum.StrEnum)
+class StrEnum(BaseDataType[StrEnumType]):
     """A config value that is an enum."""
 
-    def convert(self, value: str) -> enum.StrEnum:
+    def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
         return self.value.__class__(value)
 
-class IntEnum(BaseDataType[enum.IntEnum]):
+IntEnumType = TypeVar("IntEnumType", bound=enum.IntEnum)
+class IntEnum(BaseDataType[IntEnumType]):
     """A config value that is an enum."""
 
-    def convert(self, value: str) -> enum.IntEnum:
+    def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
         return self.value.__class__(int(value))
 
-class IntFlag(BaseDataType[enum.IntFlag]):
+IntFlagType = TypeVar("IntFlagType", bound=enum.IntFlag)
+class IntFlag(BaseDataType[IntFlagType]):
     """A config value that is an enum."""
 
-    def convert(self, value: str) -> enum.IntFlag:
+    def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
         return self.value.__class__(int(value))
 
@@ -292,29 +300,25 @@ class Optional(BaseDataType[T | None], Generic[T]):
             return True
         return self._data_type.validate()
 
-# TODO: #17 Create other iterable types like Set, Tuple, Dict, etc.
-# Then List should inherit from a common Iterable base class.
-class List(BaseDataType[list[T]], Generic[T]):
-    """A config value that is a list of values."""
+class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
+    """A ABC for sequence types like List and Tuples."""
 
     separator = ","
     escape_char = "\\"
 
-    # FIXME: #19 data_type causes type issues if it's not an instance, but a class.
-    # TODO: #18 data_type should be inferred from default
-    def __init__(self, default: list[T], *, data_type: BaseDataType[T] = UNSET) -> None:
-        """Initialize the list data type."""
+    def __init__(self, default: Sequence[T], *, data_type: BaseDataType[T] = UNSET) -> None:
+        """Initialize the sequence data type."""
         super().__init__(default)
         if len(default) <= 0 and data_type is UNSET:
-            msg = "List default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
+            msg = "Sequence default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
             raise InvalidDefaultError(msg)
         if data_type is UNSET:
             self._data_type = BaseDataType[T].cast(default[0])
         else:
             self._data_type = data_type
 
-    def convert(self, value: str) -> list[T]:
-        """Convert a string to a list."""
+    def _convert(self, value: str) -> Sequence[T]:
+        """Convert a string to a Sequence."""
         # Handle empty string as empty list
         if not value:
             return []
@@ -359,3 +363,108 @@ class List(BaseDataType[list[T]], Generic[T]):
             values.append(escaped_item)
 
         return self.separator.join(values)
+
+class List(_SequenceType[T], Generic[T]):
+    """A config value that is a list of values."""
+
+    def convert(self, value: str) -> list[T]:
+        """Convert a string to a list."""
+        return list(super()._convert(value))
+
+class Tuple(_SequenceType[T], Generic[T]):
+    """A config value that is a tuple of values."""
+
+    def convert(self, value: str) -> tuple[T, ...]:
+        """Convert a string to a tuple."""
+        return tuple(super()._convert(value))
+
+class Set(BaseDataType[set[T]], Generic[T]):
+    """A config value that is a set of values."""
+
+    def __init__(self, default: set[T], *, data_type: BaseDataType[T] = UNSET) -> None:
+        """Initialize the set data type."""
+        super().__init__(default)
+        if len(default) <= 0 and data_type is UNSET:
+            msg = "Set default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
+        if data_type is UNSET:
+            sample_element = default.pop()
+            default.add(sample_element)
+            self._data_type = BaseDataType[T].cast(sample_element)
+        else:
+            self._data_type = data_type
+
+    def convert(self, value: str) -> set[T]:
+        """Convert a string to a set."""
+        parts = value.split(",")
+        return {self._data_type.convert(item.strip()) for item in parts}
+
+    def __str__(self) -> str:
+        """Return a string representation of the set."""
+        return ",".join(str(item) for item in self.value)
+
+KT = TypeVar("KT")
+VT = TypeVar("VT")
+class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
+    """A config value that is a dictionary of string keys and values of type T."""
+
+    def __init__(
+        self,
+        default: dict[KT, VT],
+        *,
+        key_type: BaseDataType[KT] = UNSET,
+        value_type: BaseDataType[VT] = UNSET,
+    ) -> None:
+        """Initialize the dict data type."""
+        super().__init__(default)
+        if len(default.keys()) <= 0 and key_type is UNSET:
+            msg = "Dict default must have at least one key element to infer type. or specify `key_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
+        if len(default.values()) <= 0 and value_type is UNSET:
+            msg = "Dict default must have at least one value element to infer type. or specify `value_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
+        self._infer_key_type(default, key_type)
+        self._infer_value_type(default, value_type)
+
+    def _infer_key_type(self, default: dict[KT, VT], key_type: BaseDataType[KT]) -> None:
+        """Infer the key type from the default dictionary if not provided."""
+        if key_type is UNSET:
+            for key in default:
+                self._key_data_type = BaseDataType[KT].cast(key)
+                break
+        else:
+            self._key_data_type = key_type
+
+    def _infer_value_type(self, default: dict[KT, VT], value_type: BaseDataType[VT]) -> None:
+        """Infer the value type from the default dictionary if not provided."""
+        if value_type is UNSET:
+            for value in default.values():
+                self._value_data_type = BaseDataType[VT].cast(value)
+                break
+        else:
+            self._value_data_type = value_type
+
+    def convert(self, value: str) -> dict[KT, VT]:
+        """Convert a string to a dictionary."""
+        if not value:
+            return {}
+
+        parts = value.split(",")
+        result: dict[KT, VT] = {}
+        for part in parts:
+            if "=" not in part:
+                msg = f"Invalid dictionary entry: {part}. Expected format key=value."
+                raise ValueError(msg)
+            key_str, val_str = part.split("=", 1)
+            key = self._key_data_type.convert(key_str.strip())
+            val = self._value_data_type.convert(val_str.strip())
+            result[key] = val
+        return result
+
+    def __str__(self) -> str:
+        """Return a string representation of the dictionary."""
+        items = [
+            f"{self._key_data_type.convert(str(k))}={self._value_data_type.convert(str(v))}"
+            for k, v in self.value.items()
+        ]
+        return ",".join(items)
