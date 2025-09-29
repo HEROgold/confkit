@@ -224,7 +224,7 @@ class Integer(BaseDataType[int]):
 class Hex(Integer):
     """A config value that represents hexadecimal."""
 
-    def __init__(self, default: int, base: int = HEXADECIMAL) -> None:  # noqa: D107
+    def __init__(self, default: int = 0, base: int = HEXADECIMAL) -> None:  # noqa: D107
         super().__init__(default, base)
 
     def __str__(self) -> str:  # noqa: D105
@@ -237,7 +237,7 @@ class Hex(Integer):
 class Octal(Integer):
     """A config value that represents octal."""
 
-    def __init__(self, default: int, base: int = OCTAL) -> None:  # noqa: D107
+    def __init__(self, default: int = 0, base: int = OCTAL) -> None:  # noqa: D107
         super().__init__(default, base)
 
     def __str__(self) -> str:  # noqa: D105
@@ -250,7 +250,7 @@ class Octal(Integer):
 class Binary(BaseDataType[bytes | int]):
     """A config value that represents binary."""
 
-    def __init__(self, default: bytes | int) -> None:  # noqa: D107
+    def __init__(self, default: bytes | int = 0) -> None:  # noqa: D107
         if isinstance(default, bytes):
             default = int.from_bytes(default)
         super().__init__(default)
