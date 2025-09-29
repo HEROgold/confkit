@@ -6,7 +6,7 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, time, timedelta
-from typing import ClassVar, Generic, TypeVar, cast
+from typing import ClassVar, Generic, TypeVar, cast, overload
 
 from confkit.sentinels import UNSET
 
@@ -80,8 +80,6 @@ class BaseDataType(ABC, Generic[T]):
                 data_type = cast("BaseDataType[T]", Float(default))
             case str():
                 data_type = cast("BaseDataType[T]", String(default))
-            case list():
-                data_type = cast("BaseDataType[T]", List(default))
             case BaseDataType():
                 data_type = default
             case _:
@@ -307,9 +305,29 @@ class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
     separator = ","
     escape_char = "\\"
 
-    def __init__(self, default: Sequence[T], *, data_type: BaseDataType[T] = UNSET) -> None:
+    @overload
+    def __init__(self, default: Sequence[T]) -> None: ...
+    @overload
+    def __init__(self, *, data_type: BaseDataType[T]) -> None: ...
+    @overload
+    def __init__(
+        self,
+        default: Sequence[T],
+        *,
+        data_type: BaseDataType[T] = ...,
+    ) -> None: ...
+
+    def __init__(self, default: Sequence[T] = UNSET, *, data_type: BaseDataType[T] = UNSET) -> None:
         """Initialize the sequence data type."""
+        if default is UNSET and data_type is UNSET:
+            msg = "Sequence requires either a default with at least one element, or data_type to be specified."
+            raise InvalidDefaultError(msg)
+        if default is UNSET:
+            default = []
         super().__init__(default)
+        self._infer_type(default, data_type)
+
+    def _infer_type(self, default: Sequence[T], data_type: BaseDataType[T]) -> None:
         if len(default) <= 0 and data_type is UNSET:
             msg = "Sequence default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
             raise InvalidDefaultError(msg)
@@ -382,9 +400,29 @@ class Tuple(_SequenceType[T], Generic[T]):
 class Set(BaseDataType[set[T]], Generic[T]):
     """A config value that is a set of values."""
 
-    def __init__(self, default: set[T], *, data_type: BaseDataType[T] = UNSET) -> None:
+    @overload
+    def __init__(self, default: set[T]) -> None: ...
+    @overload
+    def __init__(self, *, data_type: BaseDataType[T]) -> None: ...
+    @overload
+    def __init__(
+        self,
+        default: set[T],
+        *,
+        data_type: BaseDataType[T] = ...,
+    ) -> None: ...
+
+    def __init__(self, default: set[T] = UNSET, *, data_type: BaseDataType[T] = UNSET) -> None:
         """Initialize the set data type."""
+        if default is UNSET and data_type is UNSET:
+            msg = "Set requires either a default with at least one element, or data_type to be specified."
+            raise InvalidDefaultError(msg)
+        if default is UNSET:
+            default = set()
         super().__init__(default)
+        self._infer_type(default, data_type)
+
+    def _infer_type(self, default: set[T], data_type: BaseDataType[T]) -> None:
         if len(default) <= 0 and data_type is UNSET:
             msg = "Set default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
             raise InvalidDefaultError(msg)
@@ -397,6 +435,8 @@ class Set(BaseDataType[set[T]], Generic[T]):
 
     def convert(self, value: str) -> set[T]:
         """Convert a string to a set."""
+        if not value:
+            return set()
         parts = value.split(",")
         return {self._data_type.convert(item.strip()) for item in parts}
 
@@ -409,26 +449,42 @@ VT = TypeVar("VT")
 class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
     """A config value that is a dictionary of string keys and values of type T."""
 
+    @overload
+    def __init__(self, default: dict[KT, VT]) -> None: ...
+    @overload
+    def __init__(self, *, key_type: BaseDataType[KT], value_type: BaseDataType[VT]) -> None: ...
+    @overload
     def __init__(
         self,
         default: dict[KT, VT],
+        *,
+        key_type: BaseDataType[KT] = ...,
+        value_type: BaseDataType[VT] = ...,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        default: dict[KT, VT] = UNSET,
         *,
         key_type: BaseDataType[KT] = UNSET,
         value_type: BaseDataType[VT] = UNSET,
     ) -> None:
         """Initialize the dict data type."""
+        if default is UNSET and (key_type is UNSET or value_type is UNSET):
+            msg = "Dict requires either a default with at least one key/value pair, or both key_type and value_type to be specified."  # noqa: E501
+            raise InvalidDefaultError(msg)
+        if default is UNSET:
+            default = {}
         super().__init__(default)
-        if len(default.keys()) <= 0 and key_type is UNSET:
-            msg = "Dict default must have at least one key element to infer type. or specify `key_type=<BaseDataType>`"
-            raise InvalidDefaultError(msg)
-        if len(default.values()) <= 0 and value_type is UNSET:
-            msg = "Dict default must have at least one value element to infer type. or specify `value_type=<BaseDataType>`"
-            raise InvalidDefaultError(msg)
+
         self._infer_key_type(default, key_type)
         self._infer_value_type(default, value_type)
 
     def _infer_key_type(self, default: dict[KT, VT], key_type: BaseDataType[KT]) -> None:
         """Infer the key type from the default dictionary if not provided."""
+        if len(default.keys()) <= 0 and key_type is UNSET:
+            msg = "Dict default must have at least one key element to infer type. or specify `key_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
         if key_type is UNSET:
             for key in default:
                 self._key_data_type = BaseDataType[KT].cast(key)
@@ -438,6 +494,9 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
 
     def _infer_value_type(self, default: dict[KT, VT], value_type: BaseDataType[VT]) -> None:
         """Infer the value type from the default dictionary if not provided."""
+        if len(default.values()) <= 0 and value_type is UNSET:
+            msg = "Dict default must have at least one value element to infer type. or specify `value_type=<BaseDataType>`"
+            raise InvalidDefaultError(msg)
         if value_type is UNSET:
             for value in default.values():
                 self._value_data_type = BaseDataType[VT].cast(value)
