@@ -5,7 +5,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from confkit.data_types import Boolean, Date, DateTime, Dict, Float, List, Set, String, Time, TimeDelta, Tuple
+from confkit.data_types import Boolean, Date, DateTime, Dict, Float, Integer, List, Set, String, Time, TimeDelta, Tuple
 
 
 class TestList:
@@ -13,25 +13,25 @@ class TestList:
 
     def test_empty_list(self) -> None:
         """Test conversion of an empty string to an empty list."""
-        list_type = List([1, 2, 3])
+        list_type = List([1, 2, 3], data_type=Integer())
         assert list_type.convert("") == []
 
     def test_list_basic(self) -> None:
         """Test basic list functionality."""
-        list_type = List([1, 2, 3])
+        list_type = List([1, 2, 3], data_type=Integer())
         assert list_type.convert("1,2,3") == [1, 2, 3]
         assert str(list_type) == "1,2,3"
 
     def test_list_with_separator_in_values(self) -> None:
         """Test list with escaped separators in values."""
-        list_type = List(["a", "b,c", "d"])
+        list_type = List(["a", "b,c", "d"], data_type=String())
         list_type.value = ["a", "b,c", "d"]
         assert str(list_type) == "a,b\\,c,d"
         assert list_type.convert(str(list_type)) == ["a", "b,c", "d"]
 
     def test_list_with_escape_char(self) -> None:
         """Test list with escaped escape chars."""
-        list_type = List(["a\\", "b", "c"])
+        list_type = List(["a\\", "b", "c"], data_type=String())
         list_type.value = ["a\\", "b", "c"]
         assert str(list_type) == "a\\\\,b,c"
         assert list_type.convert(str(list_type)) == ["a\\", "b", "c"]
@@ -44,7 +44,7 @@ class TestList:
 
     def test_list_custom_separator(self) -> None:
         """Test list with custom separator."""
-        list_type = List([1, 2, 3])
+        list_type = List([1, 2, 3], data_type=Integer())
         list_type.separator = ";"
         list_type.value = [4, 5, 6]
         assert str(list_type) == "4;5;6"
@@ -55,7 +55,7 @@ class TestList:
         """Test that converting to string and back preserves values."""
         if not values:
             values = [0]  # Ensure non-empty list for initialization
-        list_type = List(values)
+        list_type = List(values, data_type=Integer())
         as_string = str(list_type)
         assert list_type.convert(as_string) == values
 
@@ -65,18 +65,18 @@ class TestTuple:
 
     def test_empty_tuple(self) -> None:
         """Test conversion of an empty string to an empty tuple."""
-        tuple_type = Tuple((1, 2, 3))
+        tuple_type = Tuple((1, 2, 3), data_type=Integer())
         assert tuple_type.convert("") == ()
 
     def test_tuple_basic(self) -> None:
         """Test basic tuple functionality."""
-        tuple_type = Tuple((1, 2, 3))
+        tuple_type = Tuple((1, 2, 3), data_type=Integer())
         assert tuple_type.convert("1,2,3") == (1, 2, 3)
         assert str(tuple_type) == "1,2,3"
 
     def test_tuple_with_separator_in_values(self) -> None:
         """Test tuple with escaped separators in values."""
-        tuple_type = Tuple(("a", "b,c", "d"))
+        tuple_type = Tuple(("a", "b,c", "d"), data_type=String())
         tuple_type.value = ("a", "b,c", "d")
         assert str(tuple_type) == "a,b\\,c,d"
         assert tuple_type.convert(str(tuple_type)) == ("a", "b,c", "d")
@@ -86,7 +86,7 @@ class TestTuple:
         """Test that converting to string and back preserves values."""
         if not values:
             values = (0,)  # Ensure non-empty tuple for initialization
-        tuple_type = Tuple(values)
+        tuple_type = Tuple(values, data_type=Integer())
         as_string = str(tuple_type)
         assert tuple_type.convert(as_string) == values
 
@@ -101,7 +101,7 @@ class TestSet:
 
     def test_set_basic(self) -> None:
         """Test basic set functionality."""
-        set_type = Set({1, 2, 3})
+        set_type = Set({1, 2, 3}, data_type=Integer())
         assert set_type.convert("1,2,3") == {1, 2, 3}
         # Order can vary in string representation
         result = {int(x) for x in str(set_type).split(",")}
@@ -113,23 +113,18 @@ class TestSet:
         set_type = Set({True}, data_type=bool_data_type)
         assert set_type.convert("true,false,yes") == {True, False}
 
-    def test_set_empty_default_error(self) -> None:
-        """Test creating a set with an empty default raises error."""
-        with pytest.raises(ValueError, match="Set default must have at least one element" ):
-            Set(set())
-
 
 class TestDict:
     """Test the Dict data type."""
 
     def test_empty_dict(self) -> None:
         """Test conversion of an empty string to an empty dict."""
-        dict_type = Dict({"key": "value"})
+        dict_type = Dict({"key": "value"}, key_type=String(""), value_type=String(""))
         assert dict_type.convert("") == {}
 
     def test_dict_basic(self) -> None:
         """Test basic dict functionality."""
-        dict_type = Dict({"a": 1, "b": 2})
+        dict_type = Dict({"a": 1, "b": 2}, value_type=Integer(), key_type=String(""))
         assert dict_type.convert("a=1,b=2") == {"a": 1, "b": 2}
         # Order can vary in string representation
         result = {}
@@ -149,18 +144,9 @@ class TestDict:
 
     def test_dict_invalid_entry(self) -> None:
         """Test dict with invalid entry format."""
-        dict_type = Dict({"key": "value"})
+        dict_type = Dict({"key": "value"}, key_type=String(""), value_type=String(""))
         with pytest.raises(ValueError, match="Invalid dictionary entry" ):
             dict_type.convert("invalid_entry")
-
-    def test_dict_empty_default_error(self) -> None:
-        """Test creating a dict with an empty default raises error."""
-        error_match = r"Dict requires either a default with at least one key/value pair, or both key_type and value_type to be specified."  # noqa: E501
-        with pytest.raises(ValueError, match=error_match):
-            Dict(value_type=String())  # pyright: ignore[reportCallIssue]
-        with pytest.raises(ValueError, match=error_match):
-            Dict(key_type=String())  # pyright: ignore[reportCallIssue]
-
 
 class TestDate:
     """Test the Date data type."""

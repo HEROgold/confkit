@@ -87,15 +87,15 @@ class Test:
     # null_object = Config(object())  # noqa: ERA001
 
     # Usual test cases for Config descriptors
-    null_none = Config(None)
-    null_str = Config("0")
-    null_bool = Config(default=True)
-    null_int = Config(5)
-    null_float = Config(5.0)
-    number = Config(0)
-    string = Config("default")
-    boolean = Config(default=False)
-    c_float = Config(0.0)
+    null_none = Config(NoneType())
+    null_str = Config(String("0"))
+    null_bool = Config(Boolean(default=True))
+    null_int = Config(Integer(5))
+    null_float = Config(Float(5.0))
+    number = Config(Integer(0))
+    string = Config(String("default"))
+    boolean = Config(Boolean(default=False))
+    c_float = Config(Float(0.0))
     hex_value = Config(Hex(0xFF))
     octal_value = Config(Octal(0o77))
     binary_value = Config(Binary(0b101010))
@@ -117,14 +117,14 @@ class Test:
     custom_int_base_5 = Config(Integer(99, base=5))
     custom_int_base_3 = Config(Integer(99, base=3))
     # Test optional
-    optional_number = Config(0, optional=True)
-    optional_string = Config("", optional=True)
-    optional_boolean = Config(default=False, optional=True)
-    optional_float = Config(0.0, optional=True)
-    optional_number2 = Config(0, optional=True)
-    optional_string2 = Config("", optional=True)
-    optional_boolean2 = Config(default=False, optional=True)
-    optional_float2 = Config(0.0, optional=True)
+    optional_number = Config(Optional(Integer(0)))
+    optional_string = Config(Optional(String("")))
+    optional_boolean = Config(Optional(Boolean(default=False)))
+    optional_float = Config(Optional(Float(0.0)))
+    optional_number2 = Config(Optional(Integer(0)))
+    optional_string2 = Config(Optional(String("")))
+    optional_boolean2 = Config(Optional(Boolean(default=False)))
+    optional_float2 = Config(Optional(Float(0.0)))
     optional_number3 = Config(Optional(Integer()))
     optional_string3 = Config(Optional(String()))
     optional_boolean3 = Config(Optional(Boolean()))
@@ -134,11 +134,11 @@ class Test:
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
     optional_int_flag = Config(Optional(IntFlag(IntFlagTest.OPTION_A)))
     # Test list types
-    list_of_strings = Config(List(["a", "b", "c"]))
-    list_of_integers = Config(List([1, 2, 3, 4]))
-    list_of_floats = Config(List([1.0, 2.0, 3.0, 4.0]))
-    list_of_booleans = Config(List([True, False, True]))
-    list_of_paths = Config(List(["/path/to/file1", "/path/to/file2"]))
+    list_of_strings = Config(List(["a", "b", "c"], data_type=String()))
+    list_of_integers = Config(List([1, 2, 3, 4], data_type=Integer()))
+    list_of_floats = Config(List([1.0, 2.0, 3.0, 4.0], data_type=Float()))
+    list_of_booleans = Config(List([True, False, True], data_type=Boolean()))
+    list_of_paths = Config(List(["/path/to/file1", "/path/to/file2"], data_type=String()))
 
     @Config.with_setting(number)
     def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
@@ -210,14 +210,6 @@ def test_optional_string_null_values() -> None:
 
 
 ## Hypothesis tests:
-
-
-@given(st.booleans())
-def test_init_optional(optional_value: bool) -> None:  # noqa: FBT001
-    """Test Config initialization with various optional values."""
-    assert Config(default=0, optional=optional_value)
-    assert Config(default="test", optional=optional_value)
-
 
 @given(st.integers())
 def test_with_setting(value: int) -> None:

@@ -15,7 +15,7 @@ from hypothesis import strategies as st
 
 from confkit.config import Config
 from confkit.data_types import BaseDataType, Optional, String
-from confkit.exceptions import InvalidConverterError, InvalidDefaultError
+from confkit.exceptions import InvalidConverterError
 from confkit.sentinels import UNSET
 
 F = TypeVar("F")
@@ -37,7 +37,6 @@ def test_config_validate_file_unset() -> None:
     """Test Config.validate_file when _file is UNSET - Line 175 in config.py."""
     Config._file = UNSET
     config_instance = Config.__new__(Config)
-    config_instance.optional = False
     with pytest.raises(ValueError, match=r"Config file is not set"):
         config_instance.validate_file()
 
@@ -47,7 +46,6 @@ def test_config_validate_parser_unset() -> None:
     """Test Config.validate_parser when _parser is UNSET - Line 181 in config.py."""
     Config._parser = UNSET
     config_instance = Config.__new__(Config)
-    config_instance.optional = False
     with pytest.raises(ValueError, match=r"Config parser is not set"):
         config_instance.validate_parser()
 
@@ -71,7 +69,6 @@ def test_config_converter_is_unset() -> None:
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
-    config_instance.optional = False
     config_instance._section = "Test"
     config_instance._setting = "string"
     mock_data_type = MockDataType("default")
@@ -103,7 +100,6 @@ def test_config_validation_fails() -> None:
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
-    config_instance.optional = False
     config_instance._section = "Test"
     config_instance._setting = "string"
     config_instance._data_type = FailingDataType("default")
@@ -129,7 +125,6 @@ def test_config_optional_type_validation_success() -> None:
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
-    config_instance.optional = True
     setattr(config_instance, "_section", "Test")  # noqa: B010
     setattr(config_instance, "_setting", "string")  # noqa: B010
     setattr(config_instance, "_data_type", String("default"))  # noqa: B010
@@ -159,7 +154,6 @@ def test_config_type_mismatch_error() -> None:
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
-    config_instance.optional = False
     config_instance._section = "Test"
     config_instance._setting = "null_int"
     config_instance._data_type = WrongTypeDataType("default")
@@ -168,14 +162,6 @@ def test_config_type_mismatch_error() -> None:
         config_instance.validate_strict_type()
 
     tmp_path.unlink(missing_ok=True)
-
-
-def test_config_none_type_cast() -> None:
-    """Test None type casting in _cast_data_type - Line 105 in config.py."""
-    config_instance = Config.__new__(Config)
-    config_instance.optional = False
-    result = BaseDataType.cast(None)
-    assert result.default is None
 
 
 def test_data_type_validate_no_orig_bases() -> None:
@@ -212,13 +198,6 @@ def test_optional_data_type_value_property() -> None:
     string_type.value = "new_value"
     assert optional_type.value == "new_value"
 
-def test_invalid_default_error() -> None:
-    with pytest.raises(
-        InvalidDefaultError,
-        match=r"Unsupported default value type: object. Use a BaseDataType subclass for custom types.",
-    ):
-        BaseDataType.cast(object())
-
 @config_restore
 def test_ensure_option_existing_option() -> None:
     """Test _ensure_option when option already exists (line 202->exit branch)."""
@@ -234,7 +213,7 @@ def test_ensure_option_existing_option() -> None:
     Config.set_file(test_config)
 
     class TestExistingOption:
-        existing_setting = Config("default_value")
+        existing_setting = Config(String("default_value"))
 
     # Access the setting to trigger the descriptor setup
     _ = TestExistingOption()

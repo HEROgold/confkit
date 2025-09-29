@@ -33,66 +33,29 @@ class Config(Generic[VT]):
 
     validate_types: ClassVar[bool] = True # Validate that the converter returns the same type as the default value. (not strict)
     write_on_edit: ClassVar[bool] = True # Write to the config file when updating a value.
-    optional: bool = False # if True, allows None as an extra type when validating types. (both instance and class variables.)
 
     _parser: ConfigParser = UNSET
     _file: Path = UNSET
     _has_read_config: bool = False
-
-    if TYPE_CHECKING:
-        # Overloads for type checkers to understand the different settings of the Config descriptors.
-        @overload
-        def __init__(self: Config[str], default: str) -> None: ...
-        @overload
-        def __init__(self: Config[None], default: None) -> None: ...
-        @overload
-        def __init__(self: Config[bool], default: bool) -> None: ...  # noqa: FBT001
-        @overload
-        def __init__(self: Config[int], default: int) -> None: ...
-        @overload
-        def __init__(self: Config[float], default: float) -> None: ...
-        @overload
-        def __init__(self: Config[str | None], default: str, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[None], default: None, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[bool | None], default: bool, *, optional: bool) -> None: ...  # noqa: FBT001
-        @overload
-        def __init__(self: Config[int | None], default: int, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[float | None], default: float, *, optional: bool) -> None: ...
-        @overload # Custom data type, like Enum's or custom class.
-        def __init__(self, default: BaseDataType[VT]) -> None: ...
 
     # type Complains about the self and default overloads for None and str
     # they are explicitly set for type checkers, the actual representation doesn't matter
     # in runtime, as VT is allowed to be any type.
     def __init__( # type: ignore[reportInconsistentOverload]
         self,
-        default: VT | None | BaseDataType[VT] = UNSET,
-        *,
-        optional: bool = False,
+        default: BaseDataType[VT] = UNSET,
     ) -> None:
         """Initialize the config descriptor with a default value.
 
         Validate that parser and filepath are present.
         """
-        self.optional = optional or Config.optional # Be truthy when either one is true.
-
-        if not self.optional and default is UNSET:
+        if default is UNSET:
             msg = "Default value cannot be None when optional is False."
             raise InvalidDefaultError(msg)
 
-        self._initialize_data_type(default)
+        self._data_type = default
         self._validate_init()
         self._read_parser()
-
-    def _initialize_data_type(self, default: VT | None | BaseDataType[VT]) -> None:
-        """Initialize the data type based on the default value."""
-        if not self.optional and default is not None:
-            self._data_type = BaseDataType[VT].cast(default)
-        else:
-            self._data_type = BaseDataType[VT].cast_optional(default)
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
@@ -139,8 +102,7 @@ class Config(Generic[VT]):
         self.__converted_type = type(self.__converted_value)
         default_value_type = type(self._data_type.default)
 
-        is_optional = self.optional or isinstance(self._data_type, Optional)
-        if (is_optional) and self.__converted_type in (default_value_type, NoneType):
+        if isinstance(self._data_type, Optional) and self.__converted_type in (default_value_type, NoneType):
             # Allow None or the same type as the default value to be returned by the converter when _optional is True.
             return
         if self.__converted_type is not default_value_type:
