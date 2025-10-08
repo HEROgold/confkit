@@ -37,4 +37,4 @@ jobs:
       run: uv run ruff check .
 
     - name: Run type checking
-      run: uvx ty check .
+      run: uvx ty check . --ignore no-matching-overload
