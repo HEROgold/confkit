@@ -98,7 +98,7 @@ The [](mypackage.MyClass) class is awesome.
 
 Use confkit when you want:
 
-- Simple, no-runtime-dependency configuration management
+- Simple, configuration management
 - Type conversion and validation baked in
 - Declarative, descriptor-based definitions instead of manual parsing
 
