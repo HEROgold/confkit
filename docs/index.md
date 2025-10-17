@@ -47,8 +47,9 @@ Workflow (after forking or a feature branch):
 uv sync --group dev
 uv run pytest -q
 uv run ruff check .
-uv run pdoc confkit -o docs-mkdocs/api --force  # if touching public APIs
-uv run mkdocs build
+uv sync --group docs
+uv run pdoc confkit -o docs/api
+uv run mkdocs build -d site
 ```
 
 Before opening a PR, ensure:
@@ -73,13 +74,19 @@ This ensures that confkit remains compatible with current Python versions while 
 
 Two complementary views:
 
-1. High-level curated reference pages:
-   - [Config](reference/config.md)
-   - [Data Types](reference/data_types.md)
-   - [Exceptions](reference/exceptions.md)
-2. Full symbol index (pdoc): [confkit API](pdoc:confkit)
+### High-level curated reference pages
 
-Use `(pdoc:qual.name)` style links inside docs for deep, stable symbol links.
+- [Config](reference/config.md)
+- [Data Types](reference/data_types.md)
+- [Exceptions](reference/exceptions.md)
+
+### Full symbol index (pdoc)
+
+[confkit API](pdoc:confkit)
+Use `(pdoc:qual.name)` style links inside docs for deep, stable symbol links:
+`The [MyClass](pdoc:mypackage.MyClass) class is awesome.`
+`The [do_something](pdoc:mypackage.MyClass.do_something) method is awesome.`
+`The [](mypackage.MyClass) class is awesome.`
 
 ---
 
