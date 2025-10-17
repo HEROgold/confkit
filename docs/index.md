@@ -83,10 +83,14 @@ Two complementary views:
 ### Full symbol index (pdoc)
 
 [confkit API](pdoc:confkit)
-Use `(pdoc:qual.name)` style links inside docs for deep, stable symbol links:
-`The [MyClass](pdoc:mypackage.MyClass) class is awesome.`
-`The [do_something](pdoc:mypackage.MyClass.do_something) method is awesome.`
-`The [](mypackage.MyClass) class is awesome.`
+
+Use `(pdoc:qual.name)` style links inside docs for deep, stable symbol links
+
+```md
+The [MyClass](pdoc:mypackage.MyClass) class is awesome.
+The [do_something](pdoc:mypackage.MyClass.do_something) method is awesome.
+The [](mypackage.MyClass) class is awesome.
+```
 
 ---
 
