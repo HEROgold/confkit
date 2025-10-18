@@ -12,11 +12,13 @@ concurrency: test-${{ github.sha }}
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
       fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        # include free-threaded variants using the 't' suffix for versions that support it
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.13t", "3.14", "3.14t"]
 
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +30,11 @@ jobs:
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
+
+      - name: Set PYTHON_GIL for free-threaded builds
+        if: endsWith(matrix.python-version, 't')
+        run: |
+          echo "PYTHON_GIL=0" >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: uv sync --group dev
