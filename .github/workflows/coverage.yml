@@ -15,8 +15,11 @@ jobs:
         with:
           version: "latest"
 
-      - name: Set up Python 3.13
-        run: uv python install 3.13
+      # Use latest version for coverage testing
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          check-latest: true
 
       - name: Install dependencies
         run: uv sync --group dev
