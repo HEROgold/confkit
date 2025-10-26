@@ -12,11 +12,11 @@ from confkit.config import Config
 class Config1(Config): ...  # noqa: D101
 class Config2(Config): ...  # noqa: D101
 
-config_1 = Path("config1.ini")
+config_1 = Path("config1_test.ini")
 Config1.set_file(config_1)
 Config1.set_parser(ConfigParser())
 
-config_2 = Path("config2.ini")
+config_2 = Path("config2_test.ini")
 Config2.set_file(config_2)
 Config2.set_parser(ConfigParser())
 
