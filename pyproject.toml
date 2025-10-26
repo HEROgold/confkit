@@ -34,3 +34,7 @@ docs = [
 root = "."
 include = ["**/test_*.py", "**/tests/**/*.py"]
 reportPrivateUsage = "none"
+
+[tool.ty.src]
+include = ["src"]
+exclude = ["tests"]
