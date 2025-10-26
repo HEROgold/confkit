@@ -106,7 +106,7 @@ class StrEnum(BaseDataType[StrEnumType]):
 
     def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
-        return self.value.__class__(value)
+        return self.value.__class__(value) # ty: ignore[invalid-return-type] # this is correct. ty says "Unknown | StrEnum"
 
 IntEnumType = TypeVar("IntEnumType", bound=enum.IntEnum)
 class IntEnum(BaseDataType[IntEnumType]):
@@ -114,7 +114,7 @@ class IntEnum(BaseDataType[IntEnumType]):
 
     def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
-        return self.value.__class__(int(value))
+        return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntEnum"
 
 IntFlagType = TypeVar("IntFlagType", bound=enum.IntFlag)
 class IntFlag(BaseDataType[IntFlagType]):
@@ -122,7 +122,7 @@ class IntFlag(BaseDataType[IntFlagType]):
 
     def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
-        return self.value.__class__(int(value))
+        return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntFlag"
 
 class NoneType(BaseDataType[None]):
     """A config value that is None."""
