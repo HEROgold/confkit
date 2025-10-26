@@ -1,11 +1,12 @@
 
 from configparser import ConfigParser
 from pathlib import Path
+from typing import TypeVar
 from confkit.config import Config
 
-
-class DatabaseConfig(Config): ...
-class ApiConfig(Config): ...
+T = TypeVar("T")
+class DatabaseConfig(Config[T]): ...
+class ApiConfig(Config[T]): ...
 
 DatabaseConfig.set_parser(ConfigParser())
 DatabaseConfig.set_file(Path("database.ini"))
