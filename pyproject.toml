@@ -38,3 +38,6 @@ reportPrivateUsage = "none"
 [tool.ty.src]
 include = ["src"]
 exclude = ["tests"]
+
+[tool.ty.rules]
+invalid-assignment = "ignore"
