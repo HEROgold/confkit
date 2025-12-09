@@ -42,6 +42,23 @@ confkit uses a family of small converter classes to provide type safety and roun
 
 > Design note: `Optional` wraps another `BaseDataType` and returns `None` when a null sentinel is parsed.
 
+## Collections
+
+- [`Tuple`](pdoc:confkit.Tuple)
+- [`Set`](pdoc:confkit.Set)
+- [`Dict`](pdoc:confkit.Dict)
+
+`Tuple`, `Set`, and `Dict` mirror their built‑in counterparts. Allowing for collections to be stored in INI files.
+
+## Date & Time
+
+- [`DateTime`](pdoc:confkit.DateTime)
+- [`Date`](pdoc:confkit.Date)
+- [`Time`](pdoc:confkit.Time)
+- [`TimeDelta`](pdoc:confkit.TimeDelta)
+
+`DateTime`, `Date`, `Time` and `TimeDelta` mirror their built-in counterparts. Allowing to store date information in INI files.
+
 ## Custom Type Example
 
 - [`BaseDataType`](pdoc:confkit.BaseDataType)
