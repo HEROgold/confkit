@@ -5,8 +5,8 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from datetime import UTC, date, datetime, time, timedelta
-from typing import ClassVar, Generic, TypeVar, cast, overload
+from datetime import UTC, date, datetime, time, timedelta, tzinfo
+from typing import ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET
 
@@ -529,12 +529,32 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
         ]
         return ",".join(items)
 
+class _DateTimeKwargs(TypedDict, total=False):
+    year: Required[int]
+    month: Required[int]
+    day: Required[int]
+    hour: NotRequired[int]
+    minute: NotRequired[int]
+    second: NotRequired[int]
+    microsecond: NotRequired[int]
+    tzinfo: tzinfo | None
+    fold: NotRequired[int]
+
 class DateTime(BaseDataType[datetime]):
     """A config value that is a datetime."""
 
-    def __init__(self, default: datetime = UNSET) -> None:  # noqa: D107
+    @overload
+    def __init__(self, default: datetime = UNSET) -> None: ...
+    @overload
+    def __init__(self, **kwargs: Unpack[_DateTimeKwargs]) -> None: ...
+
+    def __init__(self, default: datetime = UNSET, **kwargs: Unpack[_DateTimeKwargs]) -> None:
+        """Initialize the datetime data type. Defaults to current datetime (datetime.now) if not provided."""
         if default is UNSET:
-            default = datetime.now(UTC)
+            try:
+                default = datetime(**kwargs)  # ty: ignore[missing-argument]  # noqa: DTZ001
+            except TypeError:
+                default = datetime.now(tz=UTC)
         super().__init__(default)
 
     def convert(self, value: str) -> datetime:
@@ -545,12 +565,23 @@ class DateTime(BaseDataType[datetime]):
         """Return the string representation of the stored value."""
         return self.value.isoformat()
 
+class _DateKwargs(TypedDict):
+    year: int
+    month: int
+    day: int
+
 class Date(BaseDataType[date]):
     """A config value that is a date."""
 
-    def __init__(self, default: date = UNSET) -> None:  # noqa: D107
+    @overload
+    def __init__(self, default: datetime = UNSET) -> None: ...
+    @overload
+    def __init__(self, **kwargs: Unpack[_DateKwargs]) -> None: ...
+
+    def __init__(self, default: date = UNSET, **kwargs: Unpack[_DateKwargs]) -> None:
+        """Initialize the date data type. Defaults to current date if not provided."""
         if default is UNSET:
-            default = datetime.now(UTC).date()
+            default = date(**kwargs) # ty: ignore[missing-argument]
         super().__init__(default)
 
     def convert(self, value: str) -> date:
@@ -560,12 +591,26 @@ class Date(BaseDataType[date]):
     def __str__(self) -> str:  # noqa: D105
         return self.value.isoformat()
 
+class _TimeKwargs(TypedDict, total=False):
+    hour: NotRequired[int]
+    minute: NotRequired[int]
+    second: NotRequired[int]
+    microsecond: NotRequired[int]
+    tzinfo: tzinfo | None
+    fold: NotRequired[int]
+
 class Time(BaseDataType[time]):
     """A config value that is a time."""
 
-    def __init__(self, default: time = UNSET) -> None:  # noqa: D107
+    @overload
+    def __init__(self, default: datetime = UNSET) -> None: ...
+    @overload
+    def __init__(self, **kwargs: Unpack[_TimeKwargs]) -> None: ...
+
+    def __init__(self, default: time = UNSET, **kwargs: Unpack[_TimeKwargs]) -> None:
+        """Initialize the time data type. Defaults to current time if not provided."""
         if default is UNSET:
-            default = datetime.now(UTC).time()
+            default = time(**kwargs) # ty: ignore[missing-argument]
         super().__init__(default)
 
     def convert(self, value: str) -> time:
@@ -575,12 +620,26 @@ class Time(BaseDataType[time]):
     def __str__(self) -> str:  # noqa: D105
         return self.value.isoformat()
 
+class _TimeDeltaKwargs(TypedDict, total=False):
+    days: NotRequired[float]
+    seconds: NotRequired[float]
+    microseconds: NotRequired[float]
+    milliseconds: NotRequired[float]
+    minutes: NotRequired[float]
+    hours: NotRequired[float]
+    weeks: NotRequired[float]
+
 class TimeDelta(BaseDataType[timedelta]):
     """A config value that is a timedelta."""
 
-    def __init__(self, default: timedelta = UNSET) -> None:  # noqa: D107
+    def __init__(
+        self,
+        default: timedelta = UNSET,
+        **kwargs: Unpack[_TimeDeltaKwargs],
+    ) -> None:
+        """Initialize the timedelta data type. Defaults to 0 if not provided."""
         if default is UNSET:
-            default = timedelta()
+            default = timedelta(**kwargs)
         super().__init__(default)
 
     def convert(self, value: str) -> timedelta:

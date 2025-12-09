@@ -47,8 +47,8 @@ api_key = my-secret-key
 
 ## Try Variations
 
-- Comment out `Config.write_on_edit = True` (or set to `False`) and observe that changes are not written.
-- Manually edit `config.ini` then re-run to see values picked up.
+- Set `Config.write_on_edit = False` and observe that changes are not written.
+- Manually edit `config.ini` then re-run to see those values picked up.
 
 ## Key Takeaways
 
