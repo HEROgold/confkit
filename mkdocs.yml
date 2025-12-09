@@ -1,4 +1,5 @@
 site_name: confkit
+site_url: https://herogold.github.io/confkit/
 site_description: Type-safe configuration manager using descriptors.
 repo_url: https://github.com/HEROgold/confkit
 repo_name: HEROgold/confkit
