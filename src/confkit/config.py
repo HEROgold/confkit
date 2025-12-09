@@ -141,7 +141,7 @@ class Config(Generic[VT]):
         if cls is Config:
             # Warn users that setting this value on the base class can lead to unexpected behavoir.
             # Tell the user to subclass <Config> first.
-            warnings.warn("<Config> is the base class. Subclass it to create specific config types.", stacklevel=2)
+            warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
         cls._parser = parser
 
     @classmethod
