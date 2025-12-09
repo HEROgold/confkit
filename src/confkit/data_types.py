@@ -538,7 +538,7 @@ class _DateTimeKwargs(TypedDict, total=False):
     second: NotRequired[int]
     microsecond: NotRequired[int]
     tzinfo: tzinfo | None
-    fold: NotRequired[int]
+    fold: int
 
 class DateTime(BaseDataType[datetime]):
     """A config value that is a datetime."""
