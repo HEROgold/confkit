@@ -533,10 +533,10 @@ class _DateTimeKwargs(TypedDict, total=False):
     year: Required[int]
     month: Required[int]
     day: Required[int]
-    hour: NotRequired[int]
-    minute: NotRequired[int]
-    second: NotRequired[int]
-    microsecond: NotRequired[int]
+    hour: int
+    minute: int
+    second: int
+    microsecond: int
     tzinfo: tzinfo | None
     fold: int
 
