@@ -548,7 +548,7 @@ class DateTime(BaseDataType[datetime]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateTimeKwargs]) -> None: ...
 
-    def __init__(self, default: datetime = UNSET, **kwargs: Unpack[_DateTimeKwargs]) -> None:
+    def __init__(self, default: datetime = UNSET, **kwargs: Unpack[_DateTimeKwargs]) -> None: # pyright: ignore[reportInconsistentOverload]
         """Initialize the datetime data type. Defaults to current datetime (datetime.now) if not provided."""
         if default is UNSET:
             try:
@@ -578,7 +578,7 @@ class Date(BaseDataType[date]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateKwargs]) -> None: ...
 
-    def __init__(self, default: date = UNSET, **kwargs: Unpack[_DateKwargs]) -> None:
+    def __init__(self, default: date = UNSET, **kwargs: Unpack[_DateKwargs]) -> None: # pyright: ignore[reportInconsistentOverload]
         """Initialize the date data type. Defaults to current date if not provided."""
         if default is UNSET:
             default = date(**kwargs)
