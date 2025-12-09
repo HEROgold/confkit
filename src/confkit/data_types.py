@@ -581,7 +581,7 @@ class Date(BaseDataType[date]):
     def __init__(self, default: date = UNSET, **kwargs: Unpack[_DateKwargs]) -> None:
         """Initialize the date data type. Defaults to current date if not provided."""
         if default is UNSET:
-            default = date(**kwargs) # ty: ignore[missing-argument]
+            default = date(**kwargs)
         super().__init__(default)
 
     def convert(self, value: str) -> date:

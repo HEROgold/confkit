@@ -1,5 +1,6 @@
 """Tests for data type classes in confkit.data_types."""
 from datetime import UTC, date, datetime, time, timedelta
+from typing import Final
 
 import pytest
 from hypothesis import given
@@ -7,6 +8,7 @@ from hypothesis import strategies as st
 
 from confkit.data_types import Boolean, Date, DateTime, Dict, Float, List, Set, String, Time, TimeDelta, Tuple
 
+DUMMY_DATE: Final = Date(year=2000, month=1, day=1)
 
 class TestList:
     """Test the List data type."""
@@ -174,15 +176,13 @@ class TestDate:
 
     def test_date_default(self) -> None:
         """Test date with default value."""
-        date_type = Date()
         # Since default uses datetime.now(), we can only check the type
-        assert isinstance(date_type.value, date)
+        assert isinstance(DUMMY_DATE.value, date)
 
     def test_date_invalid(self) -> None:
         """Test date with invalid format."""
-        date_type = Date()
         with pytest.raises(ValueError, match="Invalid isoformat string: 'not-a-date'"):
-            date_type.convert("not-a-date")
+            DUMMY_DATE.convert("not-a-date")
 
 
 class TestTime:
