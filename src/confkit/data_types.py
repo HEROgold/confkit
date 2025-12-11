@@ -97,8 +97,16 @@ class Enum(BaseDataType[EnumType]):
 
     def convert(self, value: str) -> EnumType:
         """Convert a string value to an enum."""
+        # Strip inline comments if present
+        value = value.split("#")[0].strip()
         parsed_enum_name = value.split(".")[-1]
         return self.value.__class__[parsed_enum_name]
+
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        enum_class = self.value.__class__
+        allowed = ", ".join(member.name for member in enum_class)
+        return f"{self.value.name}  # allowed: {allowed}"
 
 StrEnumType = TypeVar("StrEnumType", bound=enum.StrEnum)
 class StrEnum(BaseDataType[StrEnumType]):
@@ -106,7 +114,15 @@ class StrEnum(BaseDataType[StrEnumType]):
 
     def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
+        # Strip inline comments if present
+        value = value.split("#")[0].strip()
         return self.value.__class__(value) # ty: ignore[invalid-return-type] # this is correct. ty says "Unknown | StrEnum"
+
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        enum_class = self.value.__class__
+        allowed = ", ".join(member.value for member in enum_class)
+        return f"{self.value.value}  # allowed: {allowed}"
 
 IntEnumType = TypeVar("IntEnumType", bound=enum.IntEnum)
 class IntEnum(BaseDataType[IntEnumType]):
@@ -114,7 +130,15 @@ class IntEnum(BaseDataType[IntEnumType]):
 
     def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
+        # Strip inline comments if present
+        value = value.split("#")[0].strip()
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntEnum"
+
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        enum_class = self.value.__class__
+        allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
+        return f"{self.value.value}  # allowed: {allowed}"
 
 IntFlagType = TypeVar("IntFlagType", bound=enum.IntFlag)
 class IntFlag(BaseDataType[IntFlagType]):
@@ -122,7 +146,15 @@ class IntFlag(BaseDataType[IntFlagType]):
 
     def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
+        # Strip inline comments if present
+        value = value.split("#")[0].strip()
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntFlag"
+
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        enum_class = self.value.__class__
+        allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
+        return f"{self.value.value}  # allowed: {allowed}"
 
 class NoneType(BaseDataType[None]):
     """A config value that is None."""
