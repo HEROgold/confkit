@@ -151,6 +151,45 @@ class TestEnumConvertWithComments:
         assert result == SampleIntFlag.WRITE
 
 
+class TestOptionalEnumAllowedValues:
+    """Test that Optional wrapped enum types display allowed values."""
+
+    def test_optional_enum_str_includes_allowed_values(self) -> None:
+        """Test that Optional(Enum) __str__ includes all allowed values."""
+        from confkit.data_types import Optional
+        
+        enum_type = Enum(SampleEnum.OPTION_B)
+        optional_enum = Optional(enum_type)
+        result = str(optional_enum)
+        
+        # Should include the current value
+        assert "OPTION_B" in result
+        
+        # Should include the allowed values comment
+        assert "# allowed:" in result
+        assert "OPTION_A" in result
+        assert "OPTION_B" in result
+        assert "OPTION_C" in result
+
+    def test_optional_str_enum_str_includes_allowed_values(self) -> None:
+        """Test that Optional(StrEnum) __str__ includes all allowed values."""
+        from confkit.data_types import Optional
+        
+        enum_type = ConfigStrEnum(SampleStrEnum.WARNING)
+        optional_enum = Optional(enum_type)
+        result = str(optional_enum)
+        
+        # Should include the current value
+        assert "warning" in result
+        
+        # Should include the allowed values comment
+        assert "# allowed:" in result
+        assert "debug" in result
+        assert "info" in result
+        assert "warning" in result
+        assert "error" in result
+
+
 class TestEnumRoundTrip:
     """Test that enum values can be written and read back correctly."""
 

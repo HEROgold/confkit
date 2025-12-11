@@ -104,6 +104,8 @@ class Enum(BaseDataType[EnumType]):
 
     def __str__(self) -> str:
         """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
         enum_class = self.value.__class__
         allowed = ", ".join(member.name for member in enum_class)
         return f"{self.value.name}  # allowed: {allowed}"
@@ -120,6 +122,8 @@ class StrEnum(BaseDataType[StrEnumType]):
 
     def __str__(self) -> str:
         """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
         enum_class = self.value.__class__
         allowed = ", ".join(member.value for member in enum_class)
         return f"{self.value.value}  # allowed: {allowed}"
@@ -136,6 +140,8 @@ class IntEnum(BaseDataType[IntEnumType]):
 
     def __str__(self) -> str:
         """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
         enum_class = self.value.__class__
         allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
         return f"{self.value.value}  # allowed: {allowed}"
@@ -152,6 +158,8 @@ class IntFlag(BaseDataType[IntFlagType]):
 
     def __str__(self) -> str:
         """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
         enum_class = self.value.__class__
         allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
         return f"{self.value.value}  # allowed: {allowed}"
@@ -330,6 +338,10 @@ class Optional(BaseDataType[T | None], Generic[T]):
         if self._data_type.value is None:
             return True
         return self._data_type.validate()
+
+    def __str__(self) -> str:
+        """Return the string representation of the wrapped data type."""
+        return str(self._data_type)
 
 class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
     """A ABC for sequence types like List and Tuples."""
