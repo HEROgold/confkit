@@ -91,86 +91,106 @@ class BaseDataType(ABC, Generic[T]):
         return data_type
 
 
+class _EnumBase(BaseDataType[T], Generic[T]):
+    """Base class for enum types with common functionality."""
+
+    @staticmethod
+    def _strip_comment(value: str) -> str:
+        """Strip inline comments from value.
+
+        Since hex values use 0x prefix (not #), we can safely strip everything after #.
+        """
+        if "#" in value:
+            return value.split("#")[0].strip()
+        return value
+
+    def _format_allowed_values(self) -> str:
+        """Format the allowed values string. Override in subclasses."""
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
+        return f"{self._get_value_str()}  # allowed: {self._format_allowed_values()}"
+
+    def _get_value_str(self) -> str:
+        """Get the string representation of the current value. Override in subclasses."""
+        raise NotImplementedError
+
+
 EnumType = TypeVar("EnumType", bound=enum.Enum)
-class Enum(BaseDataType[EnumType]):
+class Enum(_EnumBase[EnumType]):
     """A config value that is an enum."""
 
     def convert(self, value: str) -> EnumType:
         """Convert a string value to an enum."""
-        # Strip our generated inline comments if present (format: "value  # allowed: ...")
-        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
-        if "  # allowed:" in value:
-            value = value.split("  # allowed:")[0]
+        value = self._strip_comment(value)
         parsed_enum_name = value.split(".")[-1]
         return self.value.__class__[parsed_enum_name]
 
-    def __str__(self) -> str:
-        """Return the string representation with allowed values."""
-        if self.value is None:
-            return str(self.value)
+    def _format_allowed_values(self) -> str:
+        """Format allowed values as comma-separated member names."""
         enum_class = self.value.__class__
-        allowed = ", ".join(member.name for member in enum_class)
-        return f"{self.value.name}  # allowed: {allowed}"
+        return ", ".join(member.name for member in enum_class)
+
+    def _get_value_str(self) -> str:
+        """Get the member name."""
+        return self.value.name
 
 StrEnumType = TypeVar("StrEnumType", bound=enum.StrEnum)
-class StrEnum(BaseDataType[StrEnumType]):
+class StrEnum(_EnumBase[StrEnumType]):
     """A config value that is an enum."""
 
     def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
-        # Strip our generated inline comments if present (format: "value  # allowed: ...")
-        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
-        if "  # allowed:" in value:
-            value = value.split("  # allowed:")[0]
+        value = self._strip_comment(value)
         return self.value.__class__(value) # ty: ignore[invalid-return-type] # this is correct. ty says "Unknown | StrEnum"
 
-    def __str__(self) -> str:
-        """Return the string representation with allowed values."""
-        if self.value is None:
-            return str(self.value)
+    def _format_allowed_values(self) -> str:
+        """Format allowed values as comma-separated member values."""
         enum_class = self.value.__class__
-        allowed = ", ".join(member.value for member in enum_class)
-        return f"{self.value.value}  # allowed: {allowed}"
+        return ", ".join(member.value for member in enum_class)
+
+    def _get_value_str(self) -> str:
+        """Get the member value."""
+        return self.value.value
 
 IntEnumType = TypeVar("IntEnumType", bound=enum.IntEnum)
-class IntEnum(BaseDataType[IntEnumType]):
+class IntEnum(_EnumBase[IntEnumType]):
     """A config value that is an enum."""
 
     def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
-        # Strip our generated inline comments if present (format: "value  # allowed: ...")
-        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
-        if "  # allowed:" in value:
-            value = value.split("  # allowed:")[0]
+        value = self._strip_comment(value)
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntEnum"
 
-    def __str__(self) -> str:
-        """Return the string representation with allowed values."""
-        if self.value is None:
-            return str(self.value)
+    def _format_allowed_values(self) -> str:
+        """Format allowed values as comma-separated name(value) pairs."""
         enum_class = self.value.__class__
-        allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
-        return f"{self.value.value}  # allowed: {allowed}"
+        return ", ".join(f"{member.name}({member.value})" for member in enum_class)
+
+    def _get_value_str(self) -> str:
+        """Get the member value as string."""
+        return str(self.value.value)
 
 IntFlagType = TypeVar("IntFlagType", bound=enum.IntFlag)
-class IntFlag(BaseDataType[IntFlagType]):
+class IntFlag(_EnumBase[IntFlagType]):
     """A config value that is an enum."""
 
     def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
-        # Strip our generated inline comments if present (format: "value  # allowed: ...")
-        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
-        if "  # allowed:" in value:
-            value = value.split("  # allowed:")[0]
+        value = self._strip_comment(value)
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntFlag"
 
-    def __str__(self) -> str:
-        """Return the string representation with allowed values."""
-        if self.value is None:
-            return str(self.value)
+    def _format_allowed_values(self) -> str:
+        """Format allowed values as comma-separated name(value) pairs."""
         enum_class = self.value.__class__
-        allowed = ", ".join(f"{member.name}({member.value})" for member in enum_class)
-        return f"{self.value.value}  # allowed: {allowed}"
+        return ", ".join(f"{member.name}({member.value})" for member in enum_class)
+
+    def _get_value_str(self) -> str:
+        """Get the member value as string."""
+        return str(self.value.value)
 
 class NoneType(BaseDataType[None]):
     """A config value that is None."""
