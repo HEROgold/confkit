@@ -2,15 +2,15 @@
 import enum
 from enum import IntEnum, IntFlag, StrEnum, auto
 
-import pytest
-
-from confkit.data_types import Enum, IntEnum as ConfigIntEnum
+from confkit.data_types import Enum, Optional
+from confkit.data_types import IntEnum as ConfigIntEnum
 from confkit.data_types import IntFlag as ConfigIntFlag
 from confkit.data_types import StrEnum as ConfigStrEnum
 
 
 class SampleEnum(enum.Enum):
     """Sample enum for standard Enum type."""
+
     OPTION_A = auto()
     OPTION_B = auto()
     OPTION_C = auto()
@@ -18,6 +18,7 @@ class SampleEnum(enum.Enum):
 
 class SampleStrEnum(StrEnum):
     """Sample enum for StrEnum type."""
+
     DEBUG = "debug"
     INFO = "info"
     WARNING = "warning"
@@ -26,6 +27,7 @@ class SampleStrEnum(StrEnum):
 
 class SampleIntEnum(IntEnum):
     """Sample enum for IntEnum type."""
+
     LOW = 0
     MEDIUM = 5
     HIGH = 10
@@ -33,6 +35,7 @@ class SampleIntEnum(IntEnum):
 
 class SampleIntFlag(IntFlag):
     """Sample enum for IntFlag type."""
+
     READ = 1
     WRITE = 2
     EXECUTE = 4
@@ -45,10 +48,10 @@ class TestEnumAllowedValues:
         """Test that standard Enum __str__ includes all allowed values."""
         enum_type = Enum(SampleEnum.OPTION_B)
         result = str(enum_type)
-        
+
         # Should include the current value
         assert "OPTION_B" in result
-        
+
         # Should include the allowed values comment
         assert "# allowed:" in result
         assert "OPTION_A" in result
@@ -59,10 +62,10 @@ class TestEnumAllowedValues:
         """Test that StrEnum __str__ includes all allowed values."""
         enum_type = ConfigStrEnum(SampleStrEnum.INFO)
         result = str(enum_type)
-        
+
         # Should include the current value
         assert "info" in result
-        
+
         # Should include the allowed values comment
         assert "# allowed:" in result
         assert "debug" in result
@@ -74,10 +77,10 @@ class TestEnumAllowedValues:
         """Test that IntEnum __str__ includes all allowed values with their integer values."""
         enum_type = ConfigIntEnum(SampleIntEnum.MEDIUM)
         result = str(enum_type)
-        
+
         # Should include the current value
         assert "5" in result
-        
+
         # Should include the allowed values comment with names and values
         assert "# allowed:" in result
         assert "LOW(0)" in result
@@ -88,10 +91,10 @@ class TestEnumAllowedValues:
         """Test that IntFlag __str__ includes all allowed values with their integer values."""
         enum_type = ConfigIntFlag(SampleIntFlag.WRITE)
         result = str(enum_type)
-        
+
         # Should include the current value
         assert "2" in result
-        
+
         # Should include the allowed values comment with names and values
         assert "# allowed:" in result
         assert "READ(1)" in result
@@ -156,15 +159,13 @@ class TestOptionalEnumAllowedValues:
 
     def test_optional_enum_str_includes_allowed_values(self) -> None:
         """Test that Optional(Enum) __str__ includes all allowed values."""
-        from confkit.data_types import Optional
-        
         enum_type = Enum(SampleEnum.OPTION_B)
         optional_enum = Optional(enum_type)
         result = str(optional_enum)
-        
+
         # Should include the current value
         assert "OPTION_B" in result
-        
+
         # Should include the allowed values comment
         assert "# allowed:" in result
         assert "OPTION_A" in result
@@ -173,15 +174,13 @@ class TestOptionalEnumAllowedValues:
 
     def test_optional_str_enum_str_includes_allowed_values(self) -> None:
         """Test that Optional(StrEnum) __str__ includes all allowed values."""
-        from confkit.data_types import Optional
-        
         enum_type = ConfigStrEnum(SampleStrEnum.WARNING)
         optional_enum = Optional(enum_type)
         result = str(optional_enum)
-        
+
         # Should include the current value
         assert "warning" in result
-        
+
         # Should include the allowed values comment
         assert "# allowed:" in result
         assert "debug" in result
@@ -196,10 +195,10 @@ class TestEnumRoundTrip:
     def test_enum_round_trip_with_str(self) -> None:
         """Test that Enum values survive a str() -> convert() round trip."""
         enum_type = Enum(SampleEnum.OPTION_A)
-        
+
         # Convert to string (includes allowed values comment)
         str_value = str(enum_type)
-        
+
         # Convert back (should strip comment)
         result = enum_type.convert(str_value)
         assert result == SampleEnum.OPTION_A
@@ -207,7 +206,7 @@ class TestEnumRoundTrip:
     def test_str_enum_round_trip_with_str(self) -> None:
         """Test that StrEnum values survive a str() -> convert() round trip."""
         enum_type = ConfigStrEnum(SampleStrEnum.ERROR)
-        
+
         str_value = str(enum_type)
         result = enum_type.convert(str_value)
         assert result == SampleStrEnum.ERROR
@@ -215,7 +214,7 @@ class TestEnumRoundTrip:
     def test_int_enum_round_trip_with_str(self) -> None:
         """Test that IntEnum values survive a str() -> convert() round trip."""
         enum_type = ConfigIntEnum(SampleIntEnum.HIGH)
-        
+
         str_value = str(enum_type)
         result = enum_type.convert(str_value)
         assert result == SampleIntEnum.HIGH
@@ -223,7 +222,7 @@ class TestEnumRoundTrip:
     def test_int_flag_round_trip_with_str(self) -> None:
         """Test that IntFlag values survive a str() -> convert() round trip."""
         enum_type = ConfigIntFlag(SampleIntFlag.EXECUTE)
-        
+
         str_value = str(enum_type)
         result = enum_type.convert(str_value)
         assert result == SampleIntFlag.EXECUTE
