@@ -97,8 +97,10 @@ class Enum(BaseDataType[EnumType]):
 
     def convert(self, value: str) -> EnumType:
         """Convert a string value to an enum."""
-        # Strip inline comments if present
-        value = value.split("#")[0].strip()
+        # Strip our generated inline comments if present (format: "value  # allowed: ...")
+        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
+        if "  # allowed:" in value:
+            value = value.split("  # allowed:")[0]
         parsed_enum_name = value.split(".")[-1]
         return self.value.__class__[parsed_enum_name]
 
@@ -116,8 +118,10 @@ class StrEnum(BaseDataType[StrEnumType]):
 
     def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
-        # Strip inline comments if present
-        value = value.split("#")[0].strip()
+        # Strip our generated inline comments if present (format: "value  # allowed: ...")
+        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
+        if "  # allowed:" in value:
+            value = value.split("  # allowed:")[0]
         return self.value.__class__(value) # ty: ignore[invalid-return-type] # this is correct. ty says "Unknown | StrEnum"
 
     def __str__(self) -> str:
@@ -134,8 +138,10 @@ class IntEnum(BaseDataType[IntEnumType]):
 
     def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
-        # Strip inline comments if present
-        value = value.split("#")[0].strip()
+        # Strip our generated inline comments if present (format: "value  # allowed: ...")
+        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
+        if "  # allowed:" in value:
+            value = value.split("  # allowed:")[0]
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntEnum"
 
     def __str__(self) -> str:
@@ -152,8 +158,10 @@ class IntFlag(BaseDataType[IntFlagType]):
 
     def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
-        # Strip inline comments if present
-        value = value.split("#")[0].strip()
+        # Strip our generated inline comments if present (format: "value  # allowed: ...")
+        # This handles cases where ConfigParser doesn't have inline_comment_prefixes enabled
+        if "  # allowed:" in value:
+            value = value.split("  # allowed:")[0]
         return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntFlag"
 
     def __str__(self) -> str:
