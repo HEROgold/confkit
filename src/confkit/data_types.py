@@ -91,7 +91,7 @@ class BaseDataType(ABC, Generic[T]):
         return data_type
 
 
-class _EnumBase(BaseDataType[T], Generic[T]):
+class _EnumBase(BaseDataType[T]):
     """Base class for enum types with common functionality."""
 
     @staticmethod
@@ -104,6 +104,7 @@ class _EnumBase(BaseDataType[T], Generic[T]):
             return value.split("#")[0].strip()
         return value
 
+    @abstractmethod
     def _format_allowed_values(self) -> str:
         """Format the allowed values string. Override in subclasses."""
         raise NotImplementedError
@@ -114,6 +115,7 @@ class _EnumBase(BaseDataType[T], Generic[T]):
             return str(self.value)
         return f"{self._get_value_str()}  # allowed: {self._format_allowed_values()}"
 
+    @abstractmethod
     def _get_value_str(self) -> str:
         """Get the string representation of the current value. Override in subclasses."""
         raise NotImplementedError
