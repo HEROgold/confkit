@@ -207,3 +207,4 @@ __marimo__/
 *test.ini
 .secrets
 uv.lock
+docs/api/
