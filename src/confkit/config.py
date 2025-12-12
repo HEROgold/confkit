@@ -135,13 +135,18 @@ class Config(Generic[VT]):
         # We handle it using the `optional` flag, or using Optional DataType. so we can safely ignore it.
         return self._data_type.convert(value) # type: ignore[reportReturnType]
 
+    @staticmethod
+    def _warn_base_class_usage() -> None:
+        """Warn users that setting parser/file on the base class can lead to unexpected behavior."""
+        warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
+
     @classmethod
     def set_parser(cls, parser: ConfigParser) -> None:
         """Set the parser for ALL descriptors."""
         if cls is Config:
             # Warn users that setting this value on the base class can lead to unexpected behavoir.
             # Tell the user to subclass <Config> first.
-            warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
+            cls._warn_base_class_usage()
         cls._parser = parser
 
     @classmethod
@@ -150,7 +155,7 @@ class Config(Generic[VT]):
         if cls is Config:
             # Warn users that setting this value on the base class can lead to unexpected behavoir.
             # Tell the user to subclass <Config> first.
-            warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
+            cls._warn_base_class_usage()
         cls._file = file
 
     def validate_strict_type(self) -> None:
