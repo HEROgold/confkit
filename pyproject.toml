@@ -1,6 +1,6 @@
 [project]
 name = "confkit"
-version = "0.8.0"
+version = "0.9.0"
 description = "Lightweight and Easy to use configuration manager for Python projects"
 readme = "README.md"
 authors = [
