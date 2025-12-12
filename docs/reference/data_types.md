@@ -29,6 +29,19 @@ confkit uses a family of small converter classes to provide type safety and roun
 - [`IntEnum`](pdoc:confkit.IntEnum)
 - [`IntFlag`](pdoc:confkit.IntFlag)
 
+All enum types automatically display allowed values as inline comments in the config file, making them self-documenting for end-users. For example:
+
+```ini
+log_level = info  # allowed: debug, info, warning, error
+```
+
+The format varies by enum type:
+- **StrEnum**: Shows member values (e.g., `debug, info, warning, error`)
+- **IntEnum/IntFlag**: Shows member names with integer values (e.g., `LOW(0), MEDIUM(5), HIGH(10)`)
+- **Enum**: Shows member names (e.g., `DEBUG, INFO, WARNING, ERROR`)
+
+Comments are automatically stripped when reading values, ensuring they don't interfere with parsing.
+
 ## Number Representation Helpers
 
 - [`Hex`](pdoc:confkit.Hex)
