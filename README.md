@@ -66,3 +66,29 @@ uv sync --group test
 pytest .
 ruff check .
 ```
+
+#### Building Documentation
+
+To build and preview documentation locally:
+
+```bash
+# Install documentation dependencies
+uv sync --group docs
+
+# Generate API documentation with pdoc
+uv run pdoc confkit -o docs/api
+
+# Build documentation site with mkdocs
+uv run mkdocs build -d site
+
+# Or serve locally for live preview (with auto-reload)
+uv run mkdocs serve
+```
+
+Documentation is automatically built and deployed to GitHub Pages when changes are pushed to the `master` branch.
+
+**After updating code that affects documentation:**
+1. Update relevant `.md` files in `docs/` directory (examples, reference, etc.)
+2. Run `uv run pdoc confkit -o docs/api` to regenerate API documentation
+3. Preview changes with `uv run mkdocs serve` and verify at `http://127.0.0.1:8000`
+4. Commit both code and documentation changes together
