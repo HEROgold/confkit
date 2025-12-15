@@ -9,7 +9,7 @@ from __future__ import annotations
 import warnings
 from functools import wraps
 from types import NoneType
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, ParamSpec, TypeVar, overload
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
 
 from .data_types import BaseDataType, Optional
 from .exceptions import InvalidConverterError, InvalidDefaultError
@@ -42,28 +42,15 @@ class Config(Generic[VT]):
 
     if TYPE_CHECKING:
         # Overloads for type checkers to understand the different settings of the Config descriptors.
-        @overload
-        def __init__(self: Config[str], default: str) -> None: ...
-        @overload
-        def __init__(self: Config[None], default: None) -> None: ...
-        @overload
-        def __init__(self: Config[bool], default: bool) -> None: ...  # noqa: FBT001
-        @overload
-        def __init__(self: Config[int], default: int) -> None: ...
-        @overload
-        def __init__(self: Config[float], default: float) -> None: ...
-        @overload
-        def __init__(self: Config[str | None], default: str, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[None], default: None, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[bool | None], default: bool, *, optional: bool) -> None: ...  # noqa: FBT001
-        @overload
-        def __init__(self: Config[int | None], default: int, *, optional: bool) -> None: ...
-        @overload
-        def __init__(self: Config[float | None], default: float, *, optional: bool) -> None: ...
         @overload # Custom data type, like Enum's or custom class.
         def __init__(self, default: BaseDataType[VT]) -> None: ...
+        @overload
+        def __init__(self, default: VT) -> None: ...
+        # Specify the states of optional explicitly for type checkers.
+        @overload
+        def __init__(self: Config[VT | None], default: VT, *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        @overload
+        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
 
     # type Complains about the self and default overloads for None and str
     # they are explicitly set for type checkers, the actual representation doesn't matter
