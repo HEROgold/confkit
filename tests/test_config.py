@@ -129,10 +129,18 @@ class Test:
     optional_string3 = Config(Optional(String()))
     optional_boolean3 = Config(Optional(Boolean()))
     optional_float3 = Config(Optional(Float()))
+    optional_number4 = Config(Integer(), optional=True)
+    optional_string4 = Config(String(), optional=True)
+    optional_boolean4 = Config(Boolean(), optional=True)
+    optional_float4 = Config(Float(), optional=True)
     optional_enum = Config(Optional(Enum(EnumTest.OPTION_A)))
     optional_str_enum = Config(Optional(StrEnum(StrEnumTest.OPTION_A)))
     optional_int_enum = Config(Optional(IntEnum(IntEnumTest.OPTION_A)))
     optional_int_flag = Config(Optional(IntFlag(IntFlagTest.OPTION_A)))
+    optional_enum2 = Config(Enum(EnumTest.OPTION_A), optional=True)
+    optional_str_enum2 = Config(StrEnum(StrEnumTest.OPTION_A), optional=True)
+    optional_int_enum2 = Config(IntEnum(IntEnumTest.OPTION_A), optional=True)
+    optional_int_flag2 = Config(IntFlag(IntFlagTest.OPTION_A), optional=True)
     # Test list types
     list_of_strings = Config(List(["a", "b", "c"]))
     list_of_integers = Config(List([1, 2, 3, 4]))
@@ -288,14 +296,16 @@ def test_none_float(value: float) -> None:
 
 
 @given(st.one_of(st.none(), st.integers()))
-def test_optional_number(value: int) -> None:
+def test_optional_number(value: int | None) -> None:
     t = Test()
     t.optional_number = value
     t.optional_number2 = value
     t.optional_number3 = value
+    t.optional_number4 = value
     assert t.optional_number == value or t.optional_number is None
     assert t.optional_number2 == value or t.optional_number2 is None
     assert t.optional_number3 == value or t.optional_number3 is None
+    assert t.optional_number4 == value or t.optional_number4 is None
 
 
 @given(st.one_of(st.none(), st.text()))
@@ -304,6 +314,7 @@ def test_optional_string(value: str | None) -> None:
     t.optional_string = value
     t.optional_string2 = value
     t.optional_string3 = value
+    t.optional_string4 = value
 
     # Convert value to expected None types. after setting it in file.
     if value and value.casefold() in NoneType.null_values:
@@ -312,28 +323,33 @@ def test_optional_string(value: str | None) -> None:
     assert t.optional_string == value
     assert t.optional_string2 == value
     assert t.optional_string3 == value
+    assert t.optional_string4 == value
 
 
 @given(st.one_of(st.none(), st.booleans()))
-def test_optional_boolean(value: bool) -> None:  # noqa: FBT001
+def test_optional_boolean(value: bool | None) -> None:  # noqa: FBT001
     t = Test()
     t.optional_boolean = value
     t.optional_boolean2 = value
     t.optional_boolean3 = value
+    t.optional_boolean4 = value
     assert t.optional_boolean == value or t.optional_boolean is None
     assert t.optional_boolean2 == value or t.optional_boolean2 is None
     assert t.optional_boolean3 == value or t.optional_boolean3 is None
+    assert t.optional_boolean4 == value or t.optional_boolean4 is None
 
 
 @given(st.one_of(st.none(), st.floats(allow_nan=False)))
-def test_optional_float(value: float) -> None:
+def test_optional_float(value: float | None) -> None:
     t = Test()
     t.optional_float = value
     t.optional_float2 = value
     t.optional_float3 = value
+    t.optional_float4 = value
     assert t.optional_float == value or t.optional_float is None
     assert t.optional_float2 == value or t.optional_float2 is None
     assert t.optional_float3 == value or t.optional_float3 is None
+    assert t.optional_float4 == value or t.optional_float4 is None
 
 
 @given(st.booleans())

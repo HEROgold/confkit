@@ -48,9 +48,13 @@ class Config(Generic[VT]):
         def __init__(self, default: VT) -> None: ...
         # Specify the states of optional explicitly for type checkers.
         @overload
+        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        @overload
+        def __init__(self: Config[VT], default: BaseDataType[VT], *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        @overload
         def __init__(self: Config[VT | None], default: VT, *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
         @overload
-        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        def __init__(self: Config[VT | None], default: BaseDataType[VT], *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
 
     # type Complains about the self and default overloads for None and str
     # they are explicitly set for type checkers, the actual representation doesn't matter
