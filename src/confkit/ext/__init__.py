@@ -1,7 +1,8 @@
-"""Optional extension modules for confkit."""
+"""Optional extension modules for confkit.
 
-from .pydantic import apply_model
+Modules inside this package may rely on optional extras. They are intentionally
+not imported eagerly so users can access the pieces they installed without
+pulling in additional dependencies.
+"""
 
-__all__: list[str] = [
-    "apply_model",
-]
+__all__: list[str] = []
