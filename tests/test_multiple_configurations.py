@@ -9,8 +9,8 @@ from hypothesis import strategies as st
 from confkit.config import Config
 
 
-class Config1(Config): ...  # noqa: D101
-class Config2(Config): ...  # noqa: D101
+class Config1(Config): ...
+class Config2(Config): ...
 
 config_1 = Path("config1_test.ini")
 Config1.set_file(config_1)
@@ -21,10 +21,10 @@ Config2.set_file(config_2)
 Config2.set_parser(ConfigParser())
 
 
-class Config3(Config1): ...  # noqa: D101
-class Config4(Config2): ...  # noqa: D101
+class Config3(Config1): ...
+class Config4(Config2): ...
 
-class TestEnv:  # noqa: D101
+class TestEnv:
     a = Config1(1)
     b = Config2(2)
     c = Config3(3)

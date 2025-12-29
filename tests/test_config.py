@@ -327,7 +327,7 @@ def test_optional_string(value: str | None) -> None:
 
 
 @given(st.one_of(st.none(), st.booleans()))
-def test_optional_boolean(value: bool | None) -> None:  # noqa: FBT001
+def test_optional_boolean(value: bool | None) -> None:
     t = Test()
     t.optional_boolean = value
     t.optional_boolean2 = value
