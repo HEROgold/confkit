@@ -43,6 +43,7 @@ After updates inside the script, the file reflects the new values (hex, octal, b
 
 - Changing `base` persists a prefixed representation so it can be reliably parsed later.
 - `Binary` will store integers; when constructed from `bytes`, those bytes are interpreted as a big-endian integer.
+- `Hex` normalizes values by dropping leading zeros (e.g. `0x000f` becomes `0xf`).
 
 ## Try Variations
 
