@@ -23,7 +23,7 @@ def _ensure_output_path(path: str | None) -> Path:
 
 def determine_level(labels: list[str]) -> str:
     """Return the requested bump level or an empty string when not provided."""
-    present = [label for label in labels if label in ALLOWED_LABELS]
+    present = [label for label in labels if label.lower() in ALLOWED_LABELS]
     unique: list[str] = []
     for label in present:
         if label not in unique:
