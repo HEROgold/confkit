@@ -110,9 +110,9 @@ class Config(Generic[VT]):
             self._data_type = BaseDataType[VT].cast_optional(default)
 
     def _read_parser(self) -> None:
-        """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
+        """Ensure the parser has read the file at initialization using UTF-8 encoding."""
         if not self._has_read_config:
-            self._parser.read(self._file)
+            self._parser.read(self._file, encoding="utf-8")
             self._has_read_config = True
 
     def _validate_init(self) -> None:
@@ -252,7 +252,7 @@ class Config(Generic[VT]):
     def write(cls) -> None:
         """Write the config parser to the file."""
         cls.validate_file()
-        with cls._file.open("w") as f:
+        with cls._file.open("w", encoding="utf-8") as f:
             cls._parser.write(f)
 
     @classmethod
