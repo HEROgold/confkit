@@ -12,6 +12,7 @@ from hypothesis import strategies as st
 
 from confkit.config import Config
 from confkit.data_types import (
+    BaseDataType,
     Binary,
     Boolean,
     Enum,
@@ -326,8 +327,28 @@ def test_optional_string(value: str | None) -> None:
     assert t.optional_string4 == value
 
 
+def test_class_access_runs_custom_validation() -> None:
+    class UpperCaseString(BaseDataType[str]):
+        def convert(self, value: str) -> str:
+            return value
+
+        def validate(self) -> bool:
+            super().validate()
+            if self.value != self.value.upper():
+                msg = "Value must be upper case"
+                raise InvalidConverterError(msg)
+            return True
+
+    class UpperCaseConfig:
+        shout = Config(UpperCaseString("DEFAULT"))
+
+    Config._parser.set("UpperCaseConfig", "shout", "lowercase")
+    with pytest.raises(InvalidConverterError, match="Value must be upper case"):
+        _ = UpperCaseConfig.shout
+
+
 @given(st.one_of(st.none(), st.booleans()))
-def test_optional_boolean(value: bool | None) -> None:
+def test_optional_boolean(value: bool | None) -> None:  # noqa: FBT001
     t = Test()
     t.optional_boolean = value
     t.optional_boolean2 = value

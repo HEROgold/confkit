@@ -61,11 +61,9 @@ def main() -> None:
     print("shout_name:", CustomConfig.shout_name)
     print("project:", CustomConfig.project)
 
-    # Assign lower / mixed case; reading returns upper due to convert
-    # FIXME: assigning these new values, puts them in the object as-is
-    # And cause validate() to fail on next read
+    # Assign lower / mixed case; storage normalizes to upper automatically
     CustomConfig.shout_name = "custom"
-    CustomConfig.project = "demo title"
+    CustomConfig.project = "demo Title"
 
     print("\nAfter reassignment:")
     print("shout_name:", CustomConfig.shout_name)

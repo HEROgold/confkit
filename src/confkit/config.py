@@ -161,9 +161,6 @@ class Config(Generic[VT]):
 
         if not cls.validate_types:
             return
-        if not self._data_type.validate():
-            msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
-            raise InvalidConverterError(msg)
 
         self.__converted_type = type(self.__converted_value)
         default_value_type = type(self._data_type.default)
@@ -174,6 +171,12 @@ class Config(Generic[VT]):
             return
         if self.__converted_type is not default_value_type:
             msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."  # noqa: E501
+            raise InvalidConverterError(msg)
+
+        # Set the data_type value. ensuring validation works as expected.
+        self._data_type.value = self.__converted_value
+        if not self._data_type.validate():
+            msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
             raise InvalidConverterError(msg)
 
     @classmethod
