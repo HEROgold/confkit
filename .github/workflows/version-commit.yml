@@ -1,0 +1,69 @@
+name: Commit Version Bump
+
+on:
+  workflow_run:
+    workflows: ["UV Version Bump"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  commit:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download bump artifact
+        id: download
+        uses: actions/download-artifact@v4
+        with:
+          name: version-bump-${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id }}
+          path: bump-context
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Inspect bump context
+        id: context
+        run: |
+          if [ ! -f bump-context/changed.txt ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(cat bump-context/changed.txt)
+          level=""
+          if [ -f bump-context/level.txt ]; then
+            level=$(cat bump-context/level.txt)
+          fi
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+          echo "level=${level}" >> "$GITHUB_OUTPUT"
+
+      - name: No changes detected
+        if: steps.context.outputs.changed != 'true'
+        run: echo "Version bump produced no changes; skipping commit."
+
+      - name: Checkout repository
+        if: steps.context.outputs.changed == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Commit and push version bump
+        if: steps.context.outputs.changed == 'true'
+        env:
+          LEVEL: ${{ steps.context.outputs.level }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout master
+          git pull --ff-only origin master
+          if [ ! -f bump-context/changes.patch ]; then
+            echo "Missing changes.patch artifact"
+            exit 1
+          fi
+          git apply --whitespace=nowarn bump-context/changes.patch
+          git add .
+          msg_level=${LEVEL:-unspecified}
+          git commit -m "chore: bump version (${msg_level})"
+          git push

@@ -1,0 +1,54 @@
+name: UV Version Bump
+
+on:
+  repository_dispatch:
+    types: [version-bump-requested]
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    if: ${{ github.event.client_payload.level != '' }}
+    runs-on: ubuntu-latest
+    env:
+      BUMP_LEVEL: ${{ github.event.client_payload.level }}
+      PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+      MERGE_SHA: ${{ github.event.client_payload.merge_commit_sha }}
+      PR_TITLE: ${{ github.event.client_payload.title }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+
+      - name: Run uv version bump
+        run: uv version bump --${BUMP_LEVEL}
+
+      - name: Prepare bump context
+        run: |
+          mkdir -p bump-context
+          echo "${BUMP_LEVEL}" > bump-context/level.txt
+          echo "${PR_NUMBER:-}" > bump-context/pr_number.txt
+          echo "${PR_TITLE:-}" > bump-context/pr_title.txt
+          echo "${MERGE_SHA:-}" > bump-context/merge_commit_sha.txt
+          if git diff --quiet; then
+            echo "false" > bump-context/changed.txt
+          else
+            echo "true" > bump-context/changed.txt
+            git status --short > bump-context/status.txt
+            git diff --binary > bump-context/changes.patch
+          fi
+
+      - name: Upload bump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-bump-${{ github.run_id }}
+          path: bump-context
+          if-no-files-found: error
