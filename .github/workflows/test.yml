@@ -11,16 +11,15 @@ on:
 concurrency: test-${{ github.sha }}
 
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
+  test-ubuntu:
+    name: Test (Ubuntu)
+    runs-on: ubuntu-latest
+    strategy: &python-matrix
+      fail-fast: true
       matrix:
-        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
         # include free-threaded variants using the 't' suffix for versions that support it
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.13t", "3.14", "3.14t"]
-
-    steps:
+    steps: &test-steps
       - uses: actions/checkout@v4
 
       - name: Install uv
@@ -47,3 +46,15 @@ jobs:
 
       - name: Run type checking
         run: uvx ty check . --ignore no-matching-overload
+
+  test-windows:
+    name: Test (Windows)
+    runs-on: windows-latest
+    strategy: *python-matrix
+    steps: *test-steps
+
+  test-macos:
+    name: Test (macOS)
+    runs-on: macos-latest
+    strategy: *python-matrix
+    steps: *test-steps
