@@ -13,8 +13,13 @@ concurrency: test-${{ github.sha }}
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+        # include free-threaded variants using the 't' suffix for versions that support it
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.13t", "3.14", "3.14t"]
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
         # include free-threaded variants using the 't' suffix for versions that support it
