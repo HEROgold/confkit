@@ -18,10 +18,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch PR labels
+        id: fetch-labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+            return pr.data.labels.map(label => label.name);
       - name: Determine bump level from labels
         id: bump-level
         env:
-          LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          LABELS_JSON: ${{ steps.fetch-labels.outputs.result }}
         run: python scripts/determine_bump_level.py
 
       - name: Stop when no release label is set
