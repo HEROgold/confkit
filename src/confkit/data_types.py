@@ -147,7 +147,7 @@ class StrEnum(_EnumBase[StrEnumType]):
     def convert(self, value: str) -> StrEnumType:
         """Convert a string value to an enum."""
         value = self._strip_comment(value)
-        return self.value.__class__(value) # ty: ignore[invalid-return-type] # this is correct. ty says "Unknown | StrEnum"
+        return self.value.__class__(value)
 
     def _format_allowed_values(self) -> str:
         """Format allowed values as comma-separated member values."""
@@ -165,7 +165,7 @@ class IntEnum(_EnumBase[IntEnumType]):
     def convert(self, value: str) -> IntEnumType:
         """Convert a string value to an enum."""
         value = self._strip_comment(value)
-        return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntEnum"
+        return self.value.__class__(int(value))
 
     def _format_allowed_values(self) -> str:
         """Format allowed values as comma-separated name(value) pairs."""
@@ -183,7 +183,7 @@ class IntFlag(_EnumBase[IntFlagType]):
     def convert(self, value: str) -> IntFlagType:
         """Convert a string value to an enum."""
         value = self._strip_comment(value)
-        return self.value.__class__(int(value)) # ty: ignore[invalid-return-type] # ty says "Unknown | IntFlag"
+        return self.value.__class__(int(value))
 
     def _format_allowed_values(self) -> str:
         """Format allowed values as comma-separated name(value) pairs."""
@@ -355,7 +355,7 @@ class Optional(BaseDataType[T | None], Generic[T]):
     @value.setter
     def value(self, value: T | None) -> None:
         """Set the current value of the wrapped data type."""
-        self._data_type.value = value # type: ignore[reportAttributeAccessIssue]
+        self._data_type.value = value
 
     def convert(self, value: str) -> T | None:
         """Convert a string value to the optional type."""
@@ -626,7 +626,7 @@ class DateTime(BaseDataType[datetime]):
         """Initialize the datetime data type. Defaults to current datetime (datetime.now) if not provided."""
         if default is UNSET:
             try:
-                default = datetime(**kwargs)  # ty: ignore[missing-argument]  # noqa: DTZ001
+                default = datetime(**kwargs)  # noqa: DTZ001 Tzinfo is (optionally) passed using kwargs
             except TypeError:
                 default = datetime.now(tz=UTC)
         super().__init__(default)
@@ -684,7 +684,7 @@ class Time(BaseDataType[time]):
     def __init__(self, default: time = UNSET, **kwargs: Unpack[_TimeKwargs]) -> None:
         """Initialize the time data type. Defaults to current time if not provided."""
         if default is UNSET:
-            default = time(**kwargs) # ty: ignore[missing-argument]
+            default = time(**kwargs)
         super().__init__(default)
 
     def convert(self, value: str) -> time:

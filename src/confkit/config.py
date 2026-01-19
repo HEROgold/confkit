@@ -56,10 +56,7 @@ class Config(Generic[VT]):
         @overload
         def __init__(self: Config[VT | None], default: BaseDataType[VT], *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
 
-    # type Complains about the self and default overloads for None and str
-    # they are explicitly set for type checkers, the actual representation doesn't matter
-    # in runtime, as VT is allowed to be any type.
-    def __init__( # type: ignore[reportInconsistentOverload]
+    def __init__(
         self,
         default: VT | None | BaseDataType[VT] = UNSET,
         *,
@@ -301,7 +298,7 @@ class Config(Generic[VT]):
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 if default is not UNSET:
                     cls._set_default(section, setting, default)
-                kwargs[name] = cls._parser.get(section, setting) # ty: ignore[invalid-assignment]
+                kwargs[name] = cls._parser.get(section, setting)
                 return func(*args, **kwargs)
 
             return inner
