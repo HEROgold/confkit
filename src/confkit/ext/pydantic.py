@@ -1,9 +1,8 @@
 """Helper utilities for working with Pydantic models and confkit."""
-from __future__ import annotations
 
 try:
-    from pydantic import BaseModel  # noqa: TC002
-except ImportError as exc:  # pragma: no cover - executed only when optional extra missing
+    from pydantic import BaseModel
+except ImportError as exc:
     msg = (
         "confkit.ext.pydantic requires the optional 'pydantic' extra. "
         "Install it via 'pip install "

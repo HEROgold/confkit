@@ -7,6 +7,7 @@ It also provides a way to set default values and to set config values using deco
 from __future__ import annotations
 
 import warnings
+from configparser import ConfigParser
 from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
@@ -17,8 +18,9 @@ from .sentinels import UNSET
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from configparser import ConfigParser
     from pathlib import Path
+
+    from confkit.ext.parsers import ConfkitParser
 
 # Type variables for Python 3.10+ (pre-PEP 695) compatibility
 VT = TypeVar("VT")
@@ -32,11 +34,14 @@ class Config(Generic[VT]):
     the ValueType (VT) is the type you want the config value to be.
     """
 
-    validate_types: ClassVar[bool] = True # Validate that the converter returns the same type as the default value. (not strict)
-    write_on_edit: ClassVar[bool] = True # Write to the config file when updating a value.
-    optional: bool = False # if True, allows None as an extra type when validating types. (both instance and class variables.)
+    validate_types: ClassVar[bool] = True
+    """Validate that the converter returns the same type as the default value. (not strict)"""
+    write_on_edit: ClassVar[bool] = True
+    """Write to the config file when updating a value."""
+    optional: bool = False
+    """If True, allows None as an extra type when validating types. (both instance and class variables.)"""
 
-    _parser: ConfigParser = UNSET
+    _parser: ConfkitParser = UNSET
     _file: Path = UNSET
     _has_read_config: bool = False
 
@@ -72,6 +77,9 @@ class Config(Generic[VT]):
         if not self.optional and default is UNSET:
             msg = "Default value cannot be None when optional is False."
             raise InvalidDefaultError(msg)
+
+        if not self._parser:
+            self._detect_parser()
 
         self._initialize_data_type(default)
         self._validate_init()
@@ -129,13 +137,33 @@ class Config(Generic[VT]):
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
-    def set_parser(cls, parser: ConfigParser) -> None:
+    def set_parser(cls, parser: ConfkitParser) -> None:
         """Set the parser for ALL descriptors."""
         if cls is Config:
             # Warn users that setting this value on the base class can lead to unexpected behavoir.
             # Tell the user to subclass <Config> first.
             cls._warn_base_class_usage()
         cls._parser = parser
+
+    @classmethod
+    def _detect_parser(cls) -> None:
+        """Set the parser for descriptors based on the file extension of cls._file.
+
+        Uses msgspec-based parsers for yaml, json, toml. Defaults to dict structure.
+        Only sets the parser if there is no parser set.
+        """
+        if cls._file is UNSET:
+            msg = "Config file is not set. Use `set_file()`."
+            raise ValueError(msg)
+        match cls._file.suffix.lower():
+            case ".ini":
+                cls._parser = ConfigParser()
+            case ".yaml" | ".yml" | ".json" | ".toml":
+                from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
+                cls._parser = MsgspecParser()
+            case _:
+                msg = f"Unsupported config file extension: {cls._file.suffix.lower()}"
+                raise ValueError(msg)
 
     @classmethod
     def set_file(cls, file: Path) -> None:
