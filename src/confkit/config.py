@@ -246,7 +246,7 @@ class Config(Generic[VT]):
         # so it can be different than type of VT
         # but we don't need obj or it's type to get the value from config in our case.
         self.validate_strict_type()
-        return self.__converted_value
+        return self.__converted_value # This is already used when checking type validation, so it's safe to return it.
 
     def __set__(self, obj: object, value: VT) -> None:
         """Set the value of the attribute."""
