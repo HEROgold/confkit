@@ -12,6 +12,8 @@ from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
 
+from confkit.watcher import FileWatcher
+
 from .data_types import BaseDataType, Optional
 from .exceptions import InvalidConverterError, InvalidDefaultError
 from .sentinels import UNSET
@@ -173,6 +175,7 @@ class Config(Generic[VT]):
             # Tell the user to subclass <Config> first.
             cls._warn_base_class_usage()
         cls._file = file
+        cls._watcher = FileWatcher(file)
 
     def validate_strict_type(self) -> None:
         """Validate the type of the converter matches the desired type."""
@@ -245,11 +248,21 @@ class Config(Generic[VT]):
         # obj_type is the class in which the variable is defined
         # so it can be different than type of VT
         # but we don't need obj or it's type to get the value from config in our case.
+        if self._watcher.has_changed():
+            self.on_file_change(
+                "get",
+                self._data_type.value,
+                self.convert(self._parser.get(self._section, self._setting)),
+            )
+
         self.validate_strict_type()
         return self.__converted_value
 
     def __set__(self, obj: object, value: VT) -> None:
         """Set the value of the attribute."""
+        if self._watcher.has_changed():
+            self.on_file_change("set", self._data_type.value, value)
+
         self._data_type.value = value
         cls = self.__class__
         cls._set(self._section, self._setting, self._data_type)
@@ -348,3 +361,12 @@ class Config(Generic[VT]):
 
             return inner
         return wrapper
+
+    def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
+        """Triggered when the config file changes.
+
+        This needs to be implemented before it's usable.
+        This will be called **before** setting the value from the config file.
+        This will be called **after** getting (but before validating it's type) the value from config file.
+        The `origin` parameter indicates whether the change was triggered by a `get` or `set` operation.
+        """
