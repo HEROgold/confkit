@@ -267,7 +267,7 @@ class Config(Generic[VT]):
             )
 
         self.validate_strict_type()
-        return self.__converted_value
+        return self.__converted_value # This is already used when checking type validation, so it's safe to return it.
 
     def __set__(self, obj: object, value: VT) -> None:
         """Set the value of the attribute."""
