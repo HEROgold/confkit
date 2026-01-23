@@ -109,7 +109,7 @@ def test_pydantic_prevalidation_handles_type_casts(config_environment: ConfigPar
     config_instance = FeatureConfig()
     apply_model(config_instance, payload)
 
-    assert config_instance.retries == 5  # noqa: PLR2004
+    assert config_instance.retries == 5
     assert config_instance.enabled is True
     assert config_instance.tags == ["alpha", "beta"]
 

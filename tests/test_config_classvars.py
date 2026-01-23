@@ -13,7 +13,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from confkit.config import Config
+from confkit.config import Config as OG
 from confkit.data_types import BaseDataType, Optional, String
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 from confkit.sentinels import UNSET
@@ -21,14 +21,19 @@ from confkit.sentinels import UNSET
 F = TypeVar("F")
 P = ParamSpec("P")
 
+class Config(OG):
+    """Subclass of Config to allow manipulation of class variables in tests."""
 
 def config_restore(func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
     def inner(*args: P.args, **kwargs: P.kwargs) -> F:
-        restores = (getattr(Config, "_file", UNSET), getattr(Config, "_parser", UNSET))
+        restores = (
+            getattr(Config, "_file", UNSET),
+            getattr(Config, "_parser", UNSET),
+            getattr(Config, "write_on_edit", UNSET),
+        )
         result = func(*args, **kwargs)
-        Config._file = restores[0]
-        Config._parser = restores[1]
+        Config._file, Config._parser, Config.write_on_edit = restores
         return result
     return inner
 
@@ -185,7 +190,7 @@ def test_data_type_validate_no_orig_bases() -> None:
             self.default = default
             self.value = default
         def validate(self) -> bool:
-            return BaseDataType.validate(self) # pyright: ignore[reportArgumentType]
+            return BaseDataType.validate(self)
 
     data_type = NoOrigBasesDataType("test")
     with pytest.raises(InvalidConverterError, match=r"No type information available for validation"):
@@ -242,30 +247,26 @@ def test_ensure_option_existing_option() -> None:
     assert test_parser.get("TestExistingOption", "existing_setting") == "existing_value"
     test_config.unlink(missing_ok=True)
 
+@pytest.mark.order("last")
 @config_restore
 def test_set_write_on_edit_disabled() -> None:
     """Test _set method when write_on_edit is False (line 230->exit branch)."""
-    original_write_on_edit = Config.write_on_edit
     test_parser = ConfigParser()
-    test_config = Path("test_no_write.ini")
+    test_config = Path("no_write_test.ini")
     test_config.unlink(missing_ok=True)
     test_config.touch()
 
     with test_config.open("w") as f:
         f.write("[TestSection]\ntest_setting = initial_value\n")
 
-    try:
-        Config.write_on_edit = False
-        Config.set_file(test_config)
-        Config.set_parser(test_parser)
+    Config.write_on_edit = False
+    Config.set_file(test_config)
+    Config.set_parser(test_parser)
 
-        initial_content = test_config.read_text()
-        Config._set("TestSection", "test_setting", "new_value")
-        final_content = test_config.read_text()
-        # Call _set which should not write to file when write_on_edit is False
-        assert initial_content == final_content
-        # But the parser should have the new value in memory
-        assert Config._parser.get("TestSection", "test_setting") == "new_value"
-    finally:
-        Config.write_on_edit = original_write_on_edit
-        test_config.unlink(missing_ok=True)
+    initial_content = test_config.read_text()
+    Config._set("TestSection", "test_setting", "new_value")
+    final_content = test_config.read_text()
+    # Call _set which should not write to file when write_on_edit is False
+    assert initial_content == final_content
+    # But the parser should have the new value in memory
+    assert Config._parser.get("TestSection", "test_setting") == "new_value"

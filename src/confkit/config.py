@@ -30,6 +30,17 @@ OVT = TypeVar("OVT")  # Separate TypeVar for nested generic to avoid scope colli
 F = TypeVar("F")
 P = ParamSpec("P")
 
+class ConfigContainerMeta(type):
+    """Metaclass for Config to "force" __set__ to be called on class variables."""
+
+    def __setattr__(cls, key: str, value: object) -> None:
+        """Set the value of the attribute on the class."""
+        attr = cls.__dict__.get(key)
+        if isinstance(attr, Config):
+            attr.__set__(cls, value)
+        else:
+            super().__setattr__(key, value)
+
 class Config(Generic[VT]):
     """A descriptor for config values, preserving type information.
 
@@ -55,13 +66,13 @@ class Config(Generic[VT]):
         def __init__(self, default: VT) -> None: ...
         # Specify the states of optional explicitly for type checkers.
         @overload
-        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ...
         @overload
-        def __init__(self: Config[VT], default: BaseDataType[VT], *, optional: Literal[False]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        def __init__(self: Config[VT], default: BaseDataType[VT], *, optional: Literal[False]) -> None: ...
         @overload
-        def __init__(self: Config[VT | None], default: VT, *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        def __init__(self: Config[VT | None], default: VT, *, optional: Literal[True]) -> None: ...
         @overload
-        def __init__(self: Config[VT | None], default: BaseDataType[VT], *, optional: Literal[True]) -> None: ... # pyright: ignore[reportInvalidTypeVarUse]
+        def __init__(self: Config[VT | None], default: BaseDataType[VT], *, optional: Literal[True]) -> None: ...
 
     def __init__(
         self,

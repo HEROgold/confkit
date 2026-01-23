@@ -3,7 +3,7 @@
 It includes the Config class and various data types used for configuration values.
 """
 
-from .config import Config
+from .config import Config, ConfigContainerMeta
 from .data_types import (
     BaseDataType,
     Binary,
@@ -35,6 +35,7 @@ __all__ = [
     "Binary",
     "Boolean",
     "Config",
+    "ConfigContainerMeta",
     "Date",
     "DateTime",
     "Dict",
