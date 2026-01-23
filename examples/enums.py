@@ -67,3 +67,13 @@ class ServerConfig:
     
     # Standard enum configuration
     environment = Config(Enum(LogLevel.INFO))
+
+if __name__ == "__main__":
+    """Demonstrate enum configurations."""
+    server_config = ServerConfig()
+
+    print("Log Level:", server_config.log_level)
+    print("Default Priority:", server_config.default_priority)
+    print("Default Permission:", server_config.default_permission)
+    print("Fallback Level:", server_config.fallback_level)
+    print("Environment:", server_config.environment)

@@ -43,25 +43,22 @@ class AppConfig:
     api_key = Config("", optional=True)
 
 
-def main():
+if __name__ == "__main__":
+    app_config = AppConfig()
     # Read values from config
-    print(f"Debug mode: {AppConfig.debug}")
-    print(f"Server port: {AppConfig.port}")
-    print(f"Host: {AppConfig.host}")
-    print(f"Timeout: {AppConfig.timeout}s")
+    print(f"Debug mode: {app_config.debug}")
+    print(f"Server port: {app_config.port}")
+    print(f"Host: {app_config.host}")
+    print(f"Timeout: {app_config.timeout}s")
     
     # Modify a configuration value
     # This automatically saves to config.ini when write_on_edit is True
-    AppConfig.port = 9000
-    print(f"Updated port: {AppConfig.port}")
+    app_config.port = 9000
+    print(f"Updated port: {app_config.port}")
     
     # Get the optional value
-    print(f"API Key: {'Not set' if not AppConfig.api_key else AppConfig.api_key}")
+    print(f"API Key: {'Not set' if not app_config.api_key else app_config.api_key}")
 
     # Set the API key
-    AppConfig.api_key = "my-secret-key"
-    print(f"Updated API Key: {AppConfig.api_key}")
-
-
-if __name__ == "__main__":
-    main()
+    app_config.api_key = "my-secret-key"
+    print(f"Updated API Key: {app_config.api_key}")

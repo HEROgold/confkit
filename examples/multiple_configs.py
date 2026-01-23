@@ -21,3 +21,11 @@ class AppConfiguration:
 
     api_key = ApiConfig("default_api_key")
     api_timeout = ApiConfig(30)
+
+if __name__ == "__main__":
+    config = AppConfiguration()
+
+    print("Database Host:", config.db_host)
+    print("Database Port:", config.db_port)
+    print("API Key:", config.api_key)
+    print("API Timeout:", config.api_timeout)

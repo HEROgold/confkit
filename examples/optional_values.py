@@ -87,7 +87,7 @@ class DatabaseConfig:
         }
 
 
-def main():
+if __name__ == "__main__":
     # Test basic optional configurations
     config = OptionalConfig()
     
@@ -143,7 +143,3 @@ def main():
     params = db_config.get_connection_params()
     for key, value in params.items():
         print(f"{key}: {value}")
-
-
-if __name__ == "__main__":
-    main()

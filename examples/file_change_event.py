@@ -50,8 +50,7 @@ class AppConfig:
     api_key.on_file_change = on_api_change
 
 
-
-def main():
+if __name__ == "__main__":
     cfg = AppConfig()
     # Read values from config
     print(f"Debug mode: {cfg.debug}")
@@ -64,7 +63,3 @@ def main():
     cfg.debug = not cfg.debug
     # Set the API key
     cfg.api_key = randint(100000, 999999)
-
-
-if __name__ == "__main__":
-    main()

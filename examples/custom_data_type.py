@@ -56,22 +56,20 @@ class CustomConfig:
     project = Config(UpperString("Example Project"))
 
 
-def main() -> None:
+if __name__ == "__main__":
+    config = CustomConfig()
     print("Initial values:")
-    print("shout_name:", CustomConfig.shout_name)
-    print("project:", CustomConfig.project)
+    print("shout_name:", config.shout_name)
+    print("project:", config.project)
 
     # Assign lower / mixed case; storage normalizes to upper automatically
-    CustomConfig.shout_name = "custom"
-    CustomConfig.project = "demo Title"
+    config.shout_name = "custom"
+    config.project = "demo Title"
 
     print("\nAfter reassignment:")
-    print("shout_name:", CustomConfig.shout_name)
-    print("project:", CustomConfig.project)
+    print("shout_name:", config.shout_name)
+    print("project:", config.project)
 
     # Show underlying INI content (optional diagnostic)
     ini_text = Path("config.ini").read_text(encoding="utf-8")
     print("\nRaw config.ini contents:\n" + ini_text)
-
-if __name__ == "__main__":  # pragma: no cover
-    main()

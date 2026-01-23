@@ -21,7 +21,7 @@ class AppConfig:
     docs = Config(URL(urlparse("https://herogold.github.io/confkit/")))
 
 
-def main() -> None:
+if __name__ == "__main__":
     app_config = AppConfig()
     # Accessing and printing the parsed URLs
     print("Homepage:", app_config.homepage)
@@ -34,8 +34,3 @@ def main() -> None:
     app_config.homepage = "https://example.com/newpage"
     print("Updated homepage:", app_config.homepage)
     print("Updated homepage netloc:", app_config.homepage.netloc)
-
-
-
-if __name__ == "__main__":
-    main()

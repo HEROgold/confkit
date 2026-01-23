@@ -40,7 +40,7 @@ class ServiceSettings(BaseModel):
     api_token: str | None = None
 
 
-def main() -> None:
+if __name__ == "__main__":
     payload = ServiceSettings(
         host="api.service.local",
         port=9090,
@@ -52,12 +52,8 @@ def main() -> None:
     config = ServiceConfig()
     apply_model(config, payload)
 
-    print(f"Host -> {ServiceConfig.host}")
-    print(f"Port -> {ServiceConfig.port}")
-    print(f"Debug -> {ServiceConfig.debug}")
-    print(f"Timeout -> {ServiceConfig.timeout}")
-    print(f"API token -> {ServiceConfig.api_token}")
-
-
-if __name__ == "__main__":
-    main()
+    print(f"Host -> {config.host}")
+    print(f"Port -> {config.port}")
+    print(f"Debug -> {config.debug}")
+    print(f"Timeout -> {config.timeout}")
+    print(f"API token -> {config.api_token}")

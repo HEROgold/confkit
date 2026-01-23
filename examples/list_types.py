@@ -42,3 +42,15 @@ class ListConfig:
     
     # Empty list with explicit data type
     empty_list = Config(List([], data_type=String("")))
+
+if __name__ == "__main__":
+    config = ListConfig()
+    
+    print("String List:", config.string_list)
+    print("Integer List:", config.int_list)
+    print("Float List:", config.float_list)
+    print("Boolean List:", config.bool_list)
+    print("Paths List:", config.paths_list)
+    print("Complex List:", config.complex_list)
+    print("List with Empty Values:", config.with_empty)
+    print("Empty List:", config.empty_list)

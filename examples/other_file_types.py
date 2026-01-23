@@ -33,12 +33,7 @@ class YamlSettings:
     value = YamlConfig(List([1, 2, 3]))
 
 
-
-def main():
+if __name__ == "__main__":
     print("JsonSettings.value:", JsonSettings.value)
     print("TomlSettings.value:", TomlSettings.value)
     print("YamlSettings.value:", YamlSettings.value)
-
-
-if __name__ == "__main__":
-    main()

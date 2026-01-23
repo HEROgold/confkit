@@ -48,54 +48,52 @@ class DataTypeConfig:
 
 
 
-def main():
+if __name__ == "__main__":
+    config = DataTypeConfig()
     # Print primitive types
     print("--- Primitive Types ---")
-    print(f"String: {DataTypeConfig.string_value}")
-    print(f"Integer: {DataTypeConfig.int_value}")
-    print(f"Float: {DataTypeConfig.float_value}")
-    print(f"Boolean: {DataTypeConfig.bool_value}")
+    print(f"String: {config.string_value}")
+    print(f"Integer: {config.int_value}")
+    print(f"Float: {config.float_value}")
+    print(f"Boolean: {config.bool_value}")
 
     # Update values
-    DataTypeConfig.string_value = "updated string"
-    DataTypeConfig.int_value = 99
-    DataTypeConfig.float_value = 2.71828
-    DataTypeConfig.bool_value = not DataTypeConfig.bool_value
+    config.string_value = "updated string"
+    config.int_value = 99
+    config.float_value = 2.71828
+    config.bool_value = not config.bool_value
     
     print("\n--- Updated Primitive Types ---")
-    print(f"String: {DataTypeConfig.string_value}")
-    print(f"Integer: {DataTypeConfig.int_value}")
-    print(f"Float: {DataTypeConfig.float_value}")
-    print(f"Boolean: {DataTypeConfig.bool_value}")
+    print(f"String: {config.string_value}")
+    print(f"Integer: {config.int_value}")
+    print(f"Float: {config.float_value}")
+    print(f"Boolean: {config.bool_value}")
 
     # Print specialized number formats
     print("\n--- Specialized Number Formats ---")
-    print(f"Hex: {DataTypeConfig.hex_value} (0x{DataTypeConfig.hex_value:x})")
-    print(f"Octal: {DataTypeConfig.octal_value} (0o{DataTypeConfig.octal_value:o})")
-    print(f"Binary: {DataTypeConfig.binary_value} (0b{DataTypeConfig.binary_value:b})")
+    print(f"Hex: {config.hex_value} (0x{config.hex_value:x})")
+    print(f"Octal: {config.octal_value} (0o{config.octal_value:o})")
+    print(f"Binary: {config.binary_value} (0b{config.binary_value:b})")
     
     # Update specialized formats
-    DataTypeConfig.hex_value = 0xABCD
-    DataTypeConfig.octal_value = 0o644
-    DataTypeConfig.binary_value = 0b11001100
+    config.hex_value = 0xABCD
+    config.octal_value = 0o644
+    config.binary_value = 0b11001100
     
     print("\n--- Updated Specialized Formats ---")
-    print(f"Hex: {DataTypeConfig.hex_value} (0x{DataTypeConfig.hex_value:x})")
-    print(f"Octal: {DataTypeConfig.octal_value} (0o{DataTypeConfig.octal_value:o})")
-    print(f"Binary: {DataTypeConfig.binary_value} (0b{DataTypeConfig.binary_value:b})")
+    print(f"Hex: {config.hex_value} (0x{config.hex_value:x})")
+    print(f"Octal: {config.octal_value} (0o{config.octal_value:o})")
+    print(f"Binary: {config.binary_value} (0b{config.binary_value:b})")
     
     # Print custom base integers
     print("\n--- Custom Base Integers ---")
-    print(f"Base 7: {DataTypeConfig.base7_value}")
-    print(f"Base 5: {DataTypeConfig.base5_value}")
+    print(f"Base 7: {config.base7_value}")
+    print(f"Base 5: {config.base5_value}")
     
     # Print auto-detected types
     print("\n--- Auto-detected Types ---")
-    print(f"Auto String: {DataTypeConfig.auto_string}")
-    print(f"Auto Int: {DataTypeConfig.auto_int}")
-    print(f"Auto Float: {DataTypeConfig.auto_float}")
-    print(f"Auto Bool: {DataTypeConfig.auto_bool}")
+    print(f"Auto String: {config.auto_string}")
+    print(f"Auto Int: {config.auto_int}")
+    print(f"Auto Float: {config.auto_float}")
+    print(f"Auto Bool: {config.auto_bool}")
 
-
-if __name__ == "__main__":
-    main()
