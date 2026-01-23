@@ -3,6 +3,7 @@
 Basic example showing how to use the on_file_change() hook to detect changes in the configuration file.
 Copy of basic.py
 """
+from random import randint
 
 from configparser import ConfigParser
 from pathlib import Path
@@ -18,11 +19,11 @@ Config.set_file(Path("config.ini"))
 Config.write_on_edit = True
 
 
-def on_api_change(self, origin: str, old: str, new: str):
+def on_api_change(origin: str, old: str, new: str):
     if origin == "get":
-        print(f"[on_file_change] API key changed from '{old}' to '{new}'. Reconnecting to API...")
-    elif origin == "set":
         print(f"[on_file_change] API key accessed. Current value: '{new}' (previous: '{old}')")
+    elif origin == "set":
+        print(f"[on_file_change] API key changed from '{old}' to '{new}'. Reconnecting to API...")
 
 def print_change(origin, old, new):
     print(f"Configuration file has changed! {origin=} {old=} {new=}")
@@ -51,23 +52,18 @@ class AppConfig:
 
 
 def main():
+    cfg = AppConfig()
     # Read values from config
-    print(f"Debug mode: {AppConfig.debug}")
-    print(f"Server port: {AppConfig.port}")
-    print(f"Host: {AppConfig.host}")
-    print(f"Timeout: {AppConfig.timeout}s")
+    print(f"Debug mode: {cfg.debug}")
+    print(f"Server port: {cfg.port}")
+    print(f"Host: {cfg.host}")
+    print(f"Timeout: {cfg.timeout}s")
     
     # Modify a configuration value
     # This automatically saves to config.ini when write_on_edit is True
-    AppConfig.port = 9000
-    print(f"Updated port: {AppConfig.port}")
-    
-    # Get the optional value
-    print(f"API Key: {'Not set' if not AppConfig.api_key else AppConfig.api_key}")
-
+    cfg.debug = not cfg.debug
     # Set the API key
-    AppConfig.api_key = "my-secret-key"
-    print(f"Updated API Key: {AppConfig.api_key}")
+    cfg.api_key = randint(100000, 999999)
 
 
 if __name__ == "__main__":
