@@ -159,9 +159,9 @@ class TestDict:
         """Test creating a dict with an empty default raises error."""
         error_match = r"Dict requires either a default with at least one key/value pair, or both key_type and value_type to be specified."  # noqa: E501
         with pytest.raises(ValueError, match=error_match):
-            Dict(value_type=String())  # pyright: ignore[reportCallIssue]
+            Dict(value_type=String())
         with pytest.raises(ValueError, match=error_match):
-            Dict(key_type=String())  # pyright: ignore[reportCallIssue]
+            Dict(key_type=String())
 
 
 class TestDate:
