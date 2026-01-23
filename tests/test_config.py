@@ -10,7 +10,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from confkit.config import Config
+from confkit.config import Config as OG
 from confkit.data_types import (
     BaseDataType,
     Binary,
@@ -29,6 +29,9 @@ from confkit.data_types import (
     String,
 )
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
+
+class Config(OG):
+    """Subclass of Config to set test-specific parameters."""
 
 config = Path("test.ini")
 config.unlink(missing_ok=True)  # Remove the file if it exists

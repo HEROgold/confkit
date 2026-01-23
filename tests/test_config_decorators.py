@@ -13,12 +13,14 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from confkit.config import Config
+from confkit.config import Config as OG
 from confkit.sentinels import UNSET
 
 F = TypeVar("F")
 P = ParamSpec("P")
 
+class Config(OG):
+    """Subclass of Config to set test-specific parameters."""
 
 def config_new(func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
