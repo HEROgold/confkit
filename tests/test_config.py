@@ -153,25 +153,25 @@ class Test:
     def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
         return kwargs.get("number")
 
-
+@pytest.mark.order(0)
 def test_enum() -> None:
     assert Test.enum == EnumTest.OPTION_A
     assert Test.enum.name == EnumTest.OPTION_A.name
     assert Test.enum.value == EnumTest.OPTION_A.value
 
-
+@pytest.mark.order(0)
 def test_str_enum() -> None:
     assert Test.str_enum == StrEnumTest.OPTION_A
     assert Test.str_enum.name == StrEnumTest.OPTION_A.name
     assert Test.str_enum.value == StrEnumTest.OPTION_A.value
 
-
+@pytest.mark.order(0)
 def test_int_enum() -> None:
     assert Test.int_enum == IntEnumTest.OPTION_A
     assert Test.int_enum.name == IntEnumTest.OPTION_A.name
     assert Test.int_enum.value == IntEnumTest.OPTION_A.value
 
-
+@pytest.mark.order(0)
 def test_int_flag() -> None:
     assert Test.int_flag == IntFlagTest.OPTION_A
     assert Test.int_flag.name == IntFlagTest.OPTION_A.name
