@@ -15,7 +15,7 @@ class TestConfig(Config[Any]):
     def on_file_change(self, origin: str, old: Any, new: Any) -> None:  # noqa: ANN401, D102
         self.__class__.file_change_events.append((origin, old, new))
 
-config_file = Path("test_config.ini")
+config_file = Path("config_test.ini")
 TestConfig.set_file(config_file)
 TestConfig._watcher.has_changed = lambda: True # Always trigger file_changed. triggering the logging of events
 TestConfig.validate_types = False  # Disable strict type validation for testing
