@@ -30,6 +30,7 @@ from confkit.data_types import (
 )
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 
+
 class Config(OG):
     """Subclass of Config to set test-specific parameters."""
 

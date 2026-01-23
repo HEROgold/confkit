@@ -4,7 +4,7 @@ line-length = 128
 target-version = "py311"
 
 [lint.per-file-ignores]
-"test_*.py" = ["S101", "D103", "SLF001", "D101"]
+"test_*.py" = ["S101", "D103", "SLF001", "D100","D101", "FBT003", "PLR2004", "N814"]
 "examples/*.py" = ["ALL"]
 
 [format]

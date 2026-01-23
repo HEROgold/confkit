@@ -1,6 +1,9 @@
 from configparser import ConfigParser
 from pathlib import Path
-from confkit.config import Config as OG, ConfigContainerMeta
+
+from confkit.config import Config as OG
+from confkit.config import ConfigContainerMeta
+
 
 class Config(OG):
     """A Config class for testing purposes."""
@@ -8,20 +11,20 @@ class Config(OG):
 Config.set_file(Path("meta_test.ini"))
 Config.set_parser(ConfigParser())
 
-def mock_metaClass():
-    class mock(ConfigContainerMeta):
+def mock_meta_class() -> None:
+    class Mock(ConfigContainerMeta):
         called_count = 0
 
-    def set_mock(cls, key, value):
-        mock.called_count += 1
+    def set_mock(cls, key, value) -> None:  # noqa: ANN001
+        Mock.called_count += 1
         ConfigContainerMeta.__setattr__(cls, key, value)
 
-    mock.__setattr__ = set_mock
-    return mock
+    Mock.__setattr__ = set_mock
+    return Mock
 
-def test_set_class_attribute():
+def test_set_class_attribute() -> None:
     """Test that setting a class attribute works as expected."""
-    meta = mock_metaClass()
+    meta = mock_meta_class()
 
     class Test(metaclass=meta):
         x = Config(10)
@@ -31,9 +34,9 @@ def test_set_class_attribute():
     assert isinstance(Test.__dict__["x"], Config)
     assert meta.called_count == 2 # one for Test.x = 20, one is called in __set__ on the descriptor
 
-def test_meta_avoiding_non_Config():
+def test_meta_avoiding_non_Config() -> None: # noqa: N802
     """Test that MetaConfig does not interfere with non-Config attributes."""
-    meta = mock_metaClass()
+    meta = mock_meta_class()
 
     class Test(metaclass=meta):
         x = 10

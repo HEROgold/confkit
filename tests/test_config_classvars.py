@@ -30,7 +30,7 @@ def config_restore(func: Callable[P, F]) -> Callable[P, F]:
         restores = (
             getattr(Config, "_file", UNSET),
             getattr(Config, "_parser", UNSET),
-            getattr(Config, "write_on_edit", UNSET)
+            getattr(Config, "write_on_edit", UNSET),
         )
         result = func(*args, **kwargs)
         Config._file, Config._parser, Config.write_on_edit = restores

@@ -6,7 +6,7 @@ from confkit.config import Config
 
 
 def test_two_instances_share_values_and_on_file_change_called() -> None:
-    """Verify two instances of the same Config-backed class see the same values
+    """Verify two instances of the same Config-backed class see the same values.
 
     Also assert that the `on_file_change` hook (attached to the descriptor)
     is invoked when the file is observed to have changed.
@@ -29,7 +29,7 @@ def test_two_instances_share_values_and_on_file_change_called() -> None:
         events: list = []
 
         # Attach a single handler to the descriptor (it's shared across instances)
-        def handler(origin, old, new):
+        def handler(origin, old, new) -> None:  # noqa: ANN001
             events.append((origin, old, new))
 
         class AppConfigLocal:
