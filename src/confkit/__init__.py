@@ -3,7 +3,7 @@
 It includes the Config class and various data types used for configuration values.
 """
 
-from .config import Config
+from .config import Config, ConfigContainerMeta
 from .data_types import (
     BaseDataType,
     Binary,
@@ -32,6 +32,7 @@ from .exceptions import InvalidConverterError, InvalidDefaultError
 
 __all__ = [
     "BaseDataType",
+    "ConfigContainerMeta",
     "Binary",
     "Boolean",
     "Config",

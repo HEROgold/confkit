@@ -51,6 +51,8 @@ class ConfkitParser(Protocol):
         """Add a section."""
     def has_option(self, section: str, option: str) -> bool:
         """Check if an option exists within a section."""
+    def remove_option(self, section: str, option: str) -> None:
+        """Remove an option from a section."""
     def get(self, section: str, option: str, fallback: str = UNSET) -> str:
         """Get the value of an option within a section, with an optional fallback."""
     def set(self, section: str, option: str, value: str) -> None:
@@ -129,3 +131,8 @@ class MsgspecParser(ConfkitParser, Generic[T]):
     def set(self, section: str, option: str, value: str) -> None:
         self.set_section(section)
         self.data[section][option] = value
+
+    @override
+    def remove_option(self, section: str, option: str) -> None:
+        if self.has_option(section, option):
+            del self.data[section][option]

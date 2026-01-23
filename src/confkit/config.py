@@ -30,6 +30,17 @@ OVT = TypeVar("OVT")  # Separate TypeVar for nested generic to avoid scope colli
 F = TypeVar("F")
 P = ParamSpec("P")
 
+class ConfigContainerMeta(type):
+    """Metaclass for Config to "force" __set__ to be called on class variables."""
+
+    def __setattr__(cls, key: str, value: Any) -> None:
+        """Set the value of the attribute on the class."""
+        attr = cls.__dict__.get(key)
+        if isinstance(attr, Config):
+            attr.__set__(cls, value)
+        else:
+            super().__setattr__(key, value)
+
 class Config(Generic[VT]):
     """A descriptor for config values, preserving type information.
 
