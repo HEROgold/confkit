@@ -1,0 +1,29 @@
+name: Bump Version By Labels
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Bump Version
+        id: bump-version
+        uses: conjikidow/bump-version@v2.0.0
+        with:
+          label-major: 'Major'
+          label-minor: 'Minor'
+          label-patch: 'Patch'
+          create-release: 'false'
+
+      - name: Debug outputs
+        run: |
+          echo "version-bumped=${{ steps.bump-version.outputs.version-bumped }}"
+          echo "new-version=${{ steps.bump-version.outputs.new-version }}"
