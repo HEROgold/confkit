@@ -5,6 +5,9 @@ on:
     types: [new-release-created]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build distribution 📦
