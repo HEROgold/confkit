@@ -7,6 +7,7 @@ It also provides a way to set default values and to set config values using deco
 from __future__ import annotations
 
 import warnings
+from abc import abstractmethod
 from configparser import ConfigParser
 from functools import wraps
 from types import NoneType
@@ -373,6 +374,7 @@ class Config(Generic[VT]):
             return inner
         return wrapper
 
+    @abstractmethod
     def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
         """Triggered when the config file changes.
 
