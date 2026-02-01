@@ -32,8 +32,27 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            ${{ env.VIRTUAL_ENV }}
+          key: ${{ runner.os }}-uv-${{ matrix.python-version }}-${{ hashFiles('**/pyproject.toml', '**/uv.lock', 'src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-${{ matrix.python-version }}-
+            ${{ runner.os }}-uv-
+
       - name: Install dependencies
         run: uv sync --group dev
+
+      - name: Cache pytest results
+        uses: actions/cache@v4
+        with:
+          path: .pytest_cache
+          key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-pytest-${{ matrix.python-version }}-
 
       - name: Run tests
         run: uv run pytest .
