@@ -1,0 +1,91 @@
+default_install_hook_types:
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-rewrite
+
+repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.26
+    hooks:
+      - id: uv-lock
+        stages:
+        - post-checkout
+        - post-merge
+        - post-rewrite
+      - id: uv-sync
+        args: ["--locked", "--all-extras"]
+        stages:
+        - post-checkout
+        - post-merge
+        - post-rewrite
+
+  # General hooks (apply globally)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # Filesystem
+      - id: check-illegal-windows-names
+      - id: check-case-conflict
+      # Git related
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      # Security
+      - id: detect-private-key
+      # File validation
+      - id: check-json
+        exclude: ^(postgres/|\.vscode/|\.obsidian/)
+      - id: check-toml
+        exclude: ^postgres/
+      - id: check-xml
+        exclude: ^postgres/
+      - id: check-yaml
+        exclude: ^postgres/
+      # Python sanity checks
+      - id: check-ast
+        files: ^src/.*\.py$
+      - id: check-docstring-first
+        files: ^src/.*\.py$
+      - id: debug-statements
+        files: ^src/.*\.py$
+
+  # Validate packaging metadata early
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.24.1
+    hooks:
+      - id: validate-pyproject
+        stages: [pre-push, pre-commit]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.14
+    hooks:
+      - id: ruff
+        name: ruff lint
+        args: ["--fix", "--unsafe-fixes"]
+        files: ^src/.*\.py$
+        stages: [pre-push, pre-commit]
+
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        language: system
+        entry: uvx ty check
+        pass_filenames: false
+        files: ^src/.*\.py$
+        stages: [pre-push, pre-commit]
+      - id: pytest
+        name: pytest
+        entry: ./.venv/bin/pytest .
+        stages: [pre-push]
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
+  # Spell checking (global)
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        stages: [pre-push, pre-commit]
