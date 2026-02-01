@@ -40,3 +40,7 @@ class Reference(BaseDataType[ConfigType]):
     def __get__(self, instance: object, owner: type) -> ConfigType:
         """Get the value from the owner configuration instance."""
         return self.value
+
+__all__ = [
+    "Reference",
+]
