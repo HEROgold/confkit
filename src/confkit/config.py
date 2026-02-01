@@ -303,10 +303,10 @@ class Config(Generic[VT]):
             cls._parser.write(f)
 
     @classmethod
-    def set(cls, section: str, setting: str, value: VT):  # noqa: ANN206
+    def set(cls, section: str, setting: str, value: VT) -> Callable[[Callable[P, F]], Callable[P, F]]:
         """Set a config value using this descriptor."""
 
-        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
+        def wrapper(func: Callable[P, F]) -> Callable[P, F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 cls._set(section, setting, value)
@@ -317,9 +317,9 @@ class Config(Generic[VT]):
 
 
     @classmethod
-    def with_setting(cls, setting: Config[OVT]):  # noqa: ANN206
+    def with_setting(cls, setting: Config[OVT]) -> Callable[[Callable[P, F]], Callable[P, F]]:
         """Insert a config value into **kwargs to the wrapped method/function using this decorator."""
-        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
+        def wrapper(func: Callable[P, F]) -> Callable[P, F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 kwargs[setting.name] = setting.convert(cls._parser.get(setting._section, setting._setting))
@@ -330,7 +330,9 @@ class Config(Generic[VT]):
 
 
     @classmethod
-    def with_kwarg(cls, section: str, setting: str, name: str | None = None, default: VT = UNSET):  # noqa: ANN206
+    def with_kwarg(
+        cls, section: str, setting: str, name: str | None = None, default: VT = UNSET,
+    ) -> Callable[[Callable[P, F]], Callable[P, F]]:
         """Insert a config value into **kwargs to the wrapped method/function using this descriptor.
 
         Use kwarg.get(`name`) to get the value.
@@ -343,7 +345,7 @@ class Config(Generic[VT]):
             msg = f"Config value {section=} {setting=} is not set. and no default value is given."
             raise ValueError(msg)
 
-        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
+        def wrapper(func: Callable[P, F]) -> Callable[P, F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 if default is not UNSET:
@@ -360,9 +362,9 @@ class Config(Generic[VT]):
             cls._set(section, setting, value)
 
     @classmethod
-    def default(cls, section: str, setting: str, value: VT):  # noqa: ANN206
+    def default(cls, section: str, setting: str, value: VT) -> Callable[[Callable[P, F]], Callable[P, F]]:
         """Set a default config value if none are set yet using this descriptor."""
-        def wrapper(func: Callable[..., F]) -> Callable[..., F]:
+        def wrapper(func: Callable[P, F]) -> Callable[P, F]:
             @wraps(func)
             def inner(*args: P.args, **kwargs: P.kwargs) -> F:
                 cls._set_default(section, setting, value)
