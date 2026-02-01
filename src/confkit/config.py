@@ -146,15 +146,15 @@ class Config(Generic[VT]):
 
     @staticmethod
     def _warn_base_class_usage() -> None:
-        """Warn users that setting parser/file on the base class can lead to unexpected behavior."""
+        """Warn users that setting parser/file on the base class can lead to unexpected behavior.
+        Tell the user to subclass <Config> first.
+        """  # noqa: D205
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
     def set_parser(cls, parser: ConfkitParser) -> None:
         """Set the parser for ALL descriptors."""
         if cls is Config:
-            # Warn users that setting this value on the base class can lead to unexpected behavoir.
-            # Tell the user to subclass <Config> first.
             cls._warn_base_class_usage()
         cls._parser = parser
 
@@ -182,8 +182,6 @@ class Config(Generic[VT]):
     def set_file(cls, file: Path) -> None:
         """Set the file for ALL descriptors."""
         if cls is Config:
-            # Warn users that setting this value on the base class can lead to unexpected behavoir.
-            # Tell the user to subclass <Config> first.
             cls._warn_base_class_usage()
         cls._file = file
         cls._watcher = FileWatcher(file)
@@ -267,7 +265,7 @@ class Config(Generic[VT]):
             )
 
         self.validate_strict_type()
-        return self.__converted_value # This is already used when checking type validation, so it's safe to return it.
+        return self.__converted_value  # This is already used when checking type validation, so it's safe to return it.
 
     def __set__(self, obj: object, value: VT) -> None:
         """Set the value of the attribute."""
