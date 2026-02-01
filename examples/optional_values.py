@@ -65,7 +65,7 @@ class DatabaseConfig:
     # Port with default
     port = Config(Optional(Integer(5432)))
     
-    def get_connection_params(self):
+    def get_connection_params(self) -> dict[str, int | str | None]:
         """Example of providing fallbacks for optional values."""
         # For username, use a default if None
         username = self.username or "default_user"

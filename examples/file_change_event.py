@@ -19,13 +19,13 @@ Config.set_file(Path("config.ini"))
 Config.write_on_edit = True
 
 
-def on_api_change(origin: str, old: str, new: str):
+def on_api_change(origin: str, old: str, new: str) -> None:
     if origin == "get":
         print(f"[on_file_change] API key accessed. Current value: '{new}' (previous: '{old}')")
     elif origin == "set":
         print(f"[on_file_change] API key changed from '{old}' to '{new}'. Reconnecting to API...")
 
-def print_change(origin, old, new):
+def print_change(origin, old, new) -> None:
     print(f"Configuration file has changed! {origin=} {old=} {new=}")
 
 class AppConfig:
