@@ -58,6 +58,15 @@ jobs:
         prerelease: false
         generate_release_notes: true
 
+    - name: Create Sentry release
+      uses: getsentry/action-release@v3
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+      with:
+        environment: production
+
     # Trigger PyPI workflow when after we create a release.
     # Pypi workflow won't with the usual on-release trigger
     # because another workflow (this one) created the release. (avoiding inf recursion)
