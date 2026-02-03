@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Lightweight and Easy to use configuration manager for Python projects"
 readme = "README.md"
 authors = [
-    { name = "HEROgold", email = "martijnwieringa28@gmail.com" }
+    { name = "HEROgold" }
 ]
 requires-python = ">=3.11"
 dependencies = []
