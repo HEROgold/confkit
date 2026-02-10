@@ -101,20 +101,15 @@ def test_env_parser_env_vars_take_precedence(env_parser, temp_env_file) -> None:
 
 
 def test_env_parser_write(env_parser, temp_env_file) -> None:
-    """Test writing to a .env file."""
+    """Test that writing raises NotImplementedError for readonly parser."""
     env_parser.data = {
         "KEY1": "value1",
         "KEY2": "value2",
         "KEY3": "value with spaces",
     }
 
-    with temp_env_file.open("w") as f:
+    with temp_env_file.open("w") as f, pytest.raises(NotImplementedError):
         env_parser.write(f)
-
-    content = temp_env_file.read_text()
-    assert "KEY1=value1" in content
-    assert "KEY2=value2" in content
-    assert 'KEY3="value with spaces"' in content
 
 
 def test_env_parser_has_section(env_parser) -> None:
@@ -141,11 +136,9 @@ def test_env_parser_get(env_parser) -> None:
 
 
 def test_env_parser_set(env_parser) -> None:
-    """Test setting values."""
-    env_parser.set("any_section", "KEY1", "value1")
-
-    assert "KEY1" in env_parser.data
-    assert env_parser.data["KEY1"] == "value1"
+    """Test that setting values raises NotImplementedError for readonly parser."""
+    with pytest.raises(NotImplementedError):
+        env_parser.set("any_section", "KEY1", "value1")
 
 
 def test_env_parser_remove_option(env_parser) -> None:
@@ -169,21 +162,16 @@ def test_env_parser_set_section(env_parser) -> None:
 
 
 def test_env_parser_integration(env_parser, temp_env_file) -> None:
-    """Test full read-write cycle."""
-    # Write initial data
-    env_parser.data = {
-        "DATABASE_URL": "postgresql://localhost/db",
-        "API_KEY": "secret123",
-        "DEBUG": "true",
-    }
+    """Test full read cycle for readonly parser."""
+    # Create a .env file
+    content = """DATABASE_URL=postgresql://localhost/db
+API_KEY=secret123
+DEBUG=true"""
+    temp_env_file.write_text(content)
 
-    with temp_env_file.open("w") as f:
-        env_parser.write(f)
+    # Read from file
+    env_parser.read(temp_env_file)
 
-    # Create new parser and read back
-    env_parser2 = EnvParser()
-    env_parser2.read(temp_env_file)
-
-    assert env_parser2.data["DATABASE_URL"] == "postgresql://localhost/db"
-    assert env_parser2.data["API_KEY"] == "secret123"
-    assert env_parser2.data["DEBUG"] == "true"
+    assert env_parser.data["DATABASE_URL"] == "postgresql://localhost/db"
+    assert env_parser.data["API_KEY"] == "secret123"
+    assert env_parser.data["DEBUG"] == "true"
