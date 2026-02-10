@@ -78,6 +78,9 @@ class EnvParser(ConfkitParser):
         """
         self.data = dict(os.environ)
 
+        if not file.exists():
+            return
+
         with file.open("r", encoding="utf-8") as f:
             for i in f:
                 line = i.strip()
@@ -87,7 +90,12 @@ class EnvParser(ConfkitParser):
                 match line.split("=", 1):
                     case [key, value]:
                         if key not in os.environ:
-                            self.data[key.strip()] = value.strip()
+                            # Strip quotes from values
+                            value = value.strip()
+                            if (value.startswith('"') and value.endswith('"')) or \
+                               (value.startswith("'") and value.endswith("'")):
+                                value = value[1:-1]
+                            self.data[key.strip()] = value
 
     @override
     def remove_option(self, section: str, option: str) -> None:
@@ -102,8 +110,7 @@ class EnvParser(ConfkitParser):
             return self.data[option]
         if fallback is not UNSET:
             return str(fallback)
-        msg = f"Option '{option}' not found in environment variables."
-        raise KeyError(msg)
+        return ""
 
     @override
     def has_option(self, section: str, option: str) -> bool:
@@ -124,8 +131,7 @@ class EnvParser(ConfkitParser):
     @override
     def set_section(self, section: str) -> None:
         """EnvParser has no sections, this is a no-op."""
-        msg = "EnvParser does not support set_section"
-        raise NotImplementedError(msg)
+        pass
 
     @override
     def set_option(self, option: str) -> None:
@@ -136,8 +142,7 @@ class EnvParser(ConfkitParser):
     @override
     def add_section(self, section: str) -> None:
         """EnvParser has no sections, this is a no-op."""
-        msg = "EnvParser does not support add_section"
-        raise NotImplementedError(msg)
+        pass
 
     @override
     def set(self, section: str, option: str, value: str) -> None:
