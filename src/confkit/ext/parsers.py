@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
@@ -57,6 +58,98 @@ class ConfkitParser(Protocol):
         """Get the value of an option within a section, with an optional fallback."""
     def set(self, section: str, option: str, value: str) -> None:
         """Set the value of an option within a section."""
+
+class EnvParser(ConfkitParser):
+    """A parser for environment variables and .env files.
+
+    This parser operates without sections - all configuration is stored as flat key-value pairs.
+    Values are read from environment variables and optionally persisted to a .env file.
+    """
+
+    def __init__(self) -> None:  # noqa: D107
+        self.data: dict[str, str] = {}
+
+    @override
+    def read(self, file: Path) -> None:
+        """Precedence, from lowest to highest.
+
+        - config file
+        - environment vars
+        """
+        self.data = dict(os.environ)
+
+        if not file.exists():
+            return
+
+        with file.open("r", encoding="utf-8") as f:
+            for i in f:
+                line = i.strip()
+                if not line or line.startswith("#"):
+                    continue
+
+                match line.split("=", 1):
+                    case [key, value]:
+                        if key not in os.environ:
+                            # Strip quotes from values
+                            value = value.strip()
+                            if (value.startswith('"') and value.endswith('"')) or \
+                               (value.startswith("'") and value.endswith("'")):
+                                value = value[1:-1]
+                            self.data[key.strip()] = value
+
+    @override
+    def remove_option(self, section: str, option: str) -> None:
+        """Remove an option (section is ignored)."""
+        if option in self.data:
+            del self.data[option]
+
+    @override
+    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
+        """Get the value of an option (section is ignored)."""
+        if option in self.data:
+            return self.data[option]
+        if fallback is not UNSET:
+            return str(fallback)
+        return ""
+
+    @override
+    def has_option(self, section: str, option: str) -> bool:
+        """Check if an option exists (section is ignored)."""
+        return option in self.data
+
+    @override
+    def has_section(self, section: str) -> bool:
+        """EnvParser has no sections, always returns True for compatibility."""
+        return True
+
+    @override
+    def write(self, io: TextIOWrapper[_WrappedBuffer]) -> None:
+        """Write configuration to a .env file."""
+        msg = "EnvParser does not support writing to .env"
+        raise NotImplementedError(msg)
+
+    @override
+    def set_section(self, section: str) -> None:
+        """EnvParser has no sections, this is a no-op."""
+        pass  # noqa: PIE790
+
+    @override
+    def set_option(self, option: str) -> None:
+        """Set an option (not used in EnvParser)."""
+        msg = "EnvParser does not support set_option"
+        raise NotImplementedError(msg)
+
+    @override
+    def add_section(self, section: str) -> None:
+        """EnvParser has no sections, this is a no-op."""
+        pass  # noqa: PIE790
+
+    @override
+    def set(self, section: str, option: str, value: str) -> None:
+        """Set the value of an option (section is ignored)."""
+        msg = "EnvParser does not support set"
+        raise NotImplementedError(msg)
+
 
 
 class MsgspecParser(ConfkitParser, Generic[T]):

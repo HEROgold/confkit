@@ -101,7 +101,7 @@ class _EnumBase(BaseDataType[T]):
         Since hex values use 0x prefix (not #), we can safely strip everything after #.
         """
         if "#" in value:
-            return value.split("#")[0].strip()
+            return value.split("#", maxsplit=1)[0].strip()
         return value
 
     @abstractmethod
