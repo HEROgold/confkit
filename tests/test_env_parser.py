@@ -108,9 +108,8 @@ def test_env_parser_write(env_parser, temp_env_file) -> None:
         "KEY3": "value with spaces",
     }
 
-    with temp_env_file.open("w") as f:
-        with pytest.raises(NotImplementedError):
-            env_parser.write(f)
+    with temp_env_file.open("w") as f, pytest.raises(NotImplementedError):
+        env_parser.write(f)
 
 
 def test_env_parser_has_section(env_parser) -> None:

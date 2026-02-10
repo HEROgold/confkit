@@ -131,7 +131,7 @@ class EnvParser(ConfkitParser):
     @override
     def set_section(self, section: str) -> None:
         """EnvParser has no sections, this is a no-op."""
-        pass
+        pass  # noqa: PIE790
 
     @override
     def set_option(self, option: str) -> None:
@@ -142,7 +142,7 @@ class EnvParser(ConfkitParser):
     @override
     def add_section(self, section: str) -> None:
         """EnvParser has no sections, this is a no-op."""
-        pass
+        pass  # noqa: PIE790
 
     @override
     def set(self, section: str, option: str, value: str) -> None:
