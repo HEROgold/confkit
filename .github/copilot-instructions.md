@@ -2,22 +2,29 @@
 
 ## Project Overview
 
-confkit is a Python library for type-safe configuration management using descriptors and ConfigParser. It provides automatic type conversion, validation, and persistence of configuration values in INI files.
+confkit is a Python library for type-safe configuration management using descriptors. It provides automatic type conversion, validation, and persistence of configuration values. Supports multiple file formats including INI, JSON, YAML, TOML, and .env files.
 
 ## Core Architecture
 
 ### Key Components
 
-- `Config` descriptor (`config.py`): The main descriptor class that handles getting/setting values in INI files
+- `Config` descriptor (`config.py`): The main descriptor class that handles getting/setting values in config files
+- `ConfigContainerMeta` (`config.py`): Metaclass that enables setting Config descriptors on class variables
 - `BaseDataType` and implementations (`data_types.py`): Type converters for different data types
+- `ConfkitParser` protocol (`ext/parsers.py`): Protocol defining the parser interface
+- `MsgspecParser` (`ext/parsers.py`): Parser for JSON, YAML, and TOML files
+- `EnvParser` (`ext/parsers.py`): Parser for environment variables and .env files
 - `sentinels.py`: Provides the `UNSET` sentinel value for representing unset values
 - `exceptions.py`: Custom exceptions for configuration errors
+- `watcher.py`: File watching functionality to detect config file changes
 
 ### Data Flow
 
 1. `Config` descriptors are defined as class variables in user-defined config classes
-1. On access, the descriptor reads from the INI file and converts to the appropriate type
-1. On assignment, the descriptor validates and writes values back to the INI file
+1. On first access, the parser automatically reads from the config file (cached with `_has_read_config` flag)
+1. The descriptor reads the value and converts it to the appropriate type using the assigned `BaseDataType`
+1. On assignment, the descriptor validates the value and writes it back to the config file (if `write_on_edit=True`)
+1. File changes are detected via `FileWatcher` and trigger `on_file_change` callbacks
 
 ## Development Workflow
 
@@ -51,25 +58,21 @@ Config descriptors can be defined in three ways:
 1. Custom data types: `name = Config(CustomType(default_value))`
 1. Optional values: `name = Config(default_value, optional=True)` or `name = Config(Optional(CustomType(default_value)))`
 
-```python
-# Example from examples/basic.py
-
-
-class AppConfig:
-    debug = Config(False)
-    port = Config(8080)
-    host = Config("localhost")
-    timeout = Config(30.5)
-    api_key = Config("", optional=True)
-
-
-def main():
-    # Read values from config
-    print(f"Debug mode: {Config.debug}")
-    print(f"Server port: {Config.port}")
-    print(f"Host: {Config.host}")
-    print(f"Timeout: {Config.timeout}s")
-```
+For complete examples, see the `examples/` directory which includes:
+- `basic.py` - Basic configuration setup with INI files
+- `other_file_types.py` - Using JSON, YAML, and TOML files
+- `decorators.py` - Using decorator patterns for config management
+- `data_types.py` - Custom data type examples
+- `list_types.py` - Working with list configurations
+- `optional_values.py` - Handling optional configuration values
+- `enums.py` - Using enums for configuration
+- `custom_data_type.py` - Creating custom data types
+- `multiple_configs.py` - Managing multiple configuration classes
+- `file_change_event.py` - Handling file change events
+- `pydantic_example.py` - Integration with Pydantic models
+- `references.py` - Using configuration references
+- `argparse_example.py` - Integration with argparse
+- `url_example.py` - URL configuration examples
 
 #### Type Converters
 
@@ -169,19 +172,33 @@ The `with_setting` approach is more type-safe as it references an actual descrip
 
 ### Required Initialization
 
-Always initialize Config with parser and file before use:
+Always initialize Config with a file path before use. The parser can be set explicitly or will be auto-detected based on file extension:
 
 ```python
-# file: config.py
-
-from configparser import ConfigParser
 from pathlib import Path
 from confkit import Config
 
+# Option 1: Auto-detect parser based on file extension
+Config.set_file(Path("config.ini"))  # Uses ConfigParser
+Config.set_file(Path("config.json"))  # Uses MsgspecParser
+Config.set_file(Path("config.yaml"))  # Uses MsgspecParser
+Config.set_file(Path("config.toml"))  # Uses MsgspecParser
+Config.set_file(Path(".env"))  # Uses EnvParser
+
+# Option 2: Explicitly set parser (not recommended unless it's absolutely required.)
+from configparser import ConfigParser
 parser = ConfigParser()
 Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 ```
+
+### Supported File Formats
+
+- **INI files** (`.ini`): Uses Python's `ConfigParser`, supports sections
+- **JSON files** (`.json`): Uses `MsgspecParser`, requires `msgspec` extra
+- **YAML files** (`.yaml`, `.yml`): Uses `MsgspecParser`, requires `msgspec` extra
+- **TOML files** (`.toml`): Uses `MsgspecParser`, requires `msgspec` extra
+- **Environment files** (`.env`): Uses `EnvParser`, no sections (flat key-value pairs)
 
 ### List Type Handling
 
@@ -196,8 +213,9 @@ List.separator = ","  # Default
 ### Project Conventions
 
 1. Type-safety is enforced by default (`Config.validate_types = True`)
-1. Automatic writing to INI file is enabled by default (`Config.write_on_edit = True`)
-1. Python 3.12+ is required for the type syntax used
+1. Automatic writing to config file is enabled by default (`Config.write_on_edit = True`)
+1. Python 3.11+ is required (3.12+ recommended for native type syntax)
+1. File changes are monitored via `FileWatcher` for automatic reloading
 
 ## Common Tasks
 
