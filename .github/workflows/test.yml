@@ -34,27 +34,21 @@ jobs:
             ${{ runner.os }}-pytest-${{ matrix.python-version }}-
 
       - name: Install uv
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "latest"
+          enable-cache: true
 
       - name: Set up Python ${{ matrix.python-version }}
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
         run: uv sync --group dev
 
       - name: Run tests
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
         run: uv run pytest .
 
       - name: Run ruff check
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
         run: uv run ruff check .
 
       - name: Run type checking
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
         run: uvx ty check . --ignore no-matching-overload
