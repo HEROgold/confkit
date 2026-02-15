@@ -25,12 +25,12 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "coverage>=7.13.3",
+    "coverage>=7.13.4",
     "pytest-cov>=7.0.0",
-    "hypothesis>=6.151.5",
+    "hypothesis>=6.151.6",
     "pydantic>=2.12.5",
     "pytest>=9.0.2",
-    "ruff>=0.15.0",
+    "ruff>=0.15.1",
     "coveralls>=4.0.2",
     "msgspec>=0.20.0",
     "pyyaml>=6.0.3",
@@ -40,7 +40,7 @@ dev = [
 docs = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.1",
-    "mkdocstrings[python]>=1.0.2",
+    "mkdocstrings[python]>=1.0.3",
     "mkdocs-pdoc-plugin @ git+https://github.com/spirali/mkdocs-pdoc-plugin",
     "pdoc>=16.0.0",
 ]
