@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  check-cache:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,6 +32,18 @@ jobs:
           key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
           restore-keys: |
             ${{ runner.os }}-pytest-${{ matrix.python-version }}-
+
+  test:
+    runs-on: ubuntu-latest
+    needs: check-cache
+    if: needs.check-cache.outputs.cache-hit != 'true'
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
