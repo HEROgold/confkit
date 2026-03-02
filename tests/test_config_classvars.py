@@ -72,7 +72,7 @@ def test_config_converter_is_unset() -> None:
     # Set up isolated environment
     test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -104,7 +104,7 @@ def test_config_validation_fails() -> None:
     # Set up isolated environment
     test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -130,7 +130,7 @@ def test_config_optional_type_validation_success() -> None:
     # Set up isolated environment
     test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -160,7 +160,7 @@ def test_config_type_mismatch_error() -> None:
     # Set up isolated environment
     test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -235,7 +235,7 @@ def test_ensure_option_existing_option() -> None:
     test_config.unlink(missing_ok=True)
     test_config.touch()
 
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
     Config.set_file(test_config)
 
     class TestExistingOption:
@@ -261,7 +261,7 @@ def test_set_write_on_edit_disabled() -> None:
 
     Config.write_on_edit = False
     Config.set_file(test_config)
-    Config._set_parser(test_parser)
+    Config.set_parser(test_parser)
 
     initial_content = test_config.read_text()
     Config._set("TestSection", "test_setting", "new_value")

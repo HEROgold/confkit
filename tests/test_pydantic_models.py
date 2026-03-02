@@ -33,7 +33,7 @@ def config_environment(tmp_path: Path) -> Generator[IniParser]:
     previous_read_state = Config._has_read_config
     previous_write_state = Config.write_on_edit
 
-    Config._set_parser(parser)
+    Config.set_parser(parser)
     Config.set_file(config_path)
     Config._has_read_config = False
     Config.write_on_edit = True

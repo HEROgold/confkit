@@ -99,7 +99,7 @@ class IniConfig(Config[T]):
     ...
 
 
-IniConfig._set_parser(IniParser())
+IniConfig.set_parser(IniParser())
 IniConfig.set_file(Path("nested_example.ini"))
 
 

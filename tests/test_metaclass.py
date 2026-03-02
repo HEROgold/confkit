@@ -9,7 +9,7 @@ class Config(OG):
     """A Config class for testing purposes."""
 
 Config.set_file(Path("meta_test.ini"))
-Config._set_parser(IniParser())
+Config.set_parser(IniParser())
 
 def mock_meta_class() -> None:
     class Mock(ConfigContainerMeta):

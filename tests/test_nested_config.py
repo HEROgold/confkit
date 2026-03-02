@@ -44,7 +44,7 @@ def test_nested_ini_config(ini_config_file: Path) -> None:
 
     class IniConfig(Config[T]): ...
 
-    IniConfig._set_parser(IniParser())
+    IniConfig.set_parser(IniParser())
     IniConfig.set_file(ini_config_file)
 
     class Database:
@@ -253,3 +253,73 @@ def test_mixed_nested_and_flat_sections(json_config_file: Path) -> None:
     assert data["FlatSection"]["setting1"] == "value1"
     assert data["NestedSection"]["setting2"] == "value2"
     assert data["NestedSection"]["Inner"]["setting3"] == "value3"
+
+
+def test_msgspec_parser_path_conflict_scalar_before_dict() -> None:
+    """Test that ConfigPathConflictError is raised when a scalar blocks a section path."""
+    from confkit.exceptions import ConfigPathConflictError
+
+    parser = MsgspecParser()
+    parser.data = {}
+
+    # Set a scalar value at "Parent.target"
+    parser.set("Parent", "target", "value")
+    assert parser.data == {"Parent": {"target": "value"}}
+
+    # Try to set a value at "Parent.target.Child" - "target" is a scalar, not a section
+    # This should raise ConfigPathConflictError
+    with pytest.raises(ConfigPathConflictError) as exc_info:
+        parser.set("Parent.target.Child", "key", "value")
+
+    assert "Path conflict" in str(exc_info.value)
+    assert "Parent.target" in str(exc_info.value)
+    assert "scalar value" in str(exc_info.value)
+
+
+def test_msgspec_parser_path_conflict_deep_nesting() -> None:
+    """Test path conflict detection in deeply nested structures."""
+    from confkit.exceptions import ConfigPathConflictError
+
+    parser = MsgspecParser()
+    parser.data = {}
+
+    # Create a deeply nested structure with a scalar at the end
+    parser.set("Level1.Level2", "Level3", "scalar_value")
+    # Result: {"Level1": {"Level2": {"Level3": "scalar_value"}}}
+
+    # Try to treat the scalar "Level3" as a section
+    with pytest.raises(ConfigPathConflictError) as exc_info:
+        parser.set("Level1.Level2.Level3.Level4", "key", "value")
+
+    assert "Path conflict" in str(exc_info.value)
+    assert "scalar value" in str(exc_info.value)
+
+
+def test_msgspec_parser_set_section_conflicts() -> None:
+    """Test that set_section also detects path conflicts."""
+    from confkit.exceptions import ConfigPathConflictError
+
+    parser = MsgspecParser()
+    parser.data = {}
+
+    # Set a scalar value
+    parser.set("Parent", "value", "scalar")
+
+    # Try to create a section where the scalar is
+    with pytest.raises(ConfigPathConflictError):
+        parser.set_section("Parent.value.Child")
+
+
+def test_msgspec_parser_normal_nested_still_works() -> None:
+    """Ensure normal nested operations still work after the fix."""
+    parser = MsgspecParser()
+    parser.data = {}
+
+    # This should work fine - no conflicts
+    parser.set("A.B.C", "key", "value")
+    parser.set("A.B", "key2", "value2")
+    parser.set("A", "key3", "value3")
+
+    assert parser.get("A.B.C", "key") == "value"
+    assert parser.get("A.B", "key2") == "value2"
+    assert parser.get("A", "key3") == "value3"

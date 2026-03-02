@@ -16,7 +16,7 @@ def test_two_instances_share_values_and_on_file_change_called() -> None:
 
         parser = IniParser()
         # Use the global Config parser/file for tests (same pattern as other tests)
-        Config._set_parser(parser)
+        Config.set_parser(parser)
         Config.set_file(config_file)
         Config.write_on_edit = True
 

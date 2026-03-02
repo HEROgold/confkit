@@ -12,6 +12,8 @@ from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
 
+from typing_extensions import deprecated
+
 from confkit.ext.parsers import IniParser
 from confkit.watcher import FileWatcher
 
@@ -153,7 +155,8 @@ class Config(Generic[VT]):
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
-    def _set_parser(cls, parser: ConfkitParser) -> None:
+    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")
+    def set_parser(cls, parser: ConfkitParser) -> None:
         """Set the parser for ALL descriptor instances (of this type/class)."""
         if cls is Config:
             cls._warn_base_class_usage()

@@ -37,7 +37,7 @@ config = Path("test.ini")
 config.unlink(missing_ok=True)  # Remove the file if it exists
 config.touch()  # Create a new empty file for testing
 parser = IniParser()
-Config._set_parser(parser)
+Config.set_parser(parser)
 Config.set_file(config)
 Config.write_on_edit = True  # Enable writing to file during tests
 
