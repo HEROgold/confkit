@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from confkit.config import Config
 from confkit.data_types import List
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 from confkit.ext.pydantic import apply_model
 
 if TYPE_CHECKING:

@@ -11,7 +11,8 @@ import pytest
 
 from confkit.config import Config
 from confkit.exceptions import ConfigPathConflictError
-from confkit.ext.parsers import IniParser, MsgspecParser
+from confkit.ext.parsers import MsgspecParser
+from confkit.parsers import IniParser
 
 if TYPE_CHECKING:
     from pathlib import Path

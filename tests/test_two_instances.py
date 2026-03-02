@@ -2,7 +2,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from confkit.config import Config
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 
 
 def test_two_instances_share_values_and_on_file_change_called() -> None:

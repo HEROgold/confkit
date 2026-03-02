@@ -4,7 +4,8 @@ from pathlib import Path
 import pytest
 
 from confkit.config import Config as OG
-from confkit.ext.parsers import IniParser, MsgspecParser
+from confkit.ext.parsers import MsgspecParser
+from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
 
 

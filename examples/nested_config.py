@@ -7,8 +7,6 @@ configuration values hierarchically. This works with:
 - TOML files (nested tables)
 - INI files (using dot notation in section names)
 """
-from confkit.ext.parsers import IniParser
-
 from pathlib import Path
 from typing import TypeVar
 
@@ -99,7 +97,6 @@ class IniConfig(Config[T]):
     ...
 
 
-IniConfig.set_parser(IniParser())
 IniConfig.set_file(Path("nested_example.ini"))
 
 
