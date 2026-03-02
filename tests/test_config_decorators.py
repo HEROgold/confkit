@@ -12,7 +12,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from confkit.config import Config as OG
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
 
 F = TypeVar("F")

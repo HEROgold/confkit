@@ -11,10 +11,10 @@ confkit is a Python library for type-safe configuration management using descrip
 - `Config` descriptor (`config.py`): The main descriptor class that handles getting/setting values in config files
 - `ConfigContainerMeta` (`config.py`): Metaclass that enables setting Config descriptors on class variables
 - `BaseDataType` and implementations (`data_types.py`): Type converters for different data types
-- `Parser` facade (`ext/parsers.py`): Unified facade for all configuration file formats (INI, JSON, YAML, TOML, .env)
-- `IniParser` (`ext/parsers.py`): Adapter for Python's built-in ConfigParser (INI files)
+- `ConfkitParser` protocol (`parsers.py`): Defines the unified parser interface for all configuration file formats (INI, JSON, YAML, TOML, .env)
+- `IniParser` (`parsers.py`): Adapter for Python's built-in ConfigParser (INI files)
 - `MsgspecParser` (`ext/parsers.py`): Adapter for JSON, YAML, and TOML files using msgspec
-- `EnvParser` (`ext/parsers.py`): Adapter for environment variables and .env files
+- `EnvParser` (`parsers.py`): Adapter for environment variables and .env files
 - `sentinels.py`: Provides the `UNSET` sentinel value for representing unset values
 - `exceptions.py`: Custom exceptions for configuration errors
 - `watcher.py`: File watching functionality to detect config file changes

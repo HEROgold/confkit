@@ -27,7 +27,7 @@ from confkit.data_types import (
     String,
 )
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 
 
 class Config(OG):

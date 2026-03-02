@@ -5,7 +5,7 @@ import hypothesis
 from hypothesis import strategies as st
 
 from confkit.config import Config
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 
 
 class Config1(Config): ...

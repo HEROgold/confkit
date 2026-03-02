@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, Ty
 
 from typing_extensions import deprecated
 
-from confkit.ext.parsers import EnvParser, IniParser
+from confkit.parsers import EnvParser, IniParser
 from confkit.watcher import FileWatcher
 
 from .data_types import BaseDataType, Optional
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from confkit.ext.parsers import ConfkitParser
+    from confkit.parsers import ConfkitParser
 
 # Type variables for Python 3.10+ (pre-PEP 695) compatibility
 VT = TypeVar("VT")
@@ -311,8 +311,7 @@ class Config(Generic[VT]):
         if not cls._parser.has_section(section):
             cls._parser.add_section(section)
 
-        sanitized_str = cls._sanitize_str(str(value))
-        cls._parser.set(section, setting, sanitized_str)
+        cls._parser.set(section, setting, value)
 
         if cls.write_on_edit:
             cls.write()

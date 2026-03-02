@@ -2,7 +2,7 @@ from pathlib import Path
 
 from confkit.config import Config as OG
 from confkit.config import ConfigContainerMeta
-from confkit.ext.parsers import IniParser
+from confkit.parsers import IniParser
 
 
 class Config(OG):
