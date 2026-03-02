@@ -300,11 +300,6 @@ class Config(Generic[VT]):
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
 
-    @staticmethod
-    def _sanitize_str(value: str) -> str:
-        """Escape the percent sign in the value."""
-        return value.replace("%", "%%")
-
     @classmethod
     def _set(cls, section: str, setting: str, value: VT | BaseDataType[VT] | BaseDataType[VT | None]) -> None:
         """Set a config value, and write it to the file."""
