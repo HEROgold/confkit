@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, Ty
 
 from typing_extensions import deprecated
 
-from confkit.ext.parsers import IniParser
+from confkit.ext.parsers import EnvParser, IniParser
 from confkit.watcher import FileWatcher
 
 from .data_types import BaseDataType, Optional
@@ -179,6 +179,8 @@ class Config(Generic[VT]):
             case ".yaml" | ".yml" | ".json" | ".toml":
                 from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
                 cls._parser = MsgspecParser()
+            case ".env":
+                cls._parser = EnvParser()
             case _:
                 msg = f"Unsupported config file extension: {cls._file.suffix.lower()}"
                 raise ValueError(msg)
