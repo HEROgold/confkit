@@ -132,9 +132,10 @@ class Config(Generic[VT]):
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
-        if not self.__class__._has_read_config:
+        cls = self.__class__
+        if not cls._has_read_config:
             self._parser.read(self._file)
-            self.__class__._has_read_config = True
+            cls._has_read_config = True
 
     def _validate_init(self) -> None:
         """Validate the config descriptor, ensuring it's properly set up."""
