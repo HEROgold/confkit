@@ -1,10 +1,23 @@
-"""Parsers for Confkit configuration files."""
+"""Optional msgspec-based parsers for Confkit configuration files.
 
+This module requires the ``msgspec`` optional extra:
+
+    pip install confkit[msgspec]
+    uv add confkit[msgspec]
+
+Importing this module without ``msgspec`` installed will raise an
+``ImportError`` immediately.  Built-in parsers (``IniParser``,
+``EnvParser``, ``ConfkitParser``) that have no optional dependencies
+live in ``confkit.parsers``.
+"""
 from __future__ import annotations
 
-import os
 import sys
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+
+from confkit.data_types import BaseDataType
+from confkit.exceptions import ConfigPathConflictError
+from confkit.parsers import ConfkitParser
 
 try:
     import msgspec
@@ -20,10 +33,16 @@ except ImportError as exc:
     )
     raise ImportError(msg) from exc
 
+
 if sys.version_info >= (3, 12):
-    from typing import Protocol, override
+    from typing import override
+    # TD: Use nested types when Python 3.11 is EOL and we can drop support for it
+    # otherwise this gets syntax errors.
+    # type NestedDict = dict[str, NestedDict | str | int | float | bool | None]  # noqa: ERA001
+    NestedDict = dict[str, Any]
 else:
-    from typing_extensions import Protocol, override
+    from typing_extensions import override
+    NestedDict = dict[str, Any]
 
 from confkit.sentinels import UNSET
 
@@ -34,122 +53,6 @@ if TYPE_CHECKING:
 
 
 T = TypeVar("T")
-
-class ConfkitParser(Protocol):
-    """A protocol for Confkit parsers."""
-
-    def read(self, file: Path) -> None:
-        """Read the configuration from a file."""
-    def write(self, io: TextIOWrapper[_WrappedBuffer]) -> None:
-        """Write the configuration to a file-like object."""
-    def has_section(self, section: str) -> bool:
-        """Check if a section exists."""
-    def set_section(self, section: str) -> None:
-        """Set a section."""
-    def set_option(self, option: str) -> None:
-        """Set an option."""
-    def add_section(self, section: str) -> None:
-        """Add a section."""
-    def has_option(self, section: str, option: str) -> bool:
-        """Check if an option exists within a section."""
-    def remove_option(self, section: str, option: str) -> None:
-        """Remove an option from a section."""
-    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
-        """Get the value of an option within a section, with an optional fallback."""
-    def set(self, section: str, option: str, value: str) -> None:
-        """Set the value of an option within a section."""
-
-class EnvParser(ConfkitParser):
-    """A parser for environment variables and .env files.
-
-    This parser operates without sections - all configuration is stored as flat key-value pairs.
-    Values are read from environment variables and optionally persisted to a .env file.
-    """
-
-    def __init__(self) -> None:  # noqa: D107
-        self.data: dict[str, str] = {}
-
-    @override
-    def read(self, file: Path) -> None:
-        """Precedence, from lowest to highest.
-
-        - config file
-        - environment vars
-        """
-        self.data = dict(os.environ)
-
-        if not file.exists():
-            return
-
-        with file.open("r", encoding="utf-8") as f:
-            for i in f:
-                line = i.strip()
-                if not line or line.startswith("#"):
-                    continue
-
-                match line.split("=", 1):
-                    case [key, value]:
-                        if key not in os.environ:
-                            # Strip quotes from values
-                            value = value.strip()
-                            if (value.startswith('"') and value.endswith('"')) or \
-                               (value.startswith("'") and value.endswith("'")):
-                                value = value[1:-1]
-                            self.data[key.strip()] = value
-
-    @override
-    def remove_option(self, section: str, option: str) -> None:
-        """Remove an option (section is ignored)."""
-        if option in self.data:
-            del self.data[option]
-
-    @override
-    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
-        """Get the value of an option (section is ignored)."""
-        if option in self.data:
-            return self.data[option]
-        if fallback is not UNSET:
-            return str(fallback)
-        return ""
-
-    @override
-    def has_option(self, section: str, option: str) -> bool:
-        """Check if an option exists (section is ignored)."""
-        return option in self.data
-
-    @override
-    def has_section(self, section: str) -> bool:
-        """EnvParser has no sections, always returns True for compatibility."""
-        return True
-
-    @override
-    def write(self, io: TextIOWrapper[_WrappedBuffer]) -> None:
-        """Write configuration to a .env file."""
-        msg = "EnvParser does not support writing to .env"
-        raise NotImplementedError(msg)
-
-    @override
-    def set_section(self, section: str) -> None:
-        """EnvParser has no sections, this is a no-op."""
-        pass  # noqa: PIE790
-
-    @override
-    def set_option(self, option: str) -> None:
-        """Set an option (not used in EnvParser)."""
-        msg = "EnvParser does not support set_option"
-        raise NotImplementedError(msg)
-
-    @override
-    def add_section(self, section: str) -> None:
-        """EnvParser has no sections, this is a no-op."""
-        pass  # noqa: PIE790
-
-    @override
-    def set(self, section: str, option: str, value: str) -> None:
-        """Set the value of an option (section is ignored)."""
-        msg = "EnvParser does not support set"
-        raise NotImplementedError(msg)
-
 
 
 class MsgspecParser(ConfkitParser, Generic[T]):
@@ -177,6 +80,9 @@ class MsgspecParser(ConfkitParser, Generic[T]):
             if parser := self._parsers.get(ext):
                 try:
                     self.data = parser.decode(f.read())
+                    # Handle None or empty values from YAML/TOML files
+                    if self.data is None or not isinstance(self.data, dict):
+                        self.data = {}
                 except msgspec.DecodeError:
                     self.data = {}
                 return
@@ -196,18 +102,79 @@ class MsgspecParser(ConfkitParser, Generic[T]):
         msg = f"Unsupported file extension for writing: {ext}"
         raise ValueError(msg)
 
+    def _navigate_to_section(self, section: str, *, create: bool = False) -> NestedDict | None:
+        """Navigate to a nested section using dot notation.
+
+        Args:
+            section: Dot-separated section path (e.g., "Parent.Child.GrandChild")
+            create: If True, create missing intermediate sections and raise an error
+                    if any path element is a scalar instead of a dict.
+
+        Returns:
+            The nested dict at the section path, or None if not found and create=False
+
+        Raises:
+            ConfigPathConflictError: When create=True and any path element (including
+                                     the final one) is a scalar value instead of a dict.
+                                     This prevents silent data loss from overwriting scalars.
+
+        """
+        if not section:
+            return self.data
+
+        parts = section.split(".")
+        current = self.data
+
+        for i, part in enumerate(parts):
+            if not isinstance(current, dict):
+                if create:
+                    path_so_far = ".".join(parts[:i])
+                    msg = (
+                        f"Cannot navigate to section '{section}': "
+                        f"'{path_so_far}' is a scalar value, not a section. "
+                        f"Path conflict at '{part}'."
+                    )
+                    raise ConfigPathConflictError(msg)
+                return None
+            if part not in current:
+                if create:
+                    current[part] = {}
+                else:
+                    return None
+            current = current[part]
+            # Check if we hit a scalar anywhere in the path (including final element when create=True)
+            if not isinstance(current, dict):
+                if create:
+                    path_so_far = ".".join(parts[: i + 1])
+                    is_final = i == len(parts) - 1
+                    if is_final:
+                        msg = (
+                            f"Cannot navigate to section '{section}': "
+                            f"'{path_so_far}' is a scalar value, not a section."
+                        )
+                    else:
+                        msg = (
+                            f"Cannot navigate to section '{section}': "
+                            f"'{path_so_far}' is a scalar value, not a section. "
+                            f"Path conflict at '{parts[i + 1]}'."
+                        )
+                    raise ConfigPathConflictError(msg)
+                return None
+
+        return current  # guaranteed to be a dict here
+
     @override
     def has_section(self, section: str) -> bool:
-        return section in self.data
+        return self._navigate_to_section(section, create=False) is not None
 
     @override
     def set_section(self, section: str) -> None:
-        if section not in self.data:
-            self.data[section] = {}
+        self._navigate_to_section(section, create=True)
 
     @override
     def has_option(self, section: str, option: str) -> bool:
-        return section in self.data and option in self.data[section]
+        section_data = self._navigate_to_section(section, create=False)
+        return section_data is not None and option in section_data
 
     @override
     def add_section(self, section: str) -> None:
@@ -215,17 +182,33 @@ class MsgspecParser(ConfkitParser, Generic[T]):
 
     @override
     def get(self, section: str, option: str, fallback: str = UNSET) -> str:
-        try:
-            return self.data[section][option]
-        except KeyError:
-            return str(fallback)
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is None or option not in section_data:
+            return str(fallback) if fallback is not UNSET else UNSET
+        return str(section_data[option])
 
     @override
-    def set(self, section: str, option: str, value: str) -> None:
-        self.set_section(section)
-        self.data[section][option] = value
+    def set(self, section: str, option: str, value: object) -> None:
+        # Raises ConfigPathConflictError if any path element is a scalar.
+        section_data = self._navigate_to_section(section, create=True)
+        # _navigate_to_section always raises ConfigPathConflictError when create=True
+        # and the path is blocked, so section_data is guaranteed to be a dict here.
+        assert section_data is not None  # noqa: S101
+        if isinstance(value, BaseDataType):
+            native = value.value
+            # BaseDataType.__str__ returns str(self.value) by default.
+            # Subclasses with custom string representations (e.g. Hex returns "0xa",
+            # Octal returns "0o10") override __str__, causing str(native) != str(value).
+            # In those cases, store the custom string so convert() can round-trip
+            # correctly on the next read. For standard types the native Python value
+            # is stored directly, preserving native JSON/YAML/TOML types.
+            stored = native if str(native) == str(value) else str(value)
+        else:
+            stored = value
+        section_data[option] = stored
 
     @override
     def remove_option(self, section: str, option: str) -> None:
-        if self.has_option(section, option):
-            del self.data[section][option]
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is not None and option in section_data:
+            del section_data[option]

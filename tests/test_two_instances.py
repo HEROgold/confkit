@@ -1,8 +1,8 @@
-from configparser import ConfigParser
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from confkit.config import Config
+from confkit.parsers import IniParser
 
 
 def test_two_instances_share_values_and_on_file_change_called() -> None:
@@ -14,7 +14,7 @@ def test_two_instances_share_values_and_on_file_change_called() -> None:
     with TemporaryDirectory() as tmpdir:
         config_file = Path(tmpdir) / "test.ini"
 
-        parser = ConfigParser()
+        parser = IniParser()
         # Use the global Config parser/file for tests (same pattern as other tests)
         Config.set_parser(parser)
         Config.set_file(config_file)

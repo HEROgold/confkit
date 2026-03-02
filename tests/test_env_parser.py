@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from confkit.ext.parsers import EnvParser
+from confkit.parsers import EnvParser
 
 if TYPE_CHECKING:
     from pathlib import Path

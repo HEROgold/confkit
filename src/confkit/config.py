@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from configparser import ConfigParser
 from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
 
+from typing_extensions import deprecated
+
+from confkit.parsers import EnvParser, IniParser
 from confkit.watcher import FileWatcher
 
 from .data_types import BaseDataType, Optional
@@ -23,7 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from confkit.ext.parsers import ConfkitParser
+    from confkit.parsers import ConfkitParser
 
 # Type variables for Python 3.10+ (pre-PEP 695) compatibility
 VT = TypeVar("VT")
@@ -130,9 +132,10 @@ class Config(Generic[VT]):
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
-        if not self._has_read_config:
+        cls = self.__class__
+        if not cls._has_read_config:
             self._parser.read(self._file)
-            self._has_read_config = True
+            cls._has_read_config = True
 
     def _validate_init(self) -> None:
         """Validate the config descriptor, ensuring it's properly set up."""
@@ -153,8 +156,9 @@ class Config(Generic[VT]):
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
+    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")  # noqa: E501
     def set_parser(cls, parser: ConfkitParser) -> None:
-        """Set the parser for ALL descriptors."""
+        """Set the parser for ALL descriptor instances (of this type/class)."""
         if cls is Config:
             cls._warn_base_class_usage()
         cls._parser = parser
@@ -171,10 +175,12 @@ class Config(Generic[VT]):
             raise ValueError(msg)
         match cls._file.suffix.lower():
             case ".ini":
-                cls._parser = ConfigParser()
+                cls._parser = IniParser()
             case ".yaml" | ".yml" | ".json" | ".toml":
                 from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
                 cls._parser = MsgspecParser()
+            case ".env":
+                cls._parser = EnvParser()
             case _:
                 msg = f"Unsupported config file extension: {cls._file.suffix.lower()}"
                 raise ValueError(msg)
@@ -234,12 +240,28 @@ class Config(Generic[VT]):
     def __set_name__(self, owner: type, name: str) -> None:
         """Set the name of the attribute to the name of the descriptor."""
         self.name = name
-        self._section = owner.__name__
+        self._section = self._build_section_name(owner)
         self._setting = name
         self._ensure_option()
         cls = self.__class__
         self._original_value = cls._parser.get(self._section, self._setting) or self._data_type.default
         self.private = f"_{self._section}_{self._setting}_{self.name}"
+
+    @staticmethod
+    def _build_section_name(owner: type) -> str:
+        """Build a section name from the class hierarchy using dot notation.
+
+        Strips out function-local scope markers like <locals>.
+        """
+        if qualname := getattr(owner, "__qualname__", None):
+            split_at = qualname.find("<locals>.")
+            if split_at != -1:
+                qualname = qualname[split_at + len("<locals>.") :]
+            return ".".join(
+                part
+                for part in qualname.split(".")
+            )
+        return owner.__name__
 
     def _ensure_section(self) -> None:
         """Ensure the section exists in the config file. Creates one if it doesn't exist."""
@@ -278,19 +300,13 @@ class Config(Generic[VT]):
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
 
-    @staticmethod
-    def _sanitize_str(value: str) -> str:
-        """Escape the percent sign in the value."""
-        return value.replace("%", "%%")
-
     @classmethod
     def _set(cls, section: str, setting: str, value: VT | BaseDataType[VT] | BaseDataType[VT | None]) -> None:
         """Set a config value, and write it to the file."""
         if not cls._parser.has_section(section):
             cls._parser.add_section(section)
 
-        sanitized_str = cls._sanitize_str(str(value))
-        cls._parser.set(section, setting, sanitized_str)
+        cls._parser.set(section, setting, value)
 
         if cls.write_on_edit:
             cls.write()

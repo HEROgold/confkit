@@ -1,0 +1,11 @@
+ServerConfig:
+  Network:
+    IPv4:
+      address: 192.168.1.100
+      netmask: 255.255.255.0
+      gateway: 192.168.1.1
+    IPv6:
+      address: fe80::1
+      prefix: 64
+    interface: eth0
+  name: web-server-01

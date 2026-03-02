@@ -9,20 +9,20 @@ from confkit.config import Config
 
 
 # config class with a custom on_file_change
-class TestConfig(Config[Any]):
+class ConfigTest(Config[Any]):
     file_change_events: ClassVar[list[tuple[str, Any, Any]]] = []
 
     def on_file_change(self, origin: str, old: Any, new: Any) -> None:  # noqa: ANN401, D102
         self.__class__.file_change_events.append((origin, old, new))
 
 config_file = Path("config_test.ini")
-TestConfig.set_file(config_file)
-TestConfig._watcher.has_changed = lambda: True # Always trigger file_changed. triggering the logging of events
-TestConfig.validate_types = False  # Disable strict type validation for testing
-TestConfig.write_on_edit = True
+ConfigTest.set_file(config_file)
+ConfigTest._watcher.has_changed = lambda: True # Always trigger file_changed. triggering the logging of events
+ConfigTest.validate_types = False  # Disable strict type validation for testing
+ConfigTest.write_on_edit = True
 
 class Test:
-    setting = TestConfig(0)
+    setting = ConfigTest(0)
 
 prev_value = 0
 
@@ -32,9 +32,9 @@ def test_on_file_change_get_and_set(value: int) -> None:
     # This only tests the set event, but we also assert get for sanity.
     # To test the get event, we would need to write the file, before getting, but after setting.
     global prev_value  # noqa: PLW0603
-    TestConfig.file_change_events.clear()
+    ConfigTest.file_change_events.clear()
     test = Test()
-    events = TestConfig.file_change_events
+    events = ConfigTest.file_change_events
 
     assert len(events) == 0
 

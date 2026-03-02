@@ -20,8 +20,6 @@ from confkit.data_types import Enum, IntEnum as ConfigIntEnum
 from confkit.data_types import IntFlag as ConfigIntFlag
 from confkit.data_types import Optional, StrEnum as ConfigStrEnum
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 
 

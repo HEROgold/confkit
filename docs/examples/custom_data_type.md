@@ -11,14 +11,11 @@ Shows how to create and use a custom [`BaseDataType`](pdoc:confkit.BaseDataType)
 ## Implementation
 
 ```python
-from configparser import ConfigParser
 from pathlib import Path
 from confkit import Config
 from confkit.data_types import BaseDataType
 
-# Configure parser + file
-parser = ConfigParser()
-Config.set_parser(parser)
+# Configure config file (parser is automatically detected from extension)
 Config.set_file(Path("config.ini"))
 
 class UpperString(BaseDataType[str]):

@@ -9,13 +9,10 @@ This page explains how to work with confkit and how the documentation is generat
 ## Descriptor Quickstart
 
 ```python
-from configparser import ConfigParser
 from pathlib import Path
 from confkit import Config
 
-# 1. Configure confkit parser/file (normally app bootstrap)
-parser = ConfigParser()
-Config.set_parser(parser)
+# 1. Configure confkit file (parser is auto-detected)
 Config.set_file(Path("config.ini"))
 
 # 2. Define your (class)variables with their default values
@@ -36,14 +33,11 @@ print(AppConfig.port)
 4. Use via `Config(CustomType(default_value))`
 
 ```python
-from configparser import ConfigParser
 from pathlib import Path
 from confkit import Config
 from confkit.data_types import BaseDataType
 
-# 1. Configure confkit parser/file (normally app bootstrap)
-parser = ConfigParser()
-Config.set_parser(parser)
+# 1. Configure confkit file (parser is auto-detected)
 Config.set_file(Path("config.ini"))
 
 # 2. Define the custom converter, with a convert method (from str -> your_type)

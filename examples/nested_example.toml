@@ -1,0 +1,11 @@
+[ServiceConfig]
+name = "my-service"
+port = 8080
+
+[ServiceConfig.API]
+version = "v1"
+timeout = 30
+
+[ServiceConfig.API.RateLimit]
+enabled = true
+requests_per_minute = 60

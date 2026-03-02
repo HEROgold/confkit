@@ -16,10 +16,8 @@ from confkit import Config
 from confkit.data_types import List
 
 # Setup a standard confkit config file (unrelated to argparse defaults file)
-parser_ini = ConfigParser()
 ini_path = Path("config.ini")
 Config.write_on_edit = False
-Config.set_parser(parser_ini)
 Config.set_file(ini_path)
 
 class AppConfig:

@@ -5,8 +5,6 @@ from configparser import ConfigParser
 from confkit import Config, BaseDataType
 from urllib.parse import ParseResult, urlparse
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 
 class URL(BaseDataType[ParseResult]):

@@ -1,11 +1,11 @@
 """Test Config.detect_parser behavior for different file extensions."""
-from configparser import ConfigParser
 from pathlib import Path
 
 import pytest
 
 from confkit.config import Config as OG
 from confkit.ext.parsers import MsgspecParser
+from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
 
 
@@ -16,7 +16,7 @@ def test_detect_parser_ini() -> None:
     Config._file = Path("test.ini")
     Config._parser = None
     Config._detect_parser()
-    assert isinstance(Config._parser, ConfigParser)
+    assert isinstance(Config._parser, IniParser)
 
 def test_detect_parser_msgspec() -> None:
     Config._file = Path("test.yaml")

@@ -16,8 +16,6 @@ from pathlib import Path
 from confkit import Config
 
 # Set up the parser and file
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 
 # Enable automatic writing when config values are changed (this is the default)

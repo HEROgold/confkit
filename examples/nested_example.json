@@ -1,0 +1,12 @@
+{
+    "DatabaseConfig": {
+        "Credentials": {
+            "username": "admin",
+            "password": "secret123",
+            "use_ssl": true
+        },
+        "host": "localhost",
+        "port": 5432,
+        "name": "myapp_db"
+    }
+}

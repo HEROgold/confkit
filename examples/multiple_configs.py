@@ -8,9 +8,7 @@ T = TypeVar("T")
 class DatabaseConfig(Config[T]): ...
 class ApiConfig(Config[T]): ...
 
-DatabaseConfig.set_parser(ConfigParser())
 DatabaseConfig.set_file(Path("database.ini"))
-ApiConfig.set_parser(ConfigParser())
 ApiConfig.set_file(Path("api.ini"))
 
 class AppConfiguration:
