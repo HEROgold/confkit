@@ -4,9 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
+import msgspec.json
+import msgspec.toml
+import msgspec.yaml
 import pytest
 
 from confkit.config import Config
+from confkit.exceptions import ConfigPathConflictError
 from confkit.ext.parsers import IniParser, MsgspecParser
 
 if TYPE_CHECKING:
@@ -97,7 +101,6 @@ def test_nested_yaml_config(yaml_config_file: Path) -> None:
 
     # Read the file and verify structure
     with yaml_config_file.open("r") as f:
-        import msgspec.yaml
         data = msgspec.yaml.decode(f.read())
 
     assert data["Database"]["host"] == "localhost"
@@ -131,7 +134,6 @@ def test_nested_json_config(json_config_file: Path) -> None:
 
     # Read and verify JSON structure
     with json_config_file.open("r") as f:
-        import msgspec.json
         data = msgspec.json.decode(f.read())
 
     assert data["Server"]["name"] == "web-server"
@@ -160,7 +162,6 @@ def test_nested_toml_config(toml_config_file: Path) -> None:
 
     # Read and verify TOML structure
     with toml_config_file.open("r") as f:
-        import msgspec.toml
         data = msgspec.toml.decode(f.read())
 
     assert data["App"]["version"] == "1.0.0"
@@ -247,7 +248,6 @@ def test_mixed_nested_and_flat_sections(json_config_file: Path) -> None:
 
     # Verify structure
     with json_config_file.open("r") as f:
-        import msgspec.json
         data = msgspec.json.decode(f.read())
 
     assert data["FlatSection"]["setting1"] == "value1"
@@ -257,8 +257,6 @@ def test_mixed_nested_and_flat_sections(json_config_file: Path) -> None:
 
 def test_msgspec_parser_path_conflict_scalar_before_dict() -> None:
     """Test that ConfigPathConflictError is raised when a scalar blocks a section path."""
-    from confkit.exceptions import ConfigPathConflictError
-
     parser = MsgspecParser()
     parser.data = {}
 
@@ -278,14 +276,12 @@ def test_msgspec_parser_path_conflict_scalar_before_dict() -> None:
 
 def test_msgspec_parser_path_conflict_deep_nesting() -> None:
     """Test path conflict detection in deeply nested structures."""
-    from confkit.exceptions import ConfigPathConflictError
-
     parser = MsgspecParser()
     parser.data = {}
 
     # Create a deeply nested structure with a scalar at the end
     parser.set("Level1.Level2", "Level3", "scalar_value")
-    # Result: {"Level1": {"Level2": {"Level3": "scalar_value"}}}
+    # Result {"Level1": {"Level2": {"Level3": "scalar_value"}}}
 
     # Try to treat the scalar "Level3" as a section
     with pytest.raises(ConfigPathConflictError) as exc_info:
@@ -297,8 +293,6 @@ def test_msgspec_parser_path_conflict_deep_nesting() -> None:
 
 def test_msgspec_parser_set_section_conflicts() -> None:
     """Test that set_section also detects path conflicts."""
-    from confkit.exceptions import ConfigPathConflictError
-
     parser = MsgspecParser()
     parser.data = {}
 
