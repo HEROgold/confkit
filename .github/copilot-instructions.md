@@ -175,24 +175,17 @@ The `with_setting` approach is more type-safe as it references an actual descrip
 
 ### Required Initialization
 
-Always initialize Config with a file path before use. The Parser facade automatically detects and uses the appropriate adapter based on file extension:
+Always initialize Config with a file path before use. The parser is auto-detected based on file extension:
 
 ```python
 from pathlib import Path
 from confkit import Config
 
-# Simplified approach - parser is auto-detected based on file extension
+# Parser is auto-detected based on file extension
 Config.set_file(Path("config.ini"))   # Uses IniParser
 Config.set_file(Path("config.json"))  # Uses MsgspecParser
 Config.set_file(Path("config.yaml"))  # Uses MsgspecParser
 Config.set_file(Path("config.toml"))  # Uses MsgspecParser
-Config.set_file(Path(".env"))         # Uses EnvParser
-
-# Option 2: Explicitly set parser (not recommended unless absolutely required)
-from confkit.ext.parsers import Parser
-parser = Parser(Path("config.ini"))
-Config.set_parser(parser)
-Config.set_file(Path("config.ini"))
 ```
 
 ### Supported File Formats
@@ -201,7 +194,7 @@ Config.set_file(Path("config.ini"))
 - **JSON files** (`.json`): Uses `MsgspecParser`, requires `msgspec` extra
 - **YAML files** (`.yaml`, `.yml`): Uses `MsgspecParser`, requires `msgspec` extra
 - **TOML files** (`.toml`): Uses `MsgspecParser`, requires `msgspec` extra
-- **Environment files** (`.env`): Uses `EnvParser`, no sections (flat key-value pairs)
+- **Environment files** (`.env`): Uses `EnvParser`, no sections (flat key-value pairs) — not auto-detected by `set_file`
 
 ### List Type Handling
 
