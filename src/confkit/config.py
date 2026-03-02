@@ -156,7 +156,7 @@ class Config(Generic[VT]):
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
-    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")
+    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")  # noqa: E501
     def set_parser(cls, parser: ConfkitParser) -> None:
         """Set the parser for ALL descriptor instances (of this type/class)."""
         if cls is Config:
