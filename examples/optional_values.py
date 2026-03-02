@@ -17,8 +17,6 @@ from pathlib import Path
 from confkit import Config
 from confkit.data_types import Integer, Optional, String, StrEnum as ConfigStrEnum
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 
 

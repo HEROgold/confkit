@@ -1,15 +1,15 @@
-from configparser import ConfigParser
 from pathlib import Path
 
 from confkit.config import Config as OG
 from confkit.config import ConfigContainerMeta
+from confkit.ext.parsers import IniParser
 
 
 class Config(OG):
     """A Config class for testing purposes."""
 
 Config.set_file(Path("meta_test.ini"))
-Config.set_parser(ConfigParser())
+Config._set_parser(IniParser())
 
 def mock_meta_class() -> None:
     class Mock(ConfigContainerMeta):

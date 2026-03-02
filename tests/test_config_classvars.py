@@ -2,10 +2,10 @@
 
 This also contains the test cases where specific settings are expected.
 """
+from confkit.ext.parsers import IniParser
 
 import tempfile
 from collections.abc import Callable
-from configparser import ConfigParser
 from pathlib import Path
 from typing import Never, ParamSpec, TypeVar
 
@@ -70,9 +70,9 @@ def test_config_converter_is_unset() -> None:
         tmp_file.write("[Test]\nstring = test_value\n")
 
     # Set up isolated environment
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -102,9 +102,9 @@ def test_config_validation_fails() -> None:
         tmp_file.write("[Test]\nstring = test_value\n")
 
     # Set up isolated environment
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -128,9 +128,9 @@ def test_config_optional_type_validation_success() -> None:
         tmp_file.write("[Test]\nstring = test_value\n")
 
     # Set up isolated environment
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -158,9 +158,9 @@ def test_config_type_mismatch_error() -> None:
         tmp_file.write("[Test]\nnull_int = 123\n")
 
     # Set up isolated environment
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_parser.read(tmp_path)
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
     Config.set_file(tmp_path)
 
     config_instance = Config.__new__(Config)
@@ -227,7 +227,7 @@ def test_invalid_default_error() -> None:
 @config_restore
 def test_ensure_option_existing_option() -> None:
     """Test _ensure_option when option already exists (line 202->exit branch)."""
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_parser.add_section("TestExistingOption")
     test_parser.set("TestExistingOption", "existing_setting", "existing_value")
 
@@ -235,7 +235,7 @@ def test_ensure_option_existing_option() -> None:
     test_config.unlink(missing_ok=True)
     test_config.touch()
 
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
     Config.set_file(test_config)
 
     class TestExistingOption:
@@ -251,7 +251,7 @@ def test_ensure_option_existing_option() -> None:
 @config_restore
 def test_set_write_on_edit_disabled() -> None:
     """Test _set method when write_on_edit is False (line 230->exit branch)."""
-    test_parser = ConfigParser()
+    test_parser = IniParser()
     test_config = Path("no_write_test.ini")
     test_config.unlink(missing_ok=True)
     test_config.touch()
@@ -261,7 +261,7 @@ def test_set_write_on_edit_disabled() -> None:
 
     Config.write_on_edit = False
     Config.set_file(test_config)
-    Config.set_parser(test_parser)
+    Config._set_parser(test_parser)
 
     initial_content = test_config.read_text()
     Config._set("TestSection", "test_setting", "new_value")

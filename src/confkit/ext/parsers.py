@@ -1,9 +1,11 @@
 """Parsers for Confkit configuration files."""
-
 from __future__ import annotations
 
 import os
 import sys
+from configparser import ConfigParser
+from io import TextIOWrapper
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
 try:
@@ -20,10 +22,16 @@ except ImportError as exc:
     )
     raise ImportError(msg) from exc
 
+
 if sys.version_info >= (3, 12):
     from typing import Protocol, override
+    # TD: Use nested types when Python 3.11 is EOL and we can drop support for it
+    # otherwise this gets syntax errors.
+    # type NestedDict = dict[str, NestedDict | str | int | float | bool | None]  # noqa: ERA001
+    NestedDict = dict[str, Any]
 else:
     from typing_extensions import Protocol, override
+    NestedDict = dict[str, Any]
 
 from confkit.sentinels import UNSET
 
@@ -58,6 +66,58 @@ class ConfkitParser(Protocol):
         """Get the value of an option within a section, with an optional fallback."""
     def set(self, section: str, option: str, value: str) -> None:
         """Set the value of an option within a section."""
+
+
+class IniParser(ConfkitParser):
+    """Adapter for ConfigParser that supports dot notation for nested sections."""
+
+    def __init__(self) -> None:
+        """Initialize the IniParser with an internal ConfigParser instance."""
+        self.parser = ConfigParser()
+        self._file: Path | None = None
+
+    @override
+    def read(self, file: Path) -> None:
+        self.parser.read(file)
+
+    @override
+    def write(self, io: TextIOWrapper) -> None:
+        self.parser.write(io)
+
+    @override
+    def has_section(self, section: str) -> bool:
+        return self.parser.has_section(section)
+
+    @override
+    def set_section(self, section: str) -> None:
+        if not self.parser.has_section(section):
+            self.parser.add_section(section)
+
+    @override
+    def set_option(self, option: str) -> None:
+        # Not used directly; options are set via set()
+        pass
+
+    @override
+    def add_section(self, section: str) -> None:
+        self.parser.add_section(section)
+
+    @override
+    def has_option(self, section: str, option: str) -> bool:
+        return self.parser.has_option(section, option)
+
+    @override
+    def remove_option(self, section: str, option: str) -> None:
+        self.parser.remove_option(section, option)
+
+    @override
+    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
+        return self.parser.get(section, option, fallback=fallback)
+
+    @override
+    def set(self, section: str, option: str, value: str) -> None:
+        self.parser.set(section, option, value)
+
 
 class EnvParser(ConfkitParser):
     """A parser for environment variables and .env files.
@@ -151,7 +211,6 @@ class EnvParser(ConfkitParser):
         raise NotImplementedError(msg)
 
 
-
 class MsgspecParser(ConfkitParser, Generic[T]):
     """Unified msgspec-based parser for YAML, JSON, TOML configuration files."""
 
@@ -177,6 +236,9 @@ class MsgspecParser(ConfkitParser, Generic[T]):
             if parser := self._parsers.get(ext):
                 try:
                     self.data = parser.decode(f.read())
+                    # Handle None or empty values from YAML/TOML files
+                    if self.data is None or not isinstance(self.data, dict):
+                        self.data = {}
                 except msgspec.DecodeError:
                     self.data = {}
                 return
@@ -196,18 +258,47 @@ class MsgspecParser(ConfkitParser, Generic[T]):
         msg = f"Unsupported file extension for writing: {ext}"
         raise ValueError(msg)
 
+    def _navigate_to_section(self, section: str, *, create: bool = False) -> NestedDict | None:
+        """Navigate to a nested section using dot notation.
+
+        Args:
+            section: Dot-separated section path (e.g., "Parent.Child.GrandChild")
+            create: If True, create missing intermediate sections
+
+        Returns:
+            The nested dict at the section path, or None if not found and create=False
+
+        """
+        if not section:
+            return self.data
+
+        parts = section.split(".")
+        current = self.data
+
+        for part in parts:
+            if not isinstance(current, dict):
+                return None
+            if part not in current:
+                if create:
+                    current[part] = {}
+                else:
+                    return None
+            current = current[part]
+
+        return current if isinstance(current, dict) else None
+
     @override
     def has_section(self, section: str) -> bool:
-        return section in self.data
+        return self._navigate_to_section(section, create=False) is not None
 
     @override
     def set_section(self, section: str) -> None:
-        if section not in self.data:
-            self.data[section] = {}
+        self._navigate_to_section(section, create=True)
 
     @override
     def has_option(self, section: str, option: str) -> bool:
-        return section in self.data and option in self.data[section]
+        section_data = self._navigate_to_section(section, create=False)
+        return section_data is not None and option in section_data
 
     @override
     def add_section(self, section: str) -> None:
@@ -215,17 +306,48 @@ class MsgspecParser(ConfkitParser, Generic[T]):
 
     @override
     def get(self, section: str, option: str, fallback: str = UNSET) -> str:
-        try:
-            return self.data[section][option]
-        except KeyError:
-            return str(fallback)
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is None or option not in section_data:
+            return str(fallback) if fallback is not UNSET else ""
+        return str(section_data[option])
 
     @override
     def set(self, section: str, option: str, value: str) -> None:
-        self.set_section(section)
-        self.data[section][option] = value
+        section_data = self._navigate_to_section(section, create=True)
+        if section_data is not None:
+            # Try to preserve the original type by parsing the string value
+            # This is important for JSON/YAML/TOML which support native types
+            parsed_value = self._parse_value(value)
+            section_data[option] = parsed_value
+
+    def _parse_value(self, value: str) -> bool | int | float | str:
+        """Parse a string value to its appropriate type for structured formats.
+
+        Attempts to convert string values back to their original types:
+        - "True"/"False" -> bool
+        - Integer strings -> int
+        - Float strings -> float
+        - Everything else remains a string
+        """
+        if value == "True":
+            return True
+        if value == "False":
+            return False
+
+        try:
+            return int(value)
+        except ValueError:
+            pass
+
+        try:
+            return float(value)
+        except ValueError:
+            pass
+
+        return value
 
     @override
     def remove_option(self, section: str, option: str) -> None:
-        if self.has_option(section, option):
-            del self.data[section][option]
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is not None and option in section_data:
+            del section_data[option]

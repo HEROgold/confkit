@@ -5,8 +5,6 @@ from typing import Any
 
 from confkit.config import Config
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 
 

@@ -1,12 +1,11 @@
 """Tests for multiple configurations."""
-
-from configparser import ConfigParser
 from pathlib import Path
 
 import hypothesis
 from hypothesis import strategies as st
 
 from confkit.config import Config
+from confkit.ext.parsers import IniParser
 
 
 class Config1(Config): ...
@@ -14,11 +13,11 @@ class Config2(Config): ...
 
 config_1 = Path("config1_test.ini")
 Config1.set_file(config_1)
-Config1.set_parser(ConfigParser())
+Config1._set_parser(IniParser())
 
 config_2 = Path("config2_test.ini")
 Config2.set_file(config_2)
-Config2.set_parser(ConfigParser())
+Config2._set_parser(IniParser())
 
 
 class Config3(Config1): ...

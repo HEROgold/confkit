@@ -1,7 +1,5 @@
 """Test suite for the Config class and its descriptors."""
-
 import enum
-from configparser import ConfigParser
 from enum import auto
 from pathlib import Path
 from unittest.mock import patch
@@ -29,6 +27,7 @@ from confkit.data_types import (
     String,
 )
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
+from confkit.ext.parsers import IniParser
 
 
 class Config(OG):
@@ -37,8 +36,8 @@ class Config(OG):
 config = Path("test.ini")
 config.unlink(missing_ok=True)  # Remove the file if it exists
 config.touch()  # Create a new empty file for testing
-parser = ConfigParser()
-Config.set_parser(parser)
+parser = IniParser()
+Config._set_parser(parser)
 Config.set_file(config)
 Config.write_on_edit = True  # Enable writing to file during tests
 
