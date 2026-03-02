@@ -15,8 +15,7 @@ from pathlib import Path
 from confkit import Config
 from confkit.data_types import BaseDataType
 
-# Configure parser + file (Parser is automatically detected)
-Config.set_parser(parser)
+# Configure config file (parser is automatically detected from extension)
 Config.set_file(Path("config.ini"))
 
 class UpperString(BaseDataType[str]):
