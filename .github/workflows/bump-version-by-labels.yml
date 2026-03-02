@@ -18,22 +18,56 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump Version
-        id: bump-version
-        uses: conjikidow/bump-version@v2.0.0
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          label-major: 'Major'
-          label-minor: 'Minor'
-          label-patch: 'Patch'
-          create-release: 'false'
+          python-version: "3.*"
 
-      - name: Auto-merge pull request
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Determine version bump
+        id: detect-bump
+        run: |
+          # Check PR labels to determine bump type
+          LABELS="${{ github.event.pull_request.labels.*.name }}"
+          if echo "$LABELS" | grep -q "Major"; then
+            echo "bump_type=major" >> $env:GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "Minor"; then
+            echo "bump_type=minor" >> $env:GITHUB_OUTPUT
+          elif echo "$LABELS" | grep -q "Patch"; then
+            echo "bump_type=patch" >> $env:GITHUB_OUTPUT
+          else
+            echo "bump_type=" >> $env:GITHUB_OUTPUT
+          fi
+
+      - name: Bump Version
+        if: steps.detect-bump.outputs.bump_type != ''
+        id: bump-version
+        run: |
+          uv run bump-my-version bump ${{ steps.detect-bump.outputs.bump_type }}
+          $NEW_VERSION = uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])"
+          echo "version-bumped=true" >> $env:GITHUB_OUTPUT
+          echo "new-version=$NEW_VERSION" >> $env:GITHUB_OUTPUT
+
+      - name: Create version bump PR
         if: steps.bump-version.outputs.version-bumped == 'true'
-        run: gh pr merge --squash --auto "${{ github.event.pull_request.number }}"
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          $BRANCH_NAME = "bump-version-${{ steps.bump-version.outputs.new-version }}"
+          git checkout -b "$BRANCH_NAME"
+          git add pyproject.toml
+          git commit -m "chore: bump version to ${{ steps.bump-version.outputs.new-version }}"
+          git push origin "$BRANCH_NAME"
+          
+          gh pr create \
+            --title "chore: bump version to ${{ steps.bump-version.outputs.new-version }}" \
+            --body "Automated version bump to ${{ steps.bump-version.outputs.new-version }}" \
+            --base master \
+            --admin
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Debug outputs
-        run: |
-          echo "version-bumped=${{ steps.bump-version.outputs.version-bumped }}"
-          echo "new-version=${{ steps.bump-version.outputs.new-version }}"
