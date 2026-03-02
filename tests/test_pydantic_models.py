@@ -9,8 +9,8 @@ from pydantic import BaseModel
 
 from confkit.config import Config
 from confkit.data_types import List
-from confkit.parsers import IniParser
 from confkit.ext.pydantic import apply_model
+from confkit.parsers import IniParser
 
 if TYPE_CHECKING:
     from collections.abc import Generator
