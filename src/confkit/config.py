@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import warnings
 from abc import abstractmethod
-from configparser import ConfigParser
 from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
 
+from confkit.ext.parsers import IniParser
 from confkit.watcher import FileWatcher
 
 from .data_types import BaseDataType, Optional
@@ -130,9 +130,9 @@ class Config(Generic[VT]):
 
     def _read_parser(self) -> None:
         """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
-        if not self._has_read_config:
+        if not self.__class__._has_read_config:
             self._parser.read(self._file)
-            self._has_read_config = True
+            self.__class__._has_read_config = True
 
     def _validate_init(self) -> None:
         """Validate the config descriptor, ensuring it's properly set up."""
@@ -153,8 +153,8 @@ class Config(Generic[VT]):
         warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
 
     @classmethod
-    def set_parser(cls, parser: ConfkitParser) -> None:
-        """Set the parser for ALL descriptors."""
+    def _set_parser(cls, parser: ConfkitParser) -> None:
+        """Set the parser for ALL descriptor instances (of this type/class)."""
         if cls is Config:
             cls._warn_base_class_usage()
         cls._parser = parser
@@ -171,7 +171,7 @@ class Config(Generic[VT]):
             raise ValueError(msg)
         match cls._file.suffix.lower():
             case ".ini":
-                cls._parser = ConfigParser()
+                cls._parser = IniParser()
             case ".yaml" | ".yml" | ".json" | ".toml":
                 from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
                 cls._parser = MsgspecParser()
@@ -234,12 +234,28 @@ class Config(Generic[VT]):
     def __set_name__(self, owner: type, name: str) -> None:
         """Set the name of the attribute to the name of the descriptor."""
         self.name = name
-        self._section = owner.__name__
+        self._section = self._build_section_name(owner)
         self._setting = name
         self._ensure_option()
         cls = self.__class__
         self._original_value = cls._parser.get(self._section, self._setting) or self._data_type.default
         self.private = f"_{self._section}_{self._setting}_{self.name}"
+
+    @staticmethod
+    def _build_section_name(owner: type) -> str:
+        """Build a section name from the class hierarchy using dot notation.
+
+        Strips out function-local scope markers like <locals>.
+        """
+        if qualname := getattr(owner, "__qualname__", None):
+            split_at = qualname.find("<locals>.")
+            if split_at != -1:
+                qualname = qualname[split_at + len("<locals>.") :]
+            return ".".join(
+                part
+                for part in qualname.split(".")
+            )
+        return owner.__name__
 
     def _ensure_section(self) -> None:
         """Ensure the section exists in the config file. Creates one if it doesn't exist."""

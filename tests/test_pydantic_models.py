@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import warnings
-from configparser import ConfigParser
 from typing import TYPE_CHECKING
 
 import pytest
@@ -10,6 +9,7 @@ from pydantic import BaseModel
 
 from confkit.config import Config
 from confkit.data_types import List
+from confkit.ext.parsers import IniParser
 from confkit.ext.pydantic import apply_model
 
 if TYPE_CHECKING:
@@ -23,8 +23,8 @@ warnings.filterwarnings(
 
 
 @pytest.fixture
-def config_environment(tmp_path: Path) -> Generator[ConfigParser]:
-    parser = ConfigParser()
+def config_environment(tmp_path: Path) -> Generator[IniParser]:
+    parser = IniParser()
     config_path = tmp_path / "pydantic.ini"
     config_path.touch()
 
@@ -33,7 +33,7 @@ def config_environment(tmp_path: Path) -> Generator[ConfigParser]:
     previous_read_state = Config._has_read_config
     previous_write_state = Config.write_on_edit
 
-    Config.set_parser(parser)
+    Config._set_parser(parser)
     Config.set_file(config_path)
     Config._has_read_config = False
     Config.write_on_edit = True
@@ -60,7 +60,7 @@ class FeatureFlagsModel(BaseModel):
     tags: list[str]
 
 
-def test_pydantic_model_populates_config(config_environment: ConfigParser) -> None:
+def test_pydantic_model_populates_config(config_environment: IniParser) -> None:
     parser = config_environment
 
     class ServiceConfig:
@@ -91,7 +91,7 @@ def test_pydantic_model_populates_config(config_environment: ConfigParser) -> No
     assert parser.get("ServiceConfig", "port") == str(payload.port)
 
 
-def test_pydantic_prevalidation_handles_type_casts(config_environment: ConfigParser) -> None:
+def test_pydantic_prevalidation_handles_type_casts(config_environment: IniParser) -> None:
     parser = config_environment
 
     class FeatureConfig:

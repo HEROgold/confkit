@@ -19,8 +19,6 @@ from pydantic import BaseModel
 from confkit import Config
 from confkit.ext.pydantic import apply_model
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("pydantic.ini"))
 
 

@@ -11,9 +11,10 @@ confkit is a Python library for type-safe configuration management using descrip
 - `Config` descriptor (`config.py`): The main descriptor class that handles getting/setting values in config files
 - `ConfigContainerMeta` (`config.py`): Metaclass that enables setting Config descriptors on class variables
 - `BaseDataType` and implementations (`data_types.py`): Type converters for different data types
-- `ConfkitParser` protocol (`ext/parsers.py`): Protocol defining the parser interface
-- `MsgspecParser` (`ext/parsers.py`): Parser for JSON, YAML, and TOML files
-- `EnvParser` (`ext/parsers.py`): Parser for environment variables and .env files
+- `Parser` facade (`ext/parsers.py`): Unified facade for all configuration file formats (INI, JSON, YAML, TOML, .env)
+- `IniParser` (`ext/parsers.py`): Adapter for Python's built-in ConfigParser (INI files)
+- `MsgspecParser` (`ext/parsers.py`): Adapter for JSON, YAML, and TOML files using msgspec
+- `EnvParser` (`ext/parsers.py`): Adapter for environment variables and .env files
 - `sentinels.py`: Provides the `UNSET` sentinel value for representing unset values
 - `exceptions.py`: Custom exceptions for configuration errors
 - `watcher.py`: File watching functionality to detect config file changes
@@ -44,6 +45,8 @@ uv sync --group test
 ```bash
 # Run linting
 ruff check .
+# Fix issues using
+ruff check . --fix --unsafe-fixes
 # Update dependencies and run tests
 uv sync --upgrade --group dev; uv run pytest .
 ```
@@ -172,29 +175,29 @@ The `with_setting` approach is more type-safe as it references an actual descrip
 
 ### Required Initialization
 
-Always initialize Config with a file path before use. The parser can be set explicitly or will be auto-detected based on file extension:
+Always initialize Config with a file path before use. The Parser facade automatically detects and uses the appropriate adapter based on file extension:
 
 ```python
 from pathlib import Path
 from confkit import Config
 
-# Option 1: Auto-detect parser based on file extension
-Config.set_file(Path("config.ini"))  # Uses ConfigParser
+# Simplified approach - parser is auto-detected based on file extension
+Config.set_file(Path("config.ini"))   # Uses IniParser
 Config.set_file(Path("config.json"))  # Uses MsgspecParser
 Config.set_file(Path("config.yaml"))  # Uses MsgspecParser
 Config.set_file(Path("config.toml"))  # Uses MsgspecParser
-Config.set_file(Path(".env"))  # Uses EnvParser
+Config.set_file(Path(".env"))         # Uses EnvParser
 
-# Option 2: Explicitly set parser (not recommended unless it's absolutely required.)
-from configparser import ConfigParser
-parser = ConfigParser()
+# Option 2: Explicitly set parser (not recommended unless absolutely required)
+from confkit.ext.parsers import Parser
+parser = Parser(Path("config.ini"))
 Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 ```
 
 ### Supported File Formats
 
-- **INI files** (`.ini`): Uses Python's `ConfigParser`, supports sections
+- **INI files** (`.ini`): Uses `IniParser`, supports sections
 - **JSON files** (`.json`): Uses `MsgspecParser`, requires `msgspec` extra
 - **YAML files** (`.yaml`, `.yml`): Uses `MsgspecParser`, requires `msgspec` extra
 - **TOML files** (`.toml`): Uses `MsgspecParser`, requires `msgspec` extra

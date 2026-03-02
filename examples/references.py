@@ -10,9 +10,6 @@ class OtherConfig(Config):
     pass
 
 # Set up the parser and file
-parser = ConfigParser()
-Config.set_parser(parser)
-OtherConfig.set_parser(ConfigParser())
 Config.set_file(Path(__file__).parent / "ref.ini")
 OtherConfig.set_file(Path(__file__).parent / "other_ref.ini")
 

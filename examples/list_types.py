@@ -16,8 +16,6 @@ from pathlib import Path
 from confkit import Config
 from confkit.data_types import List, String
 
-parser = ConfigParser()
-Config.set_parser(parser)
 Config.set_file(Path("config.ini"))
 List.escape_char = "\\"  # Set escape character for lists, these are also the default.
 List.separator = ","  # Set separator character for lists, these are also the default.
