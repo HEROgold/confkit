@@ -28,7 +28,7 @@ from .data_types import (
     TimeDelta,
     Tuple,
 )
-from .exceptions import InvalidConverterError, InvalidDefaultError
+from .exceptions import ConfigPathConflictError, InvalidConverterError, InvalidDefaultError
 
 __all__ = [
     "BaseDataType",
@@ -36,6 +36,7 @@ __all__ = [
     "Boolean",
     "Config",
     "ConfigContainerMeta",
+    "ConfigPathConflictError",
     "Date",
     "DateTime",
     "Dict",

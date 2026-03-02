@@ -8,6 +8,8 @@ from io import TextIOWrapper
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
+from confkit.exceptions import ConfigPathConflictError
+
 try:
     import msgspec
     import msgspec.json
@@ -263,10 +265,16 @@ class MsgspecParser(ConfkitParser, Generic[T]):
 
         Args:
             section: Dot-separated section path (e.g., "Parent.Child.GrandChild")
-            create: If True, create missing intermediate sections
+            create: If True, create missing intermediate sections and raise an error
+                    if an intermediate path element is a scalar instead of a dict
 
         Returns:
             The nested dict at the section path, or None if not found and create=False
+
+        Raises:
+            ConfigPathConflictError: When create=True and an intermediate path element
+                                     is a scalar value instead of a dict. This prevents
+                                     silent data loss from overwriting scalars.
 
         """
         if not section:
@@ -275,8 +283,16 @@ class MsgspecParser(ConfkitParser, Generic[T]):
         parts = section.split(".")
         current = self.data
 
-        for part in parts:
+        for i, part in enumerate(parts):
             if not isinstance(current, dict):
+                if create:
+                    path_so_far = ".".join(parts[:i])
+                    msg = (
+                        f"Cannot navigate to section '{section}': "
+                        f"'{path_so_far}' is a scalar value, not a section. "
+                        f"Path conflict at '{part}'."
+                    )
+                    raise ConfigPathConflictError(msg)
                 return None
             if part not in current:
                 if create:
@@ -284,6 +300,17 @@ class MsgspecParser(ConfkitParser, Generic[T]):
                 else:
                     return None
             current = current[part]
+            # Check if we hit a scalar in the middle of the path
+            if i < len(parts) - 1 and not isinstance(current, dict):
+                if create:
+                    path_so_far = ".".join(parts[: i + 1])
+                    msg = (
+                        f"Cannot navigate to section '{section}': "
+                        f"'{path_so_far}' is a scalar value, not a section. "
+                        f"Path conflict at '{parts[i + 1]}'."
+                    )
+                    raise ConfigPathConflictError(msg)
+                return None
 
         return current if isinstance(current, dict) else None
 
@@ -313,6 +340,7 @@ class MsgspecParser(ConfkitParser, Generic[T]):
 
     @override
     def set(self, section: str, option: str, value: str) -> None:
+        # This will raise ConfigPathConflictError if an intermediate path is a scalar
         section_data = self._navigate_to_section(section, create=True)
         if section_data is not None:
             # Try to preserve the original type by parsing the string value
