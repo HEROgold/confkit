@@ -6,6 +6,10 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
+from enum import IntEnum as dIntEnum
+from enum import IntFlag as dIntFlag
+from enum import StrEnum as dStrEnum
+from enum import Enum as dEnum
 from typing import ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET
@@ -65,30 +69,28 @@ class BaseDataType(ABC, Generic[T]):
         return Optional(BaseDataType.cast(default))
 
     @staticmethod
-    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:
+    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911
         """Convert the default value to a BaseDataType."""
         # We use Cast to shut up type checkers, as we know primitive types will be correct.
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
+        # Check enum types BEFORE basic types since some enums inherit from str/int
         match default:
-            case bool():
-                data_type = cast("BaseDataType[T]", Boolean(default))
-            case None:
-                data_type = cast("BaseDataType[T]", NoneType())
-            case int():
-                data_type = cast("BaseDataType[T]", Integer(default))
-            case float():
-                data_type = cast("BaseDataType[T]", Float(default))
-            case str():
-                data_type = cast("BaseDataType[T]", String(default))
-            case BaseDataType():
-                data_type = default
+            case dStrEnum():     return cast("BaseDataType[T]", StrEnum(default))
+            case dIntFlag():     return cast("BaseDataType[T]", IntFlag(default))
+            case dIntEnum():     return cast("BaseDataType[T]", IntEnum(default))
+            case dEnum():        return cast("BaseDataType[T]", Enum(default))
+            case bool():         return cast("BaseDataType[T]", Boolean(default))
+            case None:           return cast("BaseDataType[T]", NoneType())
+            case int():          return cast("BaseDataType[T]", Integer(default))
+            case float():        return cast("BaseDataType[T]", Float(default))
+            case str():          return cast("BaseDataType[T]", String(default))
+            case BaseDataType(): return default
             case _:
                 msg = (
                     f"Unsupported default value type: {type(default).__name__}. "
                     "Use a BaseDataType subclass for custom types."
                 )
                 raise InvalidDefaultError(msg)
-        return data_type
 
 
 class _EnumBase(BaseDataType[T]):
