@@ -49,7 +49,8 @@ jobs:
 
       - name: Run tests
         if: steps.cache-pytest.outputs.cache-hit != 'true'
-        run: uv run pytest .
+        # Avoid executing examples in CI; they could run untrusted code from PRs
+        run: uv run pytest . --ignore=tests/test_examples_run.py
 
       - name: Run ruff check
         if: steps.cache-pytest.outputs.cache-hit != 'true'
