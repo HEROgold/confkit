@@ -1,4 +1,6 @@
 """Tests for on_file_change method in Config descriptor."""
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any, ClassVar
 

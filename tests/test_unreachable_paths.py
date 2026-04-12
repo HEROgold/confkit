@@ -1,4 +1,5 @@
 """Test suite for testing supposedly unreachable code paths in data_types.py."""
+from __future__ import annotations
 
 import pytest
 from hypothesis import given
@@ -10,7 +11,7 @@ from confkit.data_types import BaseDataType
 class DataType(BaseDataType[str]):
     """Basic DataType that doesn't do anything."""
 
-    def convert(self, value: str) -> str: ... # ty: ignore[invalid-return-type].  # noqa: D102
+    def convert(self, value: str) -> str: ... # noqa: D102
 
 class MockBase:
     """Mock base class without __args__."""

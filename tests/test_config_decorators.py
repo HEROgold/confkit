@@ -3,9 +3,10 @@
 These are usually not safe enough to test using a single file, at the same time.ArithmeticError
 These get their own test file.
 """
-from collections.abc import Callable
+from __future__ import annotations
+
 from pathlib import Path
-from typing import ParamSpec, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -14,6 +15,9 @@ from hypothesis import strategies as st
 from confkit.config import Config as OG
 from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 F = TypeVar("F")
 P = ParamSpec("P")
@@ -25,7 +29,7 @@ def config_new(func: Callable[P, F]) -> Callable[P, F]:
     """Save and restore the _file and _parser attributes for the Config."""
     def inner(*args: P.args, **kwargs: P.kwargs) -> F:
         restores = (getattr(Config, "_file", UNSET), getattr(Config, "_parser", UNSET))
-        new_file = Path(f"{func.__name__}.ini")  # ty: ignore[unresolved-attribute]
+        new_file = Path(f"{func.__name__}.ini")
         new_file.touch(exist_ok=True)
         Config._file = new_file
         Config._parser = IniParser()

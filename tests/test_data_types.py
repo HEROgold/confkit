@@ -1,4 +1,6 @@
 """Tests for data type classes in confkit.data_types."""
+from __future__ import annotations
+
 from datetime import UTC, date, datetime, time, timedelta
 from typing import Final
 

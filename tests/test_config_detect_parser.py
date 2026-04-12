@@ -1,4 +1,6 @@
 """Test Config.detect_parser behavior for different file extensions."""
+from __future__ import annotations
+
 from pathlib import Path
 
 import pytest

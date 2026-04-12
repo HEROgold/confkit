@@ -1,10 +1,15 @@
 """Tests for MsgspecParser.read edge cases."""
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import msgspec
 import pytest
 
 from confkit.ext.parsers import MsgspecParser
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_read_file_does_not_exist(tmp_path: Path) -> None:

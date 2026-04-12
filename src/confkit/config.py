@@ -60,6 +60,7 @@ class Config(Generic[VT]):
     _parser: ConfkitParser = UNSET
     _file: Path = UNSET
     _has_read_config: bool = False
+    _data_type: BaseDataType[VT]
 
     if TYPE_CHECKING:
         # Overloads for type checkers to understand the different settings of the Config descriptors.
@@ -69,13 +70,13 @@ class Config(Generic[VT]):
         def __init__(self, default: VT) -> None: ...
         # Specify the states of optional explicitly for type checkers.
         @overload
-        def __init__(self: Config[VT], default: VT, *, optional: Literal[False]) -> None: ...
+        def __init__(self: Config[OVT], default: OVT, *, optional: Literal[False]) -> None: ...
         @overload
-        def __init__(self: Config[VT], default: BaseDataType[VT], *, optional: Literal[False]) -> None: ...
+        def __init__(self: Config[OVT], default: BaseDataType[OVT], *, optional: Literal[False]) -> None: ...
         @overload
-        def __init__(self: Config[VT | None], default: VT, *, optional: Literal[True]) -> None: ...
+        def __init__(self: Config[OVT | None], default: OVT, *, optional: Literal[True]) -> None: ...
         @overload
-        def __init__(self: Config[VT | None], default: BaseDataType[VT], *, optional: Literal[True]) -> None: ...
+        def __init__(self: Config[OVT | None], default: BaseDataType[OVT], *, optional: Literal[True]) -> None: ...
 
     def __init__(
         self,
@@ -144,9 +145,7 @@ class Config(Generic[VT]):
 
     def convert(self, value: str) -> VT:
         """Convert the value to the desired type using the given converter method."""
-        # Ignore the type error of VT, type checkers don't like None as an option
-        # We handle it using the `optional` flag, or using Optional DataType. so we can safely ignore it.
-        return self._data_type.convert(value) # type: ignore[reportReturnType]
+        return self._data_type.convert(value)
 
     @staticmethod
     def _warn_base_class_usage() -> None:

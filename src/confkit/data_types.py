@@ -6,10 +6,10 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
+from enum import Enum as dEnum
 from enum import IntEnum as dIntEnum
 from enum import IntFlag as dIntFlag
 from enum import StrEnum as dStrEnum
-from enum import Enum as dEnum
 from typing import ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET
@@ -205,11 +205,16 @@ class NoneType(BaseDataType[None]):
         """Initialize the NoneType data type."""
         super().__init__(None)
 
-    def convert(self, value: str) -> bool: # type: ignore[reportIncompatibleMethodOverride]
-        """Convert a string value to None."""
-        # Ignore type exception as convert should return True/False for NoneType
-        # to determine if we have a valid null value or not.
+    def is_valid(self, value: str) -> bool:
+        """Check if the provided string value is in the set of null values."""
         return value.casefold().strip() in NoneType.null_values
+
+    def convert(self, value: str) -> None:
+        """Convert a string value to None."""
+        if self.is_valid(value):
+            return
+        msg = f"Value '{value}' is not a valid null value. Expected one of: {', '.join(NoneType.null_values)}."
+        raise ValueError(msg)
 
 
 class String(BaseDataType[str]):
@@ -361,8 +366,8 @@ class Optional(BaseDataType[T | None], Generic[T]):
 
     def convert(self, value: str) -> T | None:
         """Convert a string value to the optional type."""
-        if self._none_type.convert(value):
-            return None
+        if self._none_type.is_valid(value):
+            return self._none_type.convert(value)
         return self._data_type.convert(value)
 
     def validate(self) -> bool:

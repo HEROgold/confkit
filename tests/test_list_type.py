@@ -1,4 +1,5 @@
 """Test the List data type."""
+from __future__ import annotations
 
 import pytest
 

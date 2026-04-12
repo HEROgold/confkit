@@ -2,10 +2,11 @@
 
 This also contains the test cases where specific settings are expected.
 """
+from __future__ import annotations
+
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
-from typing import Never, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Never, ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -16,6 +17,9 @@ from confkit.data_types import BaseDataType, Optional, String
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 F = TypeVar("F")
 P = ParamSpec("P")
@@ -60,7 +64,7 @@ def test_config_validate_parser_unset() -> None:
 def test_config_converter_is_unset() -> None:
     """Test validate_strict_type when converter is UNSET - Line 154 in config.py."""
     class MockDataType(BaseDataType[str]):
-        def convert(self, value: str) -> Never: # ty: ignore[invalid-return-type]
+        def convert(self, value: str) -> Never:
             ...
 
     # Create a temporary isolated environment
@@ -148,7 +152,7 @@ def test_config_type_mismatch_error() -> None:
     class WrongTypeDataType(BaseDataType[str]):
         def __init__(self, default: str) -> None:
             super().__init__(default)
-        def convert(self, value: str) -> int:  # type: ignore[override]
+        def convert(self, value: str) -> int:
             return int(value)
 
     # Create a temporary isolated environment

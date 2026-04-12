@@ -1,4 +1,6 @@
 """Tests for MsgspecParser section/option methods."""
+from __future__ import annotations
+
 from confkit.ext.parsers import MsgspecParser
 
 

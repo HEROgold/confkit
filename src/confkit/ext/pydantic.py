@@ -1,7 +1,13 @@
 """Helper utilities for working with Pydantic models and confkit."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
 
 try:
-    from pydantic import BaseModel
+    import pydantic  # noqa: F401
 except ImportError as exc:
     msg = (
         "confkit.ext.pydantic requires the optional 'pydantic' extra. "

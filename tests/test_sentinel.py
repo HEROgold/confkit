@@ -1,4 +1,5 @@
 """Test cases for the UNSET sentinel from confkit.sentinels."""
+from __future__ import annotations
 
 from confkit.sentinels import UNSET
 

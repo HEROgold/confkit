@@ -1,4 +1,6 @@
 """Test suite for the Config class and its descriptors."""
+from __future__ import annotations
+
 import enum
 from enum import auto
 from pathlib import Path
@@ -105,10 +107,10 @@ class Test:
     binary_value = Config(Binary(0b101010))
     binary_value_2 = Config(Binary(b"101010"))
     # Test invalid setups (Type checkers like pyright will raise errors here)
-    none_int = Config(Integer(None)) # type: ignore[reportArgumentType]
-    none_string = Config(String(None)) # type: ignore[reportArgumentType]
-    none_boolean = Config(Boolean(None)) # type: ignore[reportArgumentType]
-    none_float = Config(Float(None)) # type: ignore[reportArgumentType]
+    none_int = Config(Integer(None))
+    none_string = Config(String(None))
+    none_boolean = Config(Boolean(None))
+    none_float = Config(Float(None))
     # Custom data type tests
     custom = Config(Integer(0))
     optional_custom = Config(Optional(Integer(0)))
@@ -153,7 +155,7 @@ class Test:
     list_of_paths = Config(List(["/path/to/file1", "/path/to/file2"]))
 
     @Config.with_setting(number)
-    def setting(self, **kwargs):  # type: ignore[reportMissingParameterType]  # noqa: ANN003, ANN201, D102
+    def setting(self, **kwargs):  # noqa: ANN003, ANN201, D102
         return kwargs.get("number")
 
 @pytest.mark.order(0)
@@ -183,19 +185,19 @@ def test_int_flag() -> None:
 
 def test_init_no_args() -> None:
     with pytest.raises((InvalidDefaultError, InvalidConverterError)):
-        Config() # type: ignore[reportCallIssue]
+        Config()
 
 
 def test_init_no_default() -> None:
     with pytest.raises(InvalidDefaultError):
-        Config() # type: ignore[reportCallIssue]
+        Config()
 
 
 def test_optional_validate_none_value() -> None:
     """Test Optional.validate when value is None."""
     optional_type = Optional(String("default"))
     # Use monkey patching to set internal state
-    with patch.object(optional_type._data_type, "value", None):  # type: ignore[attr-defined]
+    with patch.object(optional_type._data_type, "value", None):
         assert optional_type.validate() is True
 
 

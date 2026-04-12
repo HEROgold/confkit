@@ -1,4 +1,6 @@
 """Module for custom exceptions used in the confkit package."""
+from __future__ import annotations
+
 
 class InvalidDefaultError(ValueError):
     """Raised when the default value is not set or invalid."""

@@ -1,4 +1,6 @@
 """Tests for MsgspecParser.get fallback and string branch in write."""
+from __future__ import annotations
+
 import io
 
 from confkit.ext.parsers import MsgspecParser
