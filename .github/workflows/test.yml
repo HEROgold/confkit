@@ -30,8 +30,6 @@ jobs:
         with:
           path: .pytest_cache
           key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
-          restore-keys: |
-            ${{ runner.os }}-pytest-${{ matrix.python-version }}-
 
       - name: Install uv
         if: steps.cache-pytest.outputs.cache-hit != 'true'
