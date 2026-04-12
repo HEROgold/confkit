@@ -64,7 +64,7 @@ def test_config_validate_parser_unset() -> None:
 def test_config_converter_is_unset() -> None:
     """Test validate_strict_type when converter is UNSET - Line 154 in config.py."""
     class MockDataType(BaseDataType[str]):
-        def convert(self, value: str) -> Never: # ty: ignore[invalid-return-type]
+        def convert(self, value: str) -> Never:
             ...
 
     # Create a temporary isolated environment
@@ -152,7 +152,7 @@ def test_config_type_mismatch_error() -> None:
     class WrongTypeDataType(BaseDataType[str]):
         def __init__(self, default: str) -> None:
             super().__init__(default)
-        def convert(self, value: str) -> int:  # type: ignore[override]
+        def convert(self, value: str) -> int:
             return int(value)
 
     # Create a temporary isolated environment
