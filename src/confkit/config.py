@@ -60,6 +60,7 @@ class Config(Generic[VT]):
     _parser: ConfkitParser = UNSET
     _file: Path = UNSET
     _has_read_config: bool = False
+    _data_type: BaseDataType[VT]
 
     if TYPE_CHECKING:
         # Overloads for type checkers to understand the different settings of the Config descriptors.
@@ -144,9 +145,7 @@ class Config(Generic[VT]):
 
     def convert(self, value: str) -> VT:
         """Convert the value to the desired type using the given converter method."""
-        # Ignore the type error of VT, type checkers don't like None as an option
-        # We handle it using the `optional` flag, or using Optional DataType. so we can safely ignore it.
-        return self._data_type.convert(value) # type: ignore[reportReturnType]
+        return self._data_type.convert(value)
 
     @staticmethod
     def _warn_base_class_usage() -> None:
