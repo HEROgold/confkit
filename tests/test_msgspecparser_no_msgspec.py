@@ -1,4 +1,6 @@
 """Test MsgspecParser behavior when msgspec is not installed."""
+from __future__ import annotations
+
 import re
 import sys
 

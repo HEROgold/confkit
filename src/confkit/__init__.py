@@ -2,6 +2,7 @@
 
 It includes the Config class and various data types used for configuration values.
 """
+from __future__ import annotations
 
 from .config import Config, ConfigContainerMeta
 from .data_types import (

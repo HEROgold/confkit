@@ -1,4 +1,6 @@
 """Test suite for the Config class and its descriptors."""
+from __future__ import annotations
+
 import enum
 from enum import auto
 from pathlib import Path

@@ -1,5 +1,7 @@
 
 """Tests for MsgspecParser (unified YAML/JSON/TOML parser)."""
+from __future__ import annotations
+
 import pathlib
 import tempfile
 

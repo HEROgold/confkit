@@ -6,10 +6,10 @@ import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from datetime import UTC, date, datetime, time, timedelta, tzinfo
+from enum import Enum as dEnum
 from enum import IntEnum as dIntEnum
 from enum import IntFlag as dIntFlag
 from enum import StrEnum as dStrEnum
-from enum import Enum as dEnum
 from typing import ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET

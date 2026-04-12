@@ -3,9 +3,10 @@
 These are usually not safe enough to test using a single file, at the same time.ArithmeticError
 These get their own test file.
 """
-from collections.abc import Callable
+from __future__ import annotations
+
 from pathlib import Path
-from typing import ParamSpec, TypeVar
+from typing import TYPE_CHECKING, ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -14,6 +15,9 @@ from hypothesis import strategies as st
 from confkit.config import Config as OG
 from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 F = TypeVar("F")
 P = ParamSpec("P")

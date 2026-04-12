@@ -2,10 +2,11 @@
 
 This also contains the test cases where specific settings are expected.
 """
+from __future__ import annotations
+
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
-from typing import Never, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Never, ParamSpec, TypeVar
 
 import pytest
 from hypothesis import given
@@ -16,6 +17,9 @@ from confkit.data_types import BaseDataType, Optional, String
 from confkit.exceptions import InvalidConverterError, InvalidDefaultError
 from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 F = TypeVar("F")
 P = ParamSpec("P")

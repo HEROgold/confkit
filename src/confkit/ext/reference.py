@@ -2,6 +2,7 @@
 
 It allows you to create relative references to other configuration files
 """
+from __future__ import annotations
 
 from pathlib import Path
 from typing import Any

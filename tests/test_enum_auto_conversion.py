@@ -3,10 +3,11 @@
 Tests that StrEnum, IntEnum, IntFlag, and Enum defaults are automatically
 wrapped in their corresponding data type converters when used with Config.
 """
+from __future__ import annotations
 
 import enum
 from enum import IntEnum, IntFlag, StrEnum
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from confkit import Config as ConfigBase
 from confkit.data_types import Enum as ConfigEnum
@@ -14,6 +15,9 @@ from confkit.data_types import IntEnum as ConfigIntEnum
 from confkit.data_types import IntFlag as ConfigIntFlag
 from confkit.data_types import StrEnum as ConfigStrEnum
 from confkit.parsers import IniParser
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class LogLevel(StrEnum):

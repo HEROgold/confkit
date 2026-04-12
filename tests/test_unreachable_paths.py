@@ -1,4 +1,5 @@
 """Test suite for testing supposedly unreachable code paths in data_types.py."""
+from __future__ import annotations
 
 import pytest
 from hypothesis import given

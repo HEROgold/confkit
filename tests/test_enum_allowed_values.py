@@ -1,4 +1,6 @@
 """Tests for enum types displaying allowed values."""
+from __future__ import annotations
+
 import enum
 from enum import IntEnum, IntFlag, StrEnum, auto
 
