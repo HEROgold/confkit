@@ -172,7 +172,7 @@ class Config(Generic[VT]):
         if cls._file is UNSET:
             msg = "Config file is not set. Use `set_file()`."
             raise ValueError(msg)
-        match cls._file.suffix.lower():
+        match cls._file.suffix.lower() or cls._file.stem.lower():
             case ".ini":
                 cls._parser = IniParser()
             case ".yaml" | ".yml" | ".json" | ".toml":
