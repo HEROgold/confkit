@@ -71,6 +71,8 @@ class BaseDataType(ABC, Generic[T]):
     @staticmethod
     def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911
         """Convert the default value to a BaseDataType."""
+        # Avoid circular import. Allows for nested Configs.
+        from confkit import Config  # noqa: PLC0415
         # We use Cast to shut up type checkers, as we know primitive types will be correct.
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
         # Check enum types BEFORE basic types since some enums inherit from str/int
@@ -84,6 +86,7 @@ class BaseDataType(ABC, Generic[T]):
             case int():          return cast("BaseDataType[T]", Integer(default))
             case float():        return cast("BaseDataType[T]", Float(default))
             case str():          return cast("BaseDataType[T]", String(default))
+            case Config():       return BaseDataType[T].cast(default._data_type)  # noqa: SLF001
             case BaseDataType(): return default
             case _:
                 msg = (
