@@ -88,6 +88,9 @@ class BaseDataType(ABC, Generic[T]):
             case time():         return cast("BaseDataType[T]", Time(default))
             case date():         return cast("BaseDataType[T]", Date(default))
             case datetime():     return cast("BaseDataType[T]", DateTime(default))
+            case set():          return cast("BaseDataType[T]", Set(default))
+            case list():         return cast("BaseDataType[T]", List(default))
+            case tuple():        return cast("BaseDataType[T]", Tuple(default))
             case _:
                 msg = (
                     f"Unsupported default value type: {type(default).__name__}. "
