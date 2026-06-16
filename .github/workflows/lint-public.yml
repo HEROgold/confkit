@@ -44,13 +44,12 @@ jobs:
           enable-cache: true
 
       - name: Cache lint results
-        if: matrix.type == 'ruff'
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-lint-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
+          key: ${{ runner.os }}-lint-${{matrix.type}}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
           restore-keys: |
-            ${{ runner.os }}-lint
+            ${{ runner.os }}-lint-${{matrix.type}}
 
       - name: Run type checking - ${{matrix.type}}
         run: uvx ${{matrix.type}} check examples

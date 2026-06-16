@@ -3,6 +3,7 @@
 Basic example showing how to use the on_file_change() hook to detect changes in the configuration file.
 Copy of basic.py
 """
+from typing import Literal, Any
 from random import randint
 
 from configparser import ConfigParser
@@ -17,13 +18,13 @@ Config.set_file(Path("config.ini"))
 Config.write_on_edit = True
 
 
-def on_api_change(origin: str, old: str, new: str) -> None:
+def on_api_change(origin: Literal["get", "set"], old: Any, new: Any) -> None:
     if origin == "get":
         print(f"[on_file_change] API key accessed. Current value: '{new}' (previous: '{old}')")
     elif origin == "set":
         print(f"[on_file_change] API key changed from '{old}' to '{new}'. Reconnecting to API...")
 
-def print_change(origin, old, new) -> None:
+def print_change(origin: Literal["get", "set"], old: Any, new: Any) -> None:
     print(f"Configuration file has changed! {origin=} {old=} {new=}")
 
 class AppConfig:
@@ -60,4 +61,4 @@ if __name__ == "__main__":
     # This automatically saves to config.ini when write_on_edit is True
     cfg.debug = not cfg.debug
     # Set the API key
-    cfg.api_key = randint(100000, 999999)
+    cfg.api_key = "my-secret-api"
