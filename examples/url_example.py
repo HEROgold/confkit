@@ -1,4 +1,5 @@
 """Example of using a custom URL data type with confkit."""
+from typing_extensions import override
 from pathlib import Path
 from configparser import ConfigParser
 
@@ -10,6 +11,7 @@ Config.set_file(Path("config.ini"))
 class URL(BaseDataType[ParseResult]):
     """A config value that is a URL."""
 
+    @override
     def convert(self, value: str) -> ParseResult:
         """Convert a string value to a URL."""
         return urlparse(value)
@@ -29,6 +31,6 @@ if __name__ == "__main__":
     print("Docs path:", app_config.docs.path)
 
     # You can also assign a new URL string
-    app_config.homepage = "https://example.com/newpage"
+    app_config.homepage = urlparse("https://example.com/newpage")
     print("Updated homepage:", app_config.homepage)
     print("Updated homepage netloc:", app_config.homepage.netloc)

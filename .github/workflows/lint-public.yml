@@ -1,0 +1,56 @@
+name: Type Check Public API
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: lint-public-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+  lint:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [ruff, ty, pyrefly, mypy, pyright, zuban]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv (Should be cached from setup job)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Cache lint results
+        if: matrix.type == 'ruff'
+        uses: actions/cache@v4
+        with:
+          path: .lint_cache
+          key: ${{ runner.os }}-lint-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-lint
+
+      - name: Run type checking - ${{matrix.type}}
+        run: uvx ${{matrix.type}} check examples
