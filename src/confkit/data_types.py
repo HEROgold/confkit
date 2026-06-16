@@ -10,7 +10,7 @@ from enum import Enum as dEnum
 from enum import IntEnum as dIntEnum
 from enum import IntFlag as dIntFlag
 from enum import StrEnum as dStrEnum
-from typing import ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
+from typing import Any, ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET
 
@@ -47,12 +47,13 @@ class BaseDataType(ABC, Generic[T]):
         # Extract type arguments from the generic base
         for base in orig_bases:
             if hasattr(base, "__args__"):
-                type_args = base.__args__
+                type_args: list[type] = base.__args__
                 if type_args:
                     for type_arg in type_args:
                         if hasattr(type_arg, "__origin__"):
                             # For parameterized generics, check against the origin type
-                            if isinstance(self.value, type_arg.__origin__):
+                            origin: type = type_arg.__origin__
+                            if isinstance(self.value, origin):
                                 return True
                         elif isinstance(self.value, (self.type, type_arg)):
                             return True
@@ -69,12 +70,13 @@ class BaseDataType(ABC, Generic[T]):
         return Optional(BaseDataType.cast(default))
 
     @staticmethod
-    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911
+    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911, PLR0912
         """Convert the default value to a BaseDataType."""
         # We use Cast to shut up type checkers, as we know primitive types will be correct.
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
         # Check enum types BEFORE basic types since some enums inherit from str/int
         match default:
+            case BaseDataType(): return default
             case dStrEnum():     return cast("BaseDataType[T]", StrEnum(default))
             case dIntFlag():     return cast("BaseDataType[T]", IntFlag(default))
             case dIntEnum():     return cast("BaseDataType[T]", IntEnum(default))
@@ -84,7 +86,13 @@ class BaseDataType(ABC, Generic[T]):
             case int():          return cast("BaseDataType[T]", Integer(default))
             case float():        return cast("BaseDataType[T]", Float(default))
             case str():          return cast("BaseDataType[T]", String(default))
-            case BaseDataType(): return default
+            case timedelta():    return cast("BaseDataType[T]", TimeDelta(default))
+            case time():         return cast("BaseDataType[T]", Time(default))
+            case date():         return cast("BaseDataType[T]", Date(default))
+            case datetime():     return cast("BaseDataType[T]", DateTime(default))
+            case set():          return cast("BaseDataType[T]", Set(default))
+            case list():         return cast("BaseDataType[T]", List(default))
+            case tuple():        return cast("BaseDataType[T]", Tuple(default))
             case _:
                 msg = (
                     f"Unsupported default value type: {type(default).__name__}. "
@@ -629,7 +637,7 @@ class DateTime(BaseDataType[datetime]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateTimeKwargs]) -> None: ...
 
-    def __init__(self, default: datetime = UNSET, **kwargs: Unpack[_DateTimeKwargs]) -> None:
+    def __init__(self, default: datetime = UNSET, **kwargs: Any) -> None:
         """Initialize the datetime data type. Defaults to current datetime (datetime.now) if not provided."""
         if default is UNSET:
             try:
@@ -659,7 +667,7 @@ class Date(BaseDataType[date]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateKwargs]) -> None: ...
 
-    def __init__(self, default: date = UNSET, **kwargs: Unpack[_DateKwargs]) -> None:
+    def __init__(self, default: date = UNSET, **kwargs: Any) -> None:
         """Initialize the date data type. Defaults to current date if not provided."""
         if default is UNSET:
             default = date(**kwargs)
