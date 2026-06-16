@@ -33,7 +33,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        type: [ruff, ty, pyrefly, mypy, pyright, zuban]
+        include:
+          - tool: ruff
+            args: "check ."
+          - tool: ty
+            args: "check . --ignore no-matching-overload"
+          - tool: pyrefly
+            args: "check ."
+          - tool: zuban
+            args: "check ."
+          - tool: mypy
+            args: "./examples"
+          - tool: pyright
+            args: "./examples"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,9 +59,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-lint-${{matrix.type}}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
+          key: ${{ runner.os }}-lint-${{matrix.tool}}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
           restore-keys: |
-            ${{ runner.os }}-lint-${{matrix.type}}
+            ${{ runner.os }}-lint-${{matrix.tool}}
 
-      - name: Run type checking - ${{matrix.type}}
-        run: uvx ${{matrix.type}} check examples
+      - name: Run type checking - ${{matrix.tool}}
+        run: uvx ${{matrix.tool}} ${{matrix.args}}
