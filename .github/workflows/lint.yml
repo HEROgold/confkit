@@ -8,14 +8,43 @@ on:
   workflow_dispatch:
   workflow_call:
 
-concurrency: lint-${{ github.sha }}
+concurrency: lint-${{ github.ref }}
 
 permissions:
   contents: read
 
 jobs:
-  lint:
+  setup:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name : Install dependencies
+        run: uv sync --dev
+
+  lint-and-check:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tool: ruff
+            args: "check ."
+            cache_path: ".ruff_cache"
+          - tool: ty
+            args: "check . --ignore no-matching-overload"
+            cache_path: ".ty_cache"
+          - tool: undersort
+            args: ". --check"
+            cache_path: ".undersort_cache"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,20 +53,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-lint-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
+          key: ${{ runner.os }}-${{ matrix.tool }}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
           restore-keys: |
-            ${{ runner.os }}-lint
+            ${{ runner.os }}-${{ matrix.tool }}-
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
-      - name: Run ruff check
-        run: uv run ruff check .
-
-      - name: Run type checking
-        run: uvx ty check . --ignore no-matching-overload
-
-      - name: run undersort
-        run: uvx undersort . --check
+      - name: Run ${{ matrix.tool }}
+        run: uvx ${{ matrix.tool }} ${{ matrix.args }}

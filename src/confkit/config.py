@@ -7,7 +7,6 @@ It also provides a way to set default values and to set config values using deco
 from __future__ import annotations
 
 import warnings
-from abc import abstractmethod
 from functools import wraps
 from types import NoneType
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, ParamSpec, TypeVar, overload
@@ -183,11 +182,10 @@ class Config(Generic[VT]):
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
 
-    @abstractmethod
     def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
         """Triggered when the config file changes.
 
-        This needs to be implemented before it's usable.
+        This needs to be implemented by a subclass before it's usable.
         This will be called **before** setting the value from the config file.
         This will be called **after** getting (but before validating it's type) the value from config file.
         The `origin` parameter indicates whether the change was triggered by a `get` or `set` operation.

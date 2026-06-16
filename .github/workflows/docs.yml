@@ -7,21 +7,21 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-  deployments: write
+permissions: read-all
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.ref_name }}"
   cancel-in-progress: false
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write       # Required to allow pr-preview-action to push to `gh-pages`
+      pull-requests: write  # Required to allow pr-preview-action to add comments with the link in the PR
+      pages: write          # Required to upload-pages-artifact op master
     steps:
       - uses: actions/checkout@v4
 
@@ -38,24 +38,44 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Generate docs (pdoc + mkdocs)
+        env:
+          DOCS_BASE_URL: ${{ github.event_name == 'pull_request' && format('https://github.io{0}', github.event.number) || 'https://herogold.github.io/confkit' }}
         run: |
           uv sync --group docs
           uv run pdoc confkit -o docs/api
+
+          # Replace all links to the production site with the PR preview URL for PRs, or leave them as-is for pushes to master
+          find docs/api -name "*.md" -type f -exec sed -i "s|https://herogold.github.io/confkit|$DOCS_BASE_URL|g" {} +
+
           uv run mkdocs build -d site
 
+      # Only upload artifact if the push is on the master branch
       - name: Upload artifact
+        if: github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
+      # Deploy PR Preview if the event is a pull request
+      - name: Deploy PR Preview
+        if: github.event_name == 'pull_request'
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: site
+          preview-branch: gh-pages
+          umbrella-dir: pr-previews
+
   deploy:
+    if: github.ref == 'refs/heads/master'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build-docs
+    permissions:
+      pages: write          # Required to update the Pages site
+      id-token: write       # Required to OIDC verification of the deployment
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        if: github.ref == 'refs/heads/master'
         uses: actions/deploy-pages@v4
