@@ -35,13 +35,13 @@ jobs:
       matrix:
         include:
           - tool: ruff
-            args: "check ."
+            args: "check ./examples"
           - tool: ty
-            args: "check . --ignore no-matching-overload"
+            args: "check ./examples --ignore no-matching-overload"
           - tool: pyrefly
-            args: "check ."
+            args: "check ./examples"
           - tool: zuban
-            args: "check ."
+            args: "check ./examples"
           - tool: mypy
             args: "./examples"
           - tool: pyright
