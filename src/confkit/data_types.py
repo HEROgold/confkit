@@ -69,7 +69,7 @@ class BaseDataType(ABC, Generic[T]):
         return Optional(BaseDataType.cast(default))
 
     @staticmethod
-    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911
+    def cast(default: T | BaseDataType[T]) -> BaseDataType[T]:  # noqa: C901, PLR0911, PLR0912
         """Convert the default value to a BaseDataType."""
         # We use Cast to shut up type checkers, as we know primitive types will be correct.
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
