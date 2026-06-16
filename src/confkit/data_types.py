@@ -75,6 +75,7 @@ class BaseDataType(ABC, Generic[T]):
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
         # Check enum types BEFORE basic types since some enums inherit from str/int
         match default:
+            case BaseDataType(): return default
             case dStrEnum():     return cast("BaseDataType[T]", StrEnum(default))
             case dIntFlag():     return cast("BaseDataType[T]", IntFlag(default))
             case dIntEnum():     return cast("BaseDataType[T]", IntEnum(default))
