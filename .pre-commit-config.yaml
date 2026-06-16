@@ -82,6 +82,12 @@ repos:
         types: [python]
         pass_filenames: false
         always_run: true
+      - id: undersort
+        name: undersort
+        entry: undersort
+        language: python
+        types: [python]
+        additional_dependencies: ["undersort"]
 
   # Spell checking (global)
   - repo: https://github.com/shellcheck-py/shellcheck-py

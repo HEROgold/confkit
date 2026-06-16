@@ -7,7 +7,9 @@ authors = [
     { name = "HEROgold" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "undersort>=0.1.5",
+]
 
 [project.optional-dependencies]
 pydantic = [
@@ -56,3 +58,7 @@ exclude = ["tests"]
 
 [tool.ty.rules]
 invalid-assignment = "ignore"
+
+[tool.undersort]
+order = ["public", "protected", "private"]
+method_type_order = ["instance", "class", "static"]

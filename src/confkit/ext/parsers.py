@@ -102,6 +102,56 @@ class MsgspecParser(ConfkitParser, Generic[T]):
         msg = f"Unsupported file extension for writing: {ext}"
         raise ValueError(msg)
 
+    @override
+    def has_section(self, section: str) -> bool:
+        return self._navigate_to_section(section, create=False) is not None
+
+    @override
+    def set_section(self, section: str) -> None:
+        self._navigate_to_section(section, create=True)
+
+    @override
+    def has_option(self, section: str, option: str) -> bool:
+        section_data = self._navigate_to_section(section, create=False)
+        return section_data is not None and option in section_data
+
+    @override
+    def add_section(self, section: str) -> None:
+        self.set_section(section)
+
+    @override
+    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is None or option not in section_data:
+            return str(fallback) if fallback is not UNSET else UNSET
+        return str(section_data[option])
+
+    @override
+    def set(self, section: str, option: str, value: object) -> None:
+        # Raises ConfigPathConflictError if any path element is a scalar.
+        section_data = self._navigate_to_section(section, create=True)
+        # _navigate_to_section always raises ConfigPathConflictError when create=True
+        # and the path is blocked, so section_data is guaranteed to be a dict here.
+        assert section_data is not None  # noqa: S101
+        if isinstance(value, BaseDataType):
+            native = value.value
+            # BaseDataType.__str__ returns str(self.value) by default.
+            # Subclasses with custom string representations (e.g. Hex returns "0xa",
+            # Octal returns "0o10") override __str__, causing str(native) != str(value).
+            # In those cases, store the custom string so convert() can round-trip
+            # correctly on the next read. For standard types the native Python value
+            # is stored directly, preserving native JSON/YAML/TOML types.
+            stored = native if str(native) == str(value) else str(value)
+        else:
+            stored = value
+        section_data[option] = stored
+
+    @override
+    def remove_option(self, section: str, option: str) -> None:
+        section_data = self._navigate_to_section(section, create=False)
+        if section_data is not None and option in section_data:
+            del section_data[option]
+
     def _navigate_to_section(self, section: str, *, create: bool = False) -> NestedDict | None:
         """Navigate to a nested section using dot notation.
 
@@ -162,53 +212,3 @@ class MsgspecParser(ConfkitParser, Generic[T]):
                 return None
 
         return current  # guaranteed to be a dict here
-
-    @override
-    def has_section(self, section: str) -> bool:
-        return self._navigate_to_section(section, create=False) is not None
-
-    @override
-    def set_section(self, section: str) -> None:
-        self._navigate_to_section(section, create=True)
-
-    @override
-    def has_option(self, section: str, option: str) -> bool:
-        section_data = self._navigate_to_section(section, create=False)
-        return section_data is not None and option in section_data
-
-    @override
-    def add_section(self, section: str) -> None:
-        self.set_section(section)
-
-    @override
-    def get(self, section: str, option: str, fallback: str = UNSET) -> str:
-        section_data = self._navigate_to_section(section, create=False)
-        if section_data is None or option not in section_data:
-            return str(fallback) if fallback is not UNSET else UNSET
-        return str(section_data[option])
-
-    @override
-    def set(self, section: str, option: str, value: object) -> None:
-        # Raises ConfigPathConflictError if any path element is a scalar.
-        section_data = self._navigate_to_section(section, create=True)
-        # _navigate_to_section always raises ConfigPathConflictError when create=True
-        # and the path is blocked, so section_data is guaranteed to be a dict here.
-        assert section_data is not None  # noqa: S101
-        if isinstance(value, BaseDataType):
-            native = value.value
-            # BaseDataType.__str__ returns str(self.value) by default.
-            # Subclasses with custom string representations (e.g. Hex returns "0xa",
-            # Octal returns "0o10") override __str__, causing str(native) != str(value).
-            # In those cases, store the custom string so convert() can round-trip
-            # correctly on the next read. For standard types the native Python value
-            # is stored directly, preserving native JSON/YAML/TOML types.
-            stored = native if str(native) == str(value) else str(value)
-        else:
-            stored = value
-        section_data[option] = stored
-
-    @override
-    def remove_option(self, section: str, option: str) -> None:
-        section_data = self._navigate_to_section(section, create=False)
-        if section_data is not None and option in section_data:
-            del section_data[option]

@@ -104,6 +104,22 @@ class BaseDataType(ABC, Generic[T]):
 class _EnumBase(BaseDataType[T]):
     """Base class for enum types with common functionality."""
 
+    def __str__(self) -> str:
+        """Return the string representation with allowed values."""
+        if self.value is None:
+            return str(self.value)
+        return f"{self._get_value_str()}  # allowed: {self._format_allowed_values()}"
+
+    @abstractmethod
+    def _format_allowed_values(self) -> str:
+        """Format the allowed values string. Override in subclasses."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def _get_value_str(self) -> str:
+        """Get the string representation of the current value. Override in subclasses."""
+        raise NotImplementedError
+
     @staticmethod
     def _strip_comment(value: str) -> str:
         """Strip inline comments from value.
@@ -113,22 +129,6 @@ class _EnumBase(BaseDataType[T]):
         if "#" in value:
             return value.split("#", maxsplit=1)[0].strip()
         return value
-
-    @abstractmethod
-    def _format_allowed_values(self) -> str:
-        """Format the allowed values string. Override in subclasses."""
-        raise NotImplementedError
-
-    def __str__(self) -> str:
-        """Return the string representation with allowed values."""
-        if self.value is None:
-            return str(self.value)
-        return f"{self._get_value_str()}  # allowed: {self._format_allowed_values()}"
-
-    @abstractmethod
-    def _get_value_str(self) -> str:
-        """Get the string representation of the current value. Override in subclasses."""
-        raise NotImplementedError
 
 
 EnumType = TypeVar("EnumType", bound=enum.Enum)
@@ -276,17 +276,6 @@ class Integer(BaseDataType[int]):
         super().__init__(default)
         self.base = base
 
-    @staticmethod
-    def int_to_base(number: int, base: int) -> int:
-        """Convert an integer to a string representation in a given base."""
-        if number == 0:
-            return 0
-        digits = []
-        while number:
-            digits.append(str(number % base))
-            number //= base
-        return int("".join(reversed(digits)))
-
     def __str__(self) -> str:  # noqa: D105
         if self.base == DECIMAL:
             return str(self.value)
@@ -304,6 +293,17 @@ class Integer(BaseDataType[int]):
                 raise ValueError(msg)
             return int(val_str, self.base)
         return int(value, self.base)
+
+    @staticmethod
+    def int_to_base(number: int, base: int) -> int:
+        """Convert an integer to a string representation in a given base."""
+        if number == 0:
+            return 0
+        digits = []
+        while number:
+            digits.append(str(number % base))
+            number //= base
+        return int("".join(reversed(digits)))
 
 class Hex(Integer):
     """A config value that represents hexadecimal."""
@@ -357,6 +357,10 @@ class Optional(BaseDataType[T | None], Generic[T]):
         """Initialize the optional data type. Wrapping the provided data type."""
         self._data_type = data_type
 
+    def __str__(self) -> str:
+        """Return the string representation of the wrapped data type."""
+        return str(self._data_type)
+
     @property
     def default(self) -> T | None:
         """Get the default value of the wrapped data type."""
@@ -383,10 +387,6 @@ class Optional(BaseDataType[T | None], Generic[T]):
         if self._data_type.value is None:
             return True
         return self._data_type.validate()
-
-    def __str__(self) -> str:
-        """Return the string representation of the wrapped data type."""
-        return str(self._data_type)
 
 class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
     """A ABC for sequence types like List and Tuples."""
@@ -415,6 +415,18 @@ class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
             default = []
         super().__init__(default)
         self._infer_type(default, data_type)
+
+    def __str__(self) -> str:
+        """Return a string representation of the list."""
+        values: list[str] = []
+        for item in self.value:
+            # Escape escape char
+            escaped_item = str(item).replace(self.escape_char, self.escape_char*2)
+            # Escape separator
+            escaped_item = escaped_item.replace(self.separator, f"{self.escape_char}{self.separator}")
+            values.append(escaped_item)
+
+        return self.separator.join(values)
 
     def _infer_type(self, default: Sequence[T], data_type: BaseDataType[T]) -> None:
         if len(default) <= 0 and data_type is UNSET:
@@ -460,18 +472,6 @@ class _SequenceType(BaseDataType[Sequence[T]], Generic[T]):
 
         return result
 
-    def __str__(self) -> str:
-        """Return a string representation of the list."""
-        values: list[str] = []
-        for item in self.value:
-            # Escape escape char
-            escaped_item = str(item).replace(self.escape_char, self.escape_char*2)
-            # Escape separator
-            escaped_item = escaped_item.replace(self.separator, f"{self.escape_char}{self.separator}")
-            values.append(escaped_item)
-
-        return self.separator.join(values)
-
 class List(_SequenceType[T], Generic[T]):
     """A config value that is a list of values."""
 
@@ -511,6 +511,17 @@ class Set(BaseDataType[set[T]], Generic[T]):
         super().__init__(default)
         self._infer_type(default, data_type)
 
+    def __str__(self) -> str:
+        """Return a string representation of the set."""
+        return ",".join(str(item) for item in self.value)
+
+    def convert(self, value: str) -> set[T]:
+        """Convert a string to a set."""
+        if not value:
+            return set()
+        parts = value.split(",")
+        return {self._data_type.convert(item.strip()) for item in parts}
+
     def _infer_type(self, default: set[T], data_type: BaseDataType[T]) -> None:
         if len(default) <= 0 and data_type is UNSET:
             msg = "Set default must have at least one element to infer type. or specify `data_type=<BaseDataType>`"
@@ -521,17 +532,6 @@ class Set(BaseDataType[set[T]], Generic[T]):
             self._data_type = BaseDataType[T].cast(sample_element)
         else:
             self._data_type = data_type
-
-    def convert(self, value: str) -> set[T]:
-        """Convert a string to a set."""
-        if not value:
-            return set()
-        parts = value.split(",")
-        return {self._data_type.convert(item.strip()) for item in parts}
-
-    def __str__(self) -> str:
-        """Return a string representation of the set."""
-        return ",".join(str(item) for item in self.value)
 
 KT = TypeVar("KT")
 VT = TypeVar("VT")
@@ -569,6 +569,31 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
         self._infer_key_type(default, key_type)
         self._infer_value_type(default, value_type)
 
+    def __str__(self) -> str:
+        """Return a string representation of the dictionary."""
+        items = [
+            f"{self._key_data_type.convert(str(k))}={self._value_data_type.convert(str(v))}"
+            for k, v in self.value.items()
+        ]
+        return ",".join(items)
+
+    def convert(self, value: str) -> dict[KT, VT]:
+        """Convert a string to a dictionary."""
+        if not value:
+            return {}
+
+        parts = value.split(",")
+        result: dict[KT, VT] = {}
+        for part in parts:
+            if "=" not in part:
+                msg = f"Invalid dictionary entry: {part}. Expected format key=value."
+                raise ValueError(msg)
+            key_str, val_str = part.split("=", 1)
+            key = self._key_data_type.convert(key_str.strip())
+            val = self._value_data_type.convert(val_str.strip())
+            result[key] = val
+        return result
+
     def _infer_key_type(self, default: dict[KT, VT], key_type: BaseDataType[KT]) -> None:
         """Infer the key type from the default dictionary if not provided."""
         if len(default.keys()) <= 0 and key_type is UNSET:
@@ -592,31 +617,6 @@ class Dict(BaseDataType[dict[KT, VT]], Generic[KT, VT]):
                 break
         else:
             self._value_data_type = value_type
-
-    def convert(self, value: str) -> dict[KT, VT]:
-        """Convert a string to a dictionary."""
-        if not value:
-            return {}
-
-        parts = value.split(",")
-        result: dict[KT, VT] = {}
-        for part in parts:
-            if "=" not in part:
-                msg = f"Invalid dictionary entry: {part}. Expected format key=value."
-                raise ValueError(msg)
-            key_str, val_str = part.split("=", 1)
-            key = self._key_data_type.convert(key_str.strip())
-            val = self._value_data_type.convert(val_str.strip())
-            result[key] = val
-        return result
-
-    def __str__(self) -> str:
-        """Return a string representation of the dictionary."""
-        items = [
-            f"{self._key_data_type.convert(str(k))}={self._value_data_type.convert(str(v))}"
-            for k, v in self.value.items()
-        ]
-        return ",".join(items)
 
 class _DateTimeKwargs(TypedDict, total=False):
     year: Required[int]
@@ -646,13 +646,13 @@ class DateTime(BaseDataType[datetime]):
                 default = datetime.now(tz=UTC)
         super().__init__(default)
 
-    def convert(self, value: str) -> datetime:
-        """Convert a string value to a datetime."""
-        return datetime.fromisoformat(value)
-
     def __str__(self) -> str:
         """Return the string representation of the stored value."""
         return self.value.isoformat()
+
+    def convert(self, value: str) -> datetime:
+        """Convert a string value to a datetime."""
+        return datetime.fromisoformat(value)
 
 class _DateKwargs(TypedDict):
     year: int
@@ -673,12 +673,12 @@ class Date(BaseDataType[date]):
             default = date(**kwargs)
         super().__init__(default)
 
+    def __str__(self) -> str:  # noqa: D105
+        return self.value.isoformat()
+
     def convert(self, value: str) -> date:
         """Convert a string value to a date."""
         return date.fromisoformat(value)
-
-    def __str__(self) -> str:  # noqa: D105
-        return self.value.isoformat()
 
 class _TimeKwargs(TypedDict, total=False):
     hour: NotRequired[int]
@@ -702,12 +702,12 @@ class Time(BaseDataType[time]):
             default = time(**kwargs)
         super().__init__(default)
 
+    def __str__(self) -> str:  # noqa: D105
+        return self.value.isoformat()
+
     def convert(self, value: str) -> time:
         """Convert a string value to a time."""
         return time.fromisoformat(value)
-
-    def __str__(self) -> str:  # noqa: D105
-        return self.value.isoformat()
 
 class _TimeDeltaKwargs(TypedDict, total=False):
     days: NotRequired[float]
@@ -731,12 +731,12 @@ class TimeDelta(BaseDataType[timedelta]):
             default = timedelta(**kwargs)
         super().__init__(default)
 
+    def __str__(self) -> str:  # noqa: D105
+        return str(self.value.total_seconds())
+
     def convert(self, value: str) -> timedelta:
         """Convert a string value to a timedelta."""
         return timedelta(seconds=float(value))
-
-    def __str__(self) -> str:  # noqa: D105
-        return str(self.value.total_seconds())
 
 __all__ = [
     "BINARY",

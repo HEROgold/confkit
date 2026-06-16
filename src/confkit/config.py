@@ -114,83 +114,9 @@ class Config(Generic[VT]):
         cls._file = parent._file  # noqa: SLF001
         cls._has_read_config = parent._has_read_config  # noqa: SLF001
 
-    @classmethod
-    def _find_parent(cls) -> type[Config[Any]]:
-        for base in cls.__bases__:
-            if issubclass(base, Config):
-                parent = base
-                break
-        else:
-            parent = Config
-        return parent
-
-    def _initialize_data_type(self, default: VT | None | BaseDataType[VT]) -> None:
-        """Initialize the data type based on the default value."""
-        if not self.optional and default is not None:
-            self._data_type = BaseDataType[VT].cast(default)
-        else:
-            self._data_type = BaseDataType[VT].cast_optional(default)
-
-    def _read_parser(self) -> None:
-        """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
-        cls = self.__class__
-        if not cls._has_read_config:
-            self._parser.read(self._file)
-            cls._has_read_config = True
-
-    def _validate_init(self) -> None:
-        """Validate the config descriptor, ensuring it's properly set up."""
-        self.validate_file()
-        self.validate_parser()
-
     def convert(self, value: str) -> VT:
         """Convert the value to the desired type using the given converter method."""
         return self._data_type.convert(value)
-
-    @staticmethod
-    def _warn_base_class_usage() -> None:
-        """Warn users that setting parser/file on the base class can lead to unexpected behavior.
-        Tell the user to subclass <Config> first.
-        """  # noqa: D205
-        warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
-
-    @classmethod
-    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")  # noqa: E501
-    def set_parser(cls, parser: ConfkitParser) -> None:
-        """Set the parser for ALL descriptor instances (of this type/class)."""
-        if cls is Config:
-            cls._warn_base_class_usage()
-        cls._parser = parser
-
-    @classmethod
-    def _detect_parser(cls) -> None:
-        """Set the parser for descriptors based on the file extension of cls._file.
-
-        Uses msgspec-based parsers for yaml, json, toml. Defaults to dict structure.
-        Only sets the parser if there is no parser set.
-        """
-        if cls._file is UNSET:
-            msg = "Config file is not set. Use `set_file()`."
-            raise ValueError(msg)
-        match cls._file.suffix.lower():
-            case ".ini":
-                cls._parser = IniParser()
-            case ".yaml" | ".yml" | ".json" | ".toml":
-                from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
-                cls._parser = MsgspecParser()
-            case ".env":
-                cls._parser = EnvParser()
-            case _:
-                msg = f"Unsupported config file extension: {cls._file.suffix.lower()}"
-                raise ValueError(msg)
-
-    @classmethod
-    def set_file(cls, file: Path) -> None:
-        """Set the file for ALL descriptors."""
-        if cls is Config:
-            cls._warn_base_class_usage()
-        cls._file = file
-        cls._watcher = FileWatcher(file)
 
     def validate_strict_type(self) -> None:
         """Validate the type of the converter matches the desired type."""
@@ -222,20 +148,6 @@ class Config(Generic[VT]):
             msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
             raise InvalidConverterError(msg)
 
-    @classmethod
-    def validate_file(cls) -> None:
-        """Validate the config file."""
-        if cls._file is UNSET:
-            msg = f"Config file is not set. use {cls.__name__}.set_file() to set it."
-            raise ValueError(msg)
-
-    @classmethod
-    def validate_parser(cls) -> None:
-        """Validate the config parser."""
-        if cls._parser is UNSET:
-            msg = f"Config parser is not set. use {cls.__name__}.set_parser() to set it."
-            raise ValueError(msg)
-
     def __set_name__(self, owner: type, name: str) -> None:
         """Set the name of the attribute to the name of the descriptor."""
         self.name = name
@@ -245,34 +157,6 @@ class Config(Generic[VT]):
         cls = self.__class__
         self._original_value = cls._parser.get(self._section, self._setting) or self._data_type.default
         self.private = f"_{self._section}_{self._setting}_{self.name}"
-
-    @staticmethod
-    def _build_section_name(owner: type) -> str:
-        """Build a section name from the class hierarchy using dot notation.
-
-        Strips out function-local scope markers like <locals>.
-        """
-        if qualname := getattr(owner, "__qualname__", None):
-            split_at = qualname.find("<locals>.")
-            if split_at != -1:
-                qualname = qualname[split_at + len("<locals>.") :]
-            return ".".join(
-                part
-                for part in qualname.split(".")
-            )
-        return owner.__name__
-
-    def _ensure_section(self) -> None:
-        """Ensure the section exists in the config file. Creates one if it doesn't exist."""
-        if not self._parser.has_section(self._section):
-            self._parser.add_section(self._section)
-
-    def _ensure_option(self) -> None:
-        """Ensure the option exists in the config file. Creates one if it doesn't exist."""
-        self._ensure_section()
-        if not self._parser.has_option(self._section, self._setting):
-            cls = self.__class__
-            cls._set(self._section, self._setting, self._data_type)
 
     def __get__(self, obj: object, obj_type: object) -> VT:
         """Get the value of the attribute."""
@@ -299,16 +183,45 @@ class Config(Generic[VT]):
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
 
+    @abstractmethod
+    def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
+        """Triggered when the config file changes.
+
+        This needs to be implemented before it's usable.
+        This will be called **before** setting the value from the config file.
+        This will be called **after** getting (but before validating it's type) the value from config file.
+        The `origin` parameter indicates whether the change was triggered by a `get` or `set` operation.
+        """
+
     @classmethod
-    def _set(cls, section: str, setting: str, value: VT | BaseDataType[VT] | BaseDataType[VT | None]) -> None:
-        """Set a config value, and write it to the file."""
-        if not cls._parser.has_section(section):
-            cls._parser.add_section(section)
+    @deprecated("Avoid using set_parser. Confkit will automatically assign a parser based on the file extension. In 2.0 this will be a private method.")  # noqa: E501
+    def set_parser(cls, parser: ConfkitParser) -> None:
+        """Set the parser for ALL descriptor instances (of this type/class)."""
+        if cls is Config:
+            cls._warn_base_class_usage()
+        cls._parser = parser
 
-        cls._parser.set(section, setting, value)
+    @classmethod
+    def set_file(cls, file: Path) -> None:
+        """Set the file for ALL descriptors."""
+        if cls is Config:
+            cls._warn_base_class_usage()
+        cls._file = file
+        cls._watcher = FileWatcher(file)
 
-        if cls.write_on_edit:
-            cls.write()
+    @classmethod
+    def validate_file(cls) -> None:
+        """Validate the config file."""
+        if cls._file is UNSET:
+            msg = f"Config file is not set. use {cls.__name__}.set_file() to set it."
+            raise ValueError(msg)
+
+    @classmethod
+    def validate_parser(cls) -> None:
+        """Validate the config parser."""
+        if cls._parser is UNSET:
+            msg = f"Config parser is not set. use {cls.__name__}.set_parser() to set it."
+            raise ValueError(msg)
 
 
     @classmethod
@@ -373,11 +286,6 @@ class Config(Generic[VT]):
         return wrapper
 
     @classmethod
-    def _set_default(cls, section: str, setting: str, value: VT) -> None:
-        if cls._parser.get(section, setting, fallback=UNSET) is UNSET:
-            cls._set(section, setting, value)
-
-    @classmethod
     def default(cls, section: str, setting: str, value: VT) -> Callable[[Callable[P, F]], Callable[P, F]]:
         """Set a default config value if none are set yet using this descriptor."""
         def wrapper(func: Callable[P, F]) -> Callable[P, F]:
@@ -389,12 +297,104 @@ class Config(Generic[VT]):
             return inner
         return wrapper
 
-    @abstractmethod
-    def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
-        """Triggered when the config file changes.
+    def _initialize_data_type(self, default: VT | None | BaseDataType[VT]) -> None:
+        """Initialize the data type based on the default value."""
+        if not self.optional and default is not None:
+            self._data_type = BaseDataType[VT].cast(default)
+        else:
+            self._data_type = BaseDataType[VT].cast_optional(default)
 
-        This needs to be implemented before it's usable.
-        This will be called **before** setting the value from the config file.
-        This will be called **after** getting (but before validating it's type) the value from config file.
-        The `origin` parameter indicates whether the change was triggered by a `get` or `set` operation.
+    def _read_parser(self) -> None:
+        """Ensure the parser has read the file at initialization. Avoids rewriting the file when settings are already set."""
+        cls = self.__class__
+        if not cls._has_read_config:
+            self._parser.read(self._file)
+            cls._has_read_config = True
+
+    def _validate_init(self) -> None:
+        """Validate the config descriptor, ensuring it's properly set up."""
+        self.validate_file()
+        self.validate_parser()
+
+    def _ensure_section(self) -> None:
+        """Ensure the section exists in the config file. Creates one if it doesn't exist."""
+        if not self._parser.has_section(self._section):
+            self._parser.add_section(self._section)
+
+    def _ensure_option(self) -> None:
+        """Ensure the option exists in the config file. Creates one if it doesn't exist."""
+        self._ensure_section()
+        if not self._parser.has_option(self._section, self._setting):
+            cls = self.__class__
+            cls._set(self._section, self._setting, self._data_type)
+
+    @classmethod
+    def _find_parent(cls) -> type[Config[Any]]:
+        for base in cls.__bases__:
+            if issubclass(base, Config):
+                parent = base
+                break
+        else:
+            parent = Config
+        return parent
+
+    @classmethod
+    def _detect_parser(cls) -> None:
+        """Set the parser for descriptors based on the file extension of cls._file.
+
+        Uses msgspec-based parsers for yaml, json, toml. Defaults to dict structure.
+        Only sets the parser if there is no parser set.
         """
+        if cls._file is UNSET:
+            msg = "Config file is not set. Use `set_file()`."
+            raise ValueError(msg)
+        match cls._file.suffix.lower():
+            case ".ini":
+                cls._parser = IniParser()
+            case ".yaml" | ".yml" | ".json" | ".toml":
+                from confkit.ext.parsers import MsgspecParser  # noqa: PLC0415  Only import if actually used.
+                cls._parser = MsgspecParser()
+            case ".env":
+                cls._parser = EnvParser()
+            case _:
+                msg = f"Unsupported config file extension: {cls._file.suffix.lower()}"
+                raise ValueError(msg)
+
+    @classmethod
+    def _set(cls, section: str, setting: str, value: VT | BaseDataType[VT] | BaseDataType[VT | None]) -> None:
+        """Set a config value, and write it to the file."""
+        if not cls._parser.has_section(section):
+            cls._parser.add_section(section)
+
+        cls._parser.set(section, setting, value)
+
+        if cls.write_on_edit:
+            cls.write()
+
+    @classmethod
+    def _set_default(cls, section: str, setting: str, value: VT) -> None:
+        if cls._parser.get(section, setting, fallback=UNSET) is UNSET:
+            cls._set(section, setting, value)
+
+    @staticmethod
+    def _warn_base_class_usage() -> None:
+        """Warn users that setting parser/file on the base class can lead to unexpected behavior.
+        Tell the user to subclass <Config> first.
+        """  # noqa: D205
+        warnings.warn("<Config> is the base class. Subclass <Config> to avoid unexpected behavior.", stacklevel=2)
+
+    @staticmethod
+    def _build_section_name(owner: type) -> str:
+        """Build a section name from the class hierarchy using dot notation.
+
+        Strips out function-local scope markers like <locals>.
+        """
+        if qualname := getattr(owner, "__qualname__", None):
+            split_at = qualname.find("<locals>.")
+            if split_at != -1:
+                qualname = qualname[split_at + len("<locals>.") :]
+            return ".".join(
+                part
+                for part in qualname.split(".")
+            )
+        return owner.__name__
