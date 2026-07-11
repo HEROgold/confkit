@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, ClassVar, override
+from typing import Any, ClassVar
 
 from hypothesis import given
 from hypothesis import strategies as st
+from typing_extensions import override
 
 from confkit.config import Config
 
