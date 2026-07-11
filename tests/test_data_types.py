@@ -2,13 +2,29 @@
 from __future__ import annotations
 
 from datetime import UTC, date, datetime, time, timedelta
+from pathlib import Path as dPath
+from pathlib import PosixPath, WindowsPath
 from typing import Final
 
 import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from confkit.data_types import Boolean, Date, DateTime, Dict, Float, List, Set, String, Time, TimeDelta, Tuple
+from confkit.data_types import (
+    BaseDataType,
+    Boolean,
+    Date,
+    DateTime,
+    Dict,
+    Float,
+    List,
+    Path,
+    Set,
+    String,
+    Time,
+    TimeDelta,
+    Tuple,
+)
 
 DUMMY_DATE: Final = Date(year=2000, month=1, day=1)
 
@@ -257,3 +273,53 @@ class TestTimeDelta:
         td_type = TimeDelta(test_td)
         assert td_type.convert("300.5") == test_td
         assert str(td_type) == "300.5"
+
+
+class TestPath:
+    """Test the Path data type."""
+
+    def test_path_basic(self) -> None:
+        """Test basic path functionality."""
+        path_type = Path(dPath("some/dir"))
+        assert path_type.convert("other/file.txt") == dPath("other/file.txt")
+
+    def test_path_convert_returns_concrete_path_type(self) -> None:
+        """Converted values use the same concrete Path subclass as the default."""
+        default = dPath("base")
+        path_type = Path(default)
+        converted = path_type.convert("child")
+        # dPath resolves to WindowsPath / PosixPath depending on the OS; both must match.
+        assert isinstance(converted, type(default))
+
+    def test_path_str(self) -> None:
+        """Test the string representation of a Path uses the OS separator."""
+        default = dPath("a", "b")
+        path_type = Path(default)
+        assert str(path_type) == str(default)
+
+    def test_path_empty_string(self) -> None:
+        """An empty string converts to the current-directory path."""
+        path_type = Path(dPath("."))
+        assert path_type.convert("") == dPath("")
+
+    @given(st.lists(st.text(alphabet=st.characters(blacklist_characters="/\\\x00"), min_size=1), min_size=1))
+    def test_path_round_trip(self, parts: list[str]) -> None:
+        """Converting a path's string form back yields an equal path."""
+        original = dPath(*parts)
+        path_type = Path(original)
+        assert path_type.convert(str(original)) == original
+
+    @pytest.mark.parametrize("path_cls", [dPath, PosixPath, WindowsPath])
+    def test_cast_path(self, path_cls: type[dPath]) -> None:
+        """BaseDataType.cast wraps Path, PosixPath and WindowsPath in a Path data type."""
+        try:
+            default = path_cls("some/dir")
+            converted_expected = path_cls("other/file.txt")
+        except NotImplementedError:
+            # The non-native flavour cannot be instantiated on this OS (Python < 3.13).
+            pytest.skip(f"{path_cls.__name__} is not instantiable on this platform")
+            return
+        result = BaseDataType.cast(default)
+        assert isinstance(result, Path)
+        assert result.default == default
+        assert result.convert("other/file.txt") == converted_expected

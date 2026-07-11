@@ -10,6 +10,8 @@ from enum import Enum as dEnum
 from enum import IntEnum as dIntEnum
 from enum import IntFlag as dIntFlag
 from enum import StrEnum as dStrEnum
+from pathlib import Path as dPath
+from pathlib import PosixPath, WindowsPath
 from typing import Any, ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
 from confkit.sentinels import UNSET
@@ -35,6 +37,8 @@ class BaseDataType(ABC, Generic[T]):
     @abstractmethod
     def convert(self, value: str) -> T:
         """Convert a string value to the desired type."""
+        # effectively `return self.type(value)` should work for most types however,
+        # we're marking this as abstract method to avoid validation and raising errors.
 
     def validate(self) -> bool:
         """Validate that the value matches the expected type."""
@@ -76,23 +80,23 @@ class BaseDataType(ABC, Generic[T]):
         # If a custom type is passed, it should be a BaseDataType subclass, which already has the correct types.
         # Check enum types BEFORE basic types since some enums inherit from str/int
         match default:
-            case BaseDataType(): return default
-            case dStrEnum():     return cast("BaseDataType[T]", StrEnum(default))
-            case dIntFlag():     return cast("BaseDataType[T]", IntFlag(default))
-            case dIntEnum():     return cast("BaseDataType[T]", IntEnum(default))
-            case dEnum():        return cast("BaseDataType[T]", Enum(default))
-            case bool():         return cast("BaseDataType[T]", Boolean(default))
-            case None:           return cast("BaseDataType[T]", NoneType())
-            case int():          return cast("BaseDataType[T]", Integer(default))
-            case float():        return cast("BaseDataType[T]", Float(default))
-            case str():          return cast("BaseDataType[T]", String(default))
-            case timedelta():    return cast("BaseDataType[T]", TimeDelta(default))
-            case time():         return cast("BaseDataType[T]", Time(default))
-            case date():         return cast("BaseDataType[T]", Date(default))
-            case datetime():     return cast("BaseDataType[T]", DateTime(default))
-            case set():          return cast("BaseDataType[T]", Set(default))
-            case list():         return cast("BaseDataType[T]", List(default))
-            case tuple():        return cast("BaseDataType[T]", Tuple(default))
+            case BaseDataType():                        return default
+            case dStrEnum():                            return cast("BaseDataType[T]", StrEnum(default))
+            case dIntFlag():                            return cast("BaseDataType[T]", IntFlag(default))
+            case dIntEnum():                            return cast("BaseDataType[T]", IntEnum(default))
+            case dEnum():                               return cast("BaseDataType[T]", Enum(default))
+            case bool():                                return cast("BaseDataType[T]", Boolean(default))
+            case int():                                 return cast("BaseDataType[T]", Integer(default))
+            case float():                               return cast("BaseDataType[T]", Float(default))
+            case str():                                 return cast("BaseDataType[T]", String(default))
+            case timedelta():                           return cast("BaseDataType[T]", TimeDelta(default))
+            case datetime():                            return cast("BaseDataType[T]", DateTime(default))
+            case time():                                return cast("BaseDataType[T]", Time(default))
+            case date():                                return cast("BaseDataType[T]", Date(default))
+            case set():                                 return cast("BaseDataType[T]", Set(default))
+            case list():                                return cast("BaseDataType[T]", List(default))
+            case tuple():                               return cast("BaseDataType[T]", Tuple(default))
+            case PosixPath() | WindowsPath() | dPath(): return cast("BaseDataType[T]", Path(default))
             case _:
                 msg = (
                     f"Unsupported default value type: {type(default).__name__}. "
@@ -737,6 +741,14 @@ class TimeDelta(BaseDataType[timedelta]):
     def convert(self, value: str) -> timedelta:
         """Convert a string value to a timedelta."""
         return timedelta(seconds=float(value))
+
+T2 = TypeVar("T2", bound=PosixPath | WindowsPath | dPath)
+class Path(BaseDataType[T2]):
+    """A config value that is a file path."""
+
+    def convert(self, value: str) -> T2:
+        """Convert a string value to a Path."""
+        return self.type(value)
 
 __all__ = [
     "BINARY",
