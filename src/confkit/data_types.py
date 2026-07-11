@@ -81,6 +81,7 @@ class BaseDataType(ABC, Generic[T]):
         # Check enum types BEFORE basic types since some enums inherit from str/int
         match default:
             case BaseDataType():                        return default
+            case None:                                  return cast("BaseDataType[T]", NoneType())
             case dStrEnum():                            return cast("BaseDataType[T]", StrEnum(default))
             case dIntFlag():                            return cast("BaseDataType[T]", IntFlag(default))
             case dIntEnum():                            return cast("BaseDataType[T]", IntEnum(default))
@@ -335,8 +336,11 @@ class Octal(Integer):
         """Convert a string value to an integer from octal."""
         return int(value.removeprefix("0o"), 8)
 
-class Binary(BaseDataType[bytes | int]):
-    """A config value that represents binary."""
+class Binary(BaseDataType[int]):
+    """A config value that represents binary.
+
+    Accepts ``bytes`` or ``int`` on input; the value is always stored and returned as ``int``.
+    """
 
     def __init__(self, default: bytes | int = 0) -> None:  # noqa: D107
         if isinstance(default, bytes):

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -14,7 +14,8 @@ from confkit.config import Config
 class ConfigTest(Config[Any]):
     file_change_events: ClassVar[list[tuple[str, Any, Any]]] = []
 
-    def on_file_change(self, origin: str, old: Any, new: Any) -> None:  # noqa: ANN401, D102
+    @override
+    def on_file_change(self, origin: str, old: Any, new: Any) -> None:
         self.__class__.file_change_events.append((origin, old, new))
 
 config_file = Path("config_test.ini")

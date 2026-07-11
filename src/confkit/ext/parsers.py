@@ -123,7 +123,7 @@ class MsgspecParser(ConfkitParser, Generic[T]):
     def get(self, section: str, option: str, fallback: str = UNSET) -> str:
         section_data = self._navigate_to_section(section, create=False)
         if section_data is None or option not in section_data:
-            return str(fallback) if fallback is not UNSET else UNSET
+            return fallback
         return str(section_data[option])
 
     @override
@@ -145,6 +145,10 @@ class MsgspecParser(ConfkitParser, Generic[T]):
         else:
             stored = value
         section_data[option] = stored
+
+    @override
+    def set_option(self: MsgspecParser[T], option: str) -> None:
+        self.set(section="", option=option, value=UNSET)
 
     @override
     def remove_option(self, section: str, option: str) -> None:
