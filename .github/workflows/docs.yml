@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+    types: [ opened, reopened, synchronize, closed ]
   workflow_dispatch:
 
 permissions: read-all
@@ -26,18 +27,22 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
+        if: github.event.action != 'closed'
         with:
           python-version: '3.12'
 
       - name: Install uv
+        if: github.event.action != 'closed'
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
       - name: Setup Pages
+        if: github.event.action != 'closed'
         uses: actions/configure-pages@v5
 
       - name: Generate docs (pdoc + mkdocs)
+        if: github.event.action != 'closed'
         env:
           DOCS_BASE_URL: ${{ github.event_name == 'pull_request' && format('https://github.io{0}', github.event.number) || 'https://herogold.github.io/confkit' }}
         run: |
@@ -56,7 +61,9 @@ jobs:
         with:
           path: site
 
-      # Deploy PR Preview if the event is a pull request
+      # Deploy the PR preview on open/sync/reopen; remove it when the PR is closed.
+      # pr-preview-action defaults to `action: auto`, which detects the `closed`
+      # event and deletes the preview directory from gh-pages.
       - name: Deploy PR Preview
         if: github.event_name == 'pull_request'
         uses: rossjrw/pr-preview-action@v1
