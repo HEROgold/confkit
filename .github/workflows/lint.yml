@@ -63,4 +63,4 @@ jobs:
           enable-cache: true
 
       - name: Run ${{ matrix.tool }}
-        run: uvx ${{ matrix.tool }} ${{ matrix.args }}
+        run: uv run ${{ matrix.tool }} ${{ matrix.args }}

@@ -67,4 +67,4 @@ jobs:
             ${{ runner.os }}-lint-${{matrix.tool}}
 
       - name: Run type checking - ${{matrix.tool}}
-        run: uvx ${{matrix.tool}} ${{matrix.args}}
+        run: uv run ${{matrix.tool}} ${{matrix.args}}
