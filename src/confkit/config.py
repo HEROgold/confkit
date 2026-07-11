@@ -90,6 +90,7 @@ class Config(Generic[VT]):
         cls = self.__class__
         self.optional = optional or cls.optional # Be truthy when either one is true.
 
+
         if not self.optional and default is UNSET:
             msg = "Default value cannot be None when optional is False."
             raise InvalidDefaultError(msg)
@@ -182,7 +183,7 @@ class Config(Generic[VT]):
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
 
-    def on_file_change(self, origin: Literal["get", "set"], old: VT | UNSET, new: VT) -> None:
+    def on_file_change(self, origin: Literal["get", "set"], old: VT, new: VT) -> None:
         """Triggered when the config file changes.
 
         This needs to be implemented by a subclass before it's usable.
@@ -300,6 +301,7 @@ class Config(Generic[VT]):
         if not self.optional and default is not None:
             self._data_type = BaseDataType[VT].cast(default)
         else:
+            # pyrefly: ignore [bad-assignment]
             self._data_type = BaseDataType[VT].cast_optional(default)
 
     def _read_parser(self) -> None:

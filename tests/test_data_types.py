@@ -299,8 +299,8 @@ class TestPath:
 
     def test_path_empty_string(self) -> None:
         """An empty string converts to the current-directory path."""
-        path_type = Path(dPath("."))
-        assert path_type.convert("") == dPath("")
+        path_type = Path(dPath("."))  # noqa: PTH201
+        assert path_type.convert("") == dPath("")  # noqa: PTH201
 
     @given(st.lists(st.text(alphabet=st.characters(blacklist_characters="/\\\x00"), min_size=1), min_size=1))
     def test_path_round_trip(self, parts: list[str]) -> None:
