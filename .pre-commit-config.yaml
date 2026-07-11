@@ -49,6 +49,12 @@ repos:
       - id: debug-statements
         files: ^src/.*\.py$
 
+  # Security scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
+
   # Validate packaging metadata early
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.24.1
