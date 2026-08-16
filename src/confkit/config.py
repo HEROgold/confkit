@@ -114,40 +114,6 @@ class Config(Generic[VT]):
         cls._file = parent._file  # noqa: SLF001
         cls._has_read_config = parent._has_read_config  # noqa: SLF001
 
-    def convert(self, value: str) -> VT:
-        """Convert the value to the desired type using the given converter method."""
-        return self._data_type.convert(value)
-
-    def validate_strict_type(self) -> None:
-        """Validate the type of the converter matches the desired type."""
-        if self._data_type.convert is UNSET:
-            msg = "Converter is not set."
-            raise InvalidConverterError(msg)
-
-        cls = self.__class__
-        self.__config_value = cls._parser.get(self._section, self._setting)
-        self.__converted_value = self.convert(self.__config_value)
-
-        if not cls.validate_types:
-            return
-
-        self.__converted_type = type(self.__converted_value)
-        default_value_type = type(self._data_type.default)
-
-        is_optional = self.optional or isinstance(self._data_type, Optional)
-        if (is_optional) and self.__converted_type in (default_value_type, NoneType):
-            # Allow None or the same type as the default value to be returned by the converter when _optional is True.
-            return
-        if self.__converted_type is not default_value_type:
-            msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."  # noqa: E501
-            raise InvalidConverterError(msg)
-
-        # Set the data_type value. ensuring validation works as expected.
-        self._data_type.value = self.__converted_value
-        if not self._data_type.validate():
-            msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
-            raise InvalidConverterError(msg)
-
     def __set_name__(self, owner: type, name: str) -> None:
         """Set the name of the attribute to the name of the descriptor."""
         self.name = name
@@ -182,6 +148,40 @@ class Config(Generic[VT]):
         cls = self.__class__
         cls._set(self._section, self._setting, self._data_type)
         setattr(obj, self.private, value)
+
+    def convert(self, value: str) -> VT:
+        """Convert the value to the desired type using the given converter method."""
+        return self._data_type.convert(value)
+
+    def validate_strict_type(self) -> None:
+        """Validate the type of the converter matches the desired type."""
+        if self._data_type.convert is UNSET:
+            msg = "Converter is not set."
+            raise InvalidConverterError(msg)
+
+        cls = self.__class__
+        self.__config_value = cls._parser.get(self._section, self._setting)
+        self.__converted_value = self.convert(self.__config_value)
+
+        if not cls.validate_types:
+            return
+
+        self.__converted_type = type(self.__converted_value)
+        default_value_type = type(self._data_type.default)
+
+        is_optional = self.optional or isinstance(self._data_type, Optional)
+        if (is_optional) and self.__converted_type in (default_value_type, NoneType):
+            # Allow None or the same type as the default value to be returned by the converter when _optional is True.
+            return
+        if self.__converted_type is not default_value_type:
+            msg = f"Converter does not return the same type as the default value <{default_value_type}> got <{self.__converted_type}>."  # noqa: E501
+            raise InvalidConverterError(msg)
+
+        # Set the data_type value. ensuring validation works as expected.
+        self._data_type.value = self.__converted_value
+        if not self._data_type.validate():
+            msg = f"Invalid value for {self._section}.{self._setting}: {self.__converted_value}"
+            raise InvalidConverterError(msg)
 
     def on_file_change(self, origin: Literal["get", "set"], old: VT, new: VT) -> None:
         """Triggered when the config file changes.

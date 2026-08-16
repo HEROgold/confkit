@@ -24,13 +24,6 @@ class Reference(BaseDataType[ConfigType]):
         """Return the string representation of the reference."""
         return f"{self.value._file}"  # noqa: SLF001
 
-    def convert(self, value: str) -> ConfigType:
-        """Convert a string value to the desired type."""
-        file_path = Path(value)
-        cls = self.value
-        cls.set_file(file_path.resolve())
-        return cls
-
     def __set__(self, instance: object, value: ConfigType) -> None:
         """Set the value on the owner configuration instance."""
         if not isinstance(value, type) or not issubclass(value, Config):
@@ -41,6 +34,13 @@ class Reference(BaseDataType[ConfigType]):
     def __get__(self, instance: object, owner: type) -> ConfigType:
         """Get the value from the owner configuration instance."""
         return self.value
+
+    def convert(self, value: str) -> ConfigType:
+        """Convert a string value to the desired type."""
+        file_path = Path(value)
+        cls = self.value
+        cls.set_file(file_path.resolve())
+        return cls
 
 __all__ = [
     "Reference",
