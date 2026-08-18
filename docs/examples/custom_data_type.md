@@ -20,7 +20,7 @@ Config.set_file(Path("config.ini"))
 
 class UpperString(BaseDataType[str]):
     """String that is always stored / returned in UPPER CASE."""
-    def convert(self, value: str) -> str:  # raw INI -> normalized
+    def convert(self, value: str) -> str:  # raw configuration -> normalized
         return str(value).upper()
 
     def __str__(self, value: str):  # normalized -> persisted string

@@ -89,8 +89,8 @@ print(f"IPv4 netmask: {ServerConfig.Network.IPv4.netmask}")
 print(f"IPv6 address: {ServerConfig.Network.IPv6.address}")
 print(f"IPv6 prefix: {ServerConfig.Network.IPv6.prefix}")
 
-# Example 3: INI files with dot notation
-print("\n=== Nested INI Configuration (using dot notation) ===")
+# Example 3: configuration files with dot notation
+print("\n=== Nested configuration Configuration (using dot notation) ===")
 
 
 class IniConfig(Config[T]):

@@ -25,17 +25,17 @@ Config.set_file(Path("config.ini"))
 class UpperString(BaseDataType[str]):
     """Custom string data type that normalizes to UPPER CASE.
 
-    Stored *exactly* as upper case in the INI file. Accepts any input that can
+    Stored *exactly* as upper case in the configuration file. Accepts any input that can
     be coerced to str.
     """
 
     def __str__(self) -> str:
-        # Called when storing data in the INI;
+        # Called when storing data in the configuration;
         return self.value.upper()
 
     def convert(self, value: str) -> str:
         """Convert input to upper case string."""
-        # Called when reading from INI
+        # Called when reading from configuration
         return value.upper()
 
     def validate(self) -> bool:
@@ -68,6 +68,6 @@ if __name__ == "__main__":
     print("shout_name:", config.shout_name)
     print("project:", config.project)
 
-    # Show underlying INI content (optional diagnostic)
+    # Show underlying configuration content (optional diagnostic)
     ini_text = Path("config.ini").read_text(encoding="utf-8")
     print("\nRaw config.ini contents:\n" + ini_text)
