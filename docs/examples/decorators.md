@@ -4,8 +4,8 @@
 
 Shows how to inject configuration values into functions using decorators:
 
-- [`@Config.with_setting(descriptor)`](pdoc:confkit.Config.with_setting) — injects kwarg named after descriptor
-- [`@Config.with_kwarg(section, option, kwarg_name, default)`](pdoc:confkit.Config.with_kwarg) — inject by strings + custom kwarg name
+- [@Config.with_setting(descriptor)](/confkit/api/confkit.html#Config.with_setting) — injects kwarg named after descriptor
+- [@Config.with_kwarg(section, option, kwarg_name, default)](/confkit/api/confkit.html#Config.with_kwarg) — inject by strings + custom kwarg name
 
 ## Running
 

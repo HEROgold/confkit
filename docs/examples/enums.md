@@ -4,7 +4,7 @@
 
 Demonstrates enum support:
 
-- [`StrEnum`](pdoc:confkit.StrEnum), [`IntEnum`](pdoc:confkit.IntEnum), [`IntFlag`](pdoc:confkit.IntFlag), usage via dedicated data types
+- [StrEnum](/confkit/api/confkit.html#StrEnum), [IntEnum](/confkit/api/confkit.html#IntEnum), [IntFlag](/confkit/api/confkit.html#IntFlag), usage via dedicated data types
 - Optional enum values
 - Bitwise flag composition (`Permission`)
 - **Self-documenting config files** with inline comments showing all allowed enum values

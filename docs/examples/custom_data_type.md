@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Shows how to create and use a custom [`BaseDataType`](pdoc:confkit.BaseDataType) implementation.
+Shows how to create and use a custom [BaseDataType](/confkit/api/confkit.html#BaseDataType) implementation.
 
 - Normalize and persist a value in a consistent representation
 - Demonstrate the required `convert` method

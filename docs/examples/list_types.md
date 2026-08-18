@@ -30,7 +30,7 @@ empty_list =
 
 ## Notes
 
-- See [`List.separator`](pdoc:confkit.List.separator) and [`List.escape_char`](pdoc:confkit.List.escape_char) for their default values (explicitly set in the example for clarity).
+- See [List.separator](/confkit/api/confkit.html#List.separator) and [List.escape_char](/confkit/api/confkit.html#List.escape_char) for their default values (explicitly set in the example for clarity).
 - Items containing the separator are escaped when written, then unescaped on read.
 - An explicit empty list with a declared data type stays as a blank line after the equals sign.
 

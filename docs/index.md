@@ -10,7 +10,7 @@ This landing page orients you quickly:
 | Create a custom data type | Usage Guide: [Adding a New Data Type](usage.md#adding-a-new-data-type) |
 | See all data type converters | [Reference: Data Types](reference/data_types.md) |
 | Decorator utilities | [Usage: Decorators Overview](usage.md#decorators-overview) |
-| API by symbol | [Generated API (pdoc)](pdoc:confkit) |
+| API by symbol | [Generated API (pdoc)](/confkit/api/confkit.html) |
 | Contribute / issues | GitHub Repo: [HEROgold/confkit](https://github.com/HEROgold/confkit) |
 
 ---
@@ -82,13 +82,13 @@ Two complementary views:
 
 ### Full symbol index (pdoc)
 
-[confkit API](pdoc:confkit)
+[confkit API](/confkit/api/confkit.html)
 
 Use `(pdoc:qual.name)` style links inside docs for deep, stable symbol links
 
 ```md
-The [MyClass](pdoc:mypackage.MyClass) class is awesome.
-The [do_something](pdoc:mypackage.MyClass.do_something) method is awesome.
+The [MyClass](/confkit/api/confkit.html#mypackage.MyClass) class is awesome.
+The [do_something](/confkit/api/confkit.html#mypackage.MyClass.do_something) method is awesome.
 The [](mypackage.MyClass) class is awesome.
 ```
 
