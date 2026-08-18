@@ -1,88 +1,30 @@
-name: Docs
-
+name: Documentation
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-    types: [ opened, reopened, synchronize, closed ]
-  workflow_dispatch:
-
-permissions: read-all
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages-${{ github.ref_name }}"
-  cancel-in-progress: false
-
+    branches:
+      - master
+      - main
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 jobs:
-  build-docs:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write       # Required to allow pr-preview-action to push to `gh-pages`
-      pull-requests: write  # Required to allow pr-preview-action to add comments with the link in the PR
-      pages: write          # Required to upload-pages-artifact op master
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        if: github.event.action != 'closed'
-        with:
-          python-version: '3.12'
-
-      - name: Install uv
-        if: github.event.action != 'closed'
-        uses: astral-sh/setup-uv@v7
-        with:
-          enable-cache: true
-
-      - name: Setup Pages
-        if: github.event.action != 'closed'
-        uses: actions/configure-pages@v5
-
-      - name: Generate docs (pdoc + mkdocs)
-        if: github.event.action != 'closed'
-        env:
-          DOCS_BASE_URL: ${{ github.event_name == 'pull_request' && format('https://github.io{0}', github.event.number) || 'https://herogold.github.io/confkit' }}
-        run: |
-          uv sync --group docs
-          uv run pdoc confkit -o docs/api
-
-          # Replace all links to the production site with the PR preview URL for PRs, or leave them as-is for pushes to master
-          find docs/api -name "*.md" -type f -exec sed -i "s|https://herogold.github.io/confkit|$DOCS_BASE_URL|g" {} +
-
-          uv run mkdocs build -d site
-
-      # Only upload artifact if the push is on the master branch
-      - name: Upload artifact
-        if: github.ref == 'refs/heads/master'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      # Deploy the PR preview on open/sync/reopen; remove it when the PR is closed.
-      # pr-preview-action defaults to `action: auto`, which detects the `closed`
-      # event and deletes the preview directory from gh-pages.
-      - name: Deploy PR Preview
-        if: github.event_name == 'pull_request'
-        uses: rossjrw/pr-preview-action@v1
-        with:
-          source-dir: site
-          preview-branch: gh-pages
-          umbrella-dir: pr-previews
-
   deploy:
-    if: github.ref == 'refs/heads/master'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build-docs
-    permissions:
-      pages: write          # Required to update the Pages site
-      id-token: write       # Required to OIDC verification of the deployment
     steps:
-      - name: Deploy to GitHub Pages
+      - uses: actions/configure-pages@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+      - run: pip install zensical pdoc
+      - run: pdoc confkit -o docs/api
+      - run: zensical build --clean
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+      - uses: actions/deploy-pages@v5
         id: deployment
-        uses: actions/deploy-pages@v4

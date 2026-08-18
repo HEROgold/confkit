@@ -4,7 +4,7 @@
 
 Demonstrates nullable / optional configuration patterns:
 
-- `optional=True` shorthand vs [`Optional(...)`](pdoc:confkit.Optional) wrapper
+- `optional=True` shorthand vs [Optional(...)](/confkit/api/confkit.html#Optional) wrapper
 - Optional enums, strings, integers
 - Empty string vs None semantics
 - Cascading defaults & fallback logic

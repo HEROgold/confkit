@@ -8,26 +8,26 @@ confkit uses a family of small converter classes to provide type safety and roun
 
 ## Base Type
 
-- [`BaseDataType`](pdoc:confkit.BaseDataType)
-  - [`BaseDataType.convert`](pdoc:confkit.BaseDataType.convert)
-  - [`BaseDataType.validate`](pdoc:confkit.BaseDataType.validate)
-  - [`BaseDataType.cast`](pdoc:confkit.BaseDataType.cast)
-  - [`BaseDataType.cast_optional`](pdoc:confkit.BaseDataType.cast_optional)
+- [BaseDataType](/confkit/api/confkit.html#BaseDataType)
+  - [BaseDataType.convert](/confkit/api/confkit.html#BaseDataType.convert)
+  - [BaseDataType.validate](/confkit/api/confkit.html#BaseDataType.validate)
+  - [BaseDataType.cast](/confkit/api/confkit.html#BaseDataType.cast)
+  - [BaseDataType.cast_optional](/confkit/api/confkit.html#BaseDataType.cast_optional)
 
 ## Primitive Converters
 
-- [`String`](pdoc:confkit.String)
-- [`Integer`](pdoc:confkit.Integer)
-- [`Float`](pdoc:confkit.Float)
-- [`Boolean`](pdoc:confkit.Boolean)
-- [`NoneType`](pdoc:confkit.NoneType)
+- [String](/confkit/api/confkit.html#String)
+- [Integer](/confkit/api/confkit.html#Integer)
+- [Float](/confkit/api/confkit.html#Float)
+- [Boolean](/confkit/api/confkit.html#Boolean)
+- [NoneType](/confkit/api/confkit.html#NoneType)
 
 ## Enum Converters
 
-- [`Enum`](pdoc:confkit.Enum)
-- [`StrEnum`](pdoc:confkit.StrEnum)
-- [`IntEnum`](pdoc:confkit.IntEnum)
-- [`IntFlag`](pdoc:confkit.IntFlag)
+- [Enum](/confkit/api/confkit.html#Enum)
+- [StrEnum](/confkit/api/confkit.html#StrEnum)
+- [IntEnum](/confkit/api/confkit.html#IntEnum)
+- [IntFlag](/confkit/api/confkit.html#IntFlag)
 
 All enum types automatically display allowed values as inline comments in the config file, making them self-documenting for end-users. For example:
 
@@ -44,34 +44,34 @@ Comments are automatically stripped when reading values, ensuring they don't int
 
 ## Number Representation Helpers
 
-- [`Hex`](pdoc:confkit.Hex)
-- [`Octal`](pdoc:confkit.Octal)
-- [`Binary`](pdoc:confkit.Binary)
+- [Hex](/confkit/api/confkit.html#Hex)
+- [Octal](/confkit/api/confkit.html#Octal)
+- [Binary](/confkit/api/confkit.html#Binary)
 
 ## Optional & Composite
 
-- [`Optional`](pdoc:confkit.Optional)
-- [`List`](pdoc:confkit.List)
+- [Optional](/confkit/api/confkit.html#Optional)
+- [List](/confkit/api/confkit.html#List)
 
 > Design note: `Optional` wraps another `BaseDataType` and returns `None` when a null sentinel is parsed.
 
 ## Collections
 
-- [`Tuple`](pdoc:confkit.Tuple)
-- [`Set`](pdoc:confkit.Set)
-- [`Dict`](pdoc:confkit.Dict)
+- [Tuple](/confkit/api/confkit.html#Tuple)
+- [Set](/confkit/api/confkit.html#Set)
+- [Dict](/confkit/api/confkit.html#Dict)
 
 `Tuple`, `Set`, and `Dict` mirror their built‑in counterparts. Allowing for collections to be stored in INI files.
 
 ## Date & Time
 
-- [`DateTime`](pdoc:confkit.DateTime)
-- [`Date`](pdoc:confkit.Date)
-- [`Time`](pdoc:confkit.Time)
-- [`TimeDelta`](pdoc:confkit.TimeDelta)
+- [DateTime](/confkit/api/confkit.html#DateTime)
+- [Date](/confkit/api/confkit.html#Date)
+- [Time](/confkit/api/confkit.html#Time)
+- [TimeDelta](/confkit/api/confkit.html#TimeDelta)
 
 `DateTime`, `Date`, `Time` and `TimeDelta` mirror their built-in counterparts. Allowing to store date information in INI files.
 
 ## Custom Type Example
 
-- [`BaseDataType`](pdoc:confkit.BaseDataType)
+- [BaseDataType](/confkit/api/confkit.html#BaseDataType)

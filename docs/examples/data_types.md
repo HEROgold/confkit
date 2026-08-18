@@ -5,9 +5,9 @@
 Showcases the breadth of built-in and helper data types:
 
 - Explicit vs implicit (auto-detected) types
-- Numeric formatting ([Hex](pdoc:confkit.Hex), [Octal](pdoc:confkit.Octal), [Binary](pdoc:confkit.Binary))
+- Numeric formatting ([Hex](/confkit/api/confkit.html#Hex), [Octal](/confkit/api/confkit.html#Octal), [Binary](/confkit/api/confkit.html#Binary))
 - Custom base integers (encoded as `<base>c<value>` in the file)
-- Bytes → integer conversion via [`Binary`](pdoc:confkit.Binary)
+- Bytes → integer conversion via [Binary](/confkit/api/confkit.html#Binary)
 
 ## Running
 

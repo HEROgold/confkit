@@ -16,7 +16,7 @@ All examples assume you are in the project root and have dependencies installed 
 uv run python examples/basic.py
 ```
 
-> If you are editing examples and want immediate persistence, remember that [`Config.write_on_edit`](pdoc:confkit.Config.write_on_edit) defaults to `True` unless explicitly disabled.
+> If you are editing examples and want immediate persistence, remember that [Config.write_on_edit](/confkit/api/confkit.html#Config.write_on_edit) defaults to `True` unless explicitly disabled.
 
 ## Example Categories
 
