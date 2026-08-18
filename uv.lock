@@ -204,6 +204,7 @@ docs = [
     { name = "mkdocs-pdoc-plugin" },
     { name = "mkdocstrings", extra = ["python"] },
     { name = "pdoc" },
+    { name = "zensical" },
 ]
 
 [package.metadata]
@@ -237,6 +238,7 @@ docs = [
     { name = "mkdocs-pdoc-plugin", git = "https://github.com/spirali/mkdocs-pdoc-plugin" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=1.0.3" },
     { name = "pdoc", specifier = ">=16.0.0" },
+    { name = "zensical", specifier = ">=0.0.55" },
 ]
 
 [[package]]
