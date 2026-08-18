@@ -42,10 +42,10 @@ Config.set_file(Path("config.ini"))
 
 # 2. Define the custom converter, with a convert method (from str -> your_type)
 class UpperString(BaseDataType[str]):
-    def convert(self, value: str) -> str:  # str from INI -> normalized value
+    def convert(self, value: str) -> str:  # str from configuration -> normalized value
         return str(value).upper()
 
-    def __str__(self, value: str):  # value -> string for INI
+    def __str__(self, value: str):  # value -> string for configuration
         return value.upper()
 
 # 3. Use the custom datatype inside a config class

@@ -61,7 +61,7 @@ Comments are automatically stripped when reading values, ensuring they don't int
 - [Set](/confkit/api/confkit.html#Set)
 - [Dict](/confkit/api/confkit.html#Dict)
 
-`Tuple`, `Set`, and `Dict` mirror their built‑in counterparts. Allowing for collections to be stored in INI files.
+`Tuple`, `Set`, and `Dict` mirror their built‑in counterparts. Allowing for collections to be stored in configuration files.
 
 ## Date & Time
 
@@ -70,7 +70,7 @@ Comments are automatically stripped when reading values, ensuring they don't int
 - [Time](/confkit/api/confkit.html#Time)
 - [TimeDelta](/confkit/api/confkit.html#TimeDelta)
 
-`DateTime`, `Date`, `Time` and `TimeDelta` mirror their built-in counterparts. Allowing to store date information in INI files.
+`DateTime`, `Date`, `Time` and `TimeDelta` mirror their built-in counterparts. Allowing to store date information in configuration files.
 
 ## Custom Type Example
 

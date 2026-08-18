@@ -20,12 +20,12 @@ This ensures that confkit remains compatible with current Python versions while 
 ## What is it?
 
 confkit is a Python library that provides type-safe configuration management with automatic type conversion and validation.
-It uses descriptors to define configuration values as class attributes that automatically read from and write to INI files.
+It uses descriptors to define configuration values as class attributes that automatically read from and write to configuration files.
 
 ## What does it do?
 
 - Type-safe configuration with automatic type conversion
-- Automatic INI file management
+- Automatic configuration file management
 - Default value handling with file persistence
 - Optional value support
 - Enum support (Enum, StrEnum, IntEnum, IntFlag)
