@@ -45,6 +45,7 @@ docs = [
     "mkdocstrings[python]>=1.0.3",
     "mkdocs-pdoc-plugin @ git+https://github.com/spirali/mkdocs-pdoc-plugin",
     "pdoc>=16.0.0",
+    "zensical>=0.0.55",
 ]
 
 [[tool.pyright.executionEnvironments]]
