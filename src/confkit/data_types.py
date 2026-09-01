@@ -5,7 +5,7 @@ from __future__ import annotations
 import enum
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from datetime import date, datetime, time, timedelta, tzinfo
+from datetime import UTC, date, datetime, time, timedelta, tzinfo
 from enum import Enum as dEnum
 from enum import IntEnum as dIntEnum
 from enum import IntFlag as dIntFlag
@@ -650,7 +650,10 @@ class DateTime(BaseDataType[datetime]):
     def __init__(self, default: datetime | UNSET = UNSET, **kwargs: Any) -> None:
         """Initialize the datetime data type."""
         if default is UNSET:
-            default = datetime(**kwargs)  # noqa: DTZ001 Tzinfo is (optionally) passed using kwargs
+            try:
+                default = datetime(**kwargs)  # noqa: DTZ001 Tzinfo is (optionally) passed using kwargs
+            except TypeError:
+                default = datetime.now(tz=UTC)
         super().__init__(default)
 
     @override
