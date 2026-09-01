@@ -14,6 +14,8 @@ from pathlib import Path as dPath
 from pathlib import PosixPath, WindowsPath
 from typing import Any, ClassVar, Generic, NotRequired, Required, TypedDict, TypeVar, Unpack, cast, overload
 
+from typing_extensions import override
+
 from confkit.sentinels import UNSET
 
 from .exceptions import InvalidConverterError, InvalidDefaultError
@@ -645,8 +647,8 @@ class DateTime(BaseDataType[datetime]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateTimeKwargs]) -> None: ...
 
-    def __init__(self, default: datetime = UNSET, **kwargs: Any) -> None:
-        """Initialize the datetime data type. Defaults to current datetime (datetime.now) if not provided."""
+    def __init__(self, default: datetime | UNSET = UNSET, **kwargs: Any) -> None:
+        """Initialize the datetime data type."""
         if default is UNSET:
             try:
                 default = datetime(**kwargs)  # noqa: DTZ001 Tzinfo is (optionally) passed using kwargs
@@ -654,10 +656,12 @@ class DateTime(BaseDataType[datetime]):
                 default = datetime.now(tz=UTC)
         super().__init__(default)
 
+    @override
     def __str__(self) -> str:
         """Return the string representation of the stored value."""
         return self.value.isoformat()
 
+    @override
     def convert(self, value: str) -> datetime:
         """Convert a string value to a datetime."""
         return datetime.fromisoformat(value)
@@ -675,15 +679,17 @@ class Date(BaseDataType[date]):
     @overload
     def __init__(self, **kwargs: Unpack[_DateKwargs]) -> None: ...
 
-    def __init__(self, default: date = UNSET, **kwargs: Any) -> None:
+    def __init__(self, default: date | UNSET = UNSET, **kwargs: Any) -> None:
         """Initialize the date data type. Defaults to current date if not provided."""
         if default is UNSET:
             default = date(**kwargs)
         super().__init__(default)
 
-    def __str__(self) -> str:  # noqa: D105
+    @override
+    def __str__(self) -> str:
         return self.value.isoformat()
 
+    @override
     def convert(self, value: str) -> date:
         """Convert a string value to a date."""
         return date.fromisoformat(value)
@@ -704,15 +710,17 @@ class Time(BaseDataType[time]):
     @overload
     def __init__(self, **kwargs: Unpack[_TimeKwargs]) -> None: ...
 
-    def __init__(self, default: time = UNSET, **kwargs: Unpack[_TimeKwargs]) -> None:
+    def __init__(self, default: time | UNSET = UNSET, **kwargs: Unpack[_TimeKwargs]) -> None:
         """Initialize the time data type. Defaults to current time if not provided."""
         if default is UNSET:
             default = time(**kwargs)
         super().__init__(default)
 
-    def __str__(self) -> str:  # noqa: D105
+    @override
+    def __str__(self) -> str:
         return self.value.isoformat()
 
+    @override
     def convert(self, value: str) -> time:
         """Convert a string value to a time."""
         return time.fromisoformat(value)
