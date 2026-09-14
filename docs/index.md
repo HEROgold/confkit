@@ -49,7 +49,7 @@ uv run pytest -q
 uv run ruff check .
 uv sync --group docs
 uv run pdoc confkit -o docs/api
-uv run mkdocs build -d site
+uv run zensical build --clean
 ```
 
 Before opening a PR, ensure:

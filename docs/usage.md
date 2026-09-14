@@ -80,17 +80,17 @@ class Service:
 
 See also: the dedicated reference pages for cross-linked signatures.
 
-## Regenerating API Docs (pdoc + mkdocs)
+## Regenerating API Docs (pdoc + zensical)
 
-The documentation is using both `mkdocstrings` and the `mkdocs-pdoc-plugin` for deep API symbol cross-references.
-The `api/` directory inside `docs-mkdocs/` is produced by `pdoc`. Regenerate it after changing code-level docstrings or adding new public classes/functions.
+The site is built with `zensical`, which reads the `mkdocs.yml` config and uses the `mkdocstrings` and `pdoc` plugins for deep API symbol cross-references.
+The `api/` directory inside `docs/` is produced by `pdoc`. Regenerate it after changing code-level docstrings or adding new public classes/functions.
 
 ```bash
-uv run pdoc confkit -o docs-mkdocs/api --force
+uv run pdoc confkit -o docs/api --force
 ```
 
 Key points:
 
 1. `--force` overwrites existing output
-2. The MkDocs plugin (configured in `mkdocs.yml` as `pdoc: { api_path: api }`) enables links like `(pdoc:confkit.config.Config)` inside Markdown
+2. The `pdoc` plugin (configured in `mkdocs.yml` as `pdoc: { api_path: api }`) enables links like `(pdoc:confkit.config.Config)` inside Markdown
 3. Reference pages in `reference/` intentionally use those links for stable deep-links
