@@ -7,7 +7,9 @@ authors = [
     { name = "HEROgold" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "typing-extensions>=4.5.0",
+]
 
 [project.optional-dependencies]
 pydantic = [
