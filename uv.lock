@@ -171,6 +171,9 @@ wheels = [
 name = "confkit"
 version = "2.1.0"
 source = { editable = "." }
+dependencies = [
+    { name = "typing-extensions" },
+]
 
 [package.optional-dependencies]
 msgspec = [
@@ -213,6 +216,7 @@ requires-dist = [
     { name = "pydantic", marker = "extra == 'pydantic'", specifier = ">=2.12.5" },
     { name = "pyyaml", marker = "extra == 'msgspec'", specifier = ">=6.0.3" },
     { name = "tomli-w", marker = "extra == 'msgspec'", specifier = ">=1.2.0" },
+    { name = "typing-extensions", specifier = ">=4.5.0" },
 ]
 provides-extras = ["pydantic", "msgspec"]
 

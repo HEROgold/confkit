@@ -49,3 +49,19 @@ jobs:
         if: steps.cache-pytest.outputs.cache-hit != 'true'
         # Avoid executing examples in CI; they could run untrusted code from PRs
         run: uv run pytest . --ignore=tests/test_examples_run.py
+
+  # The test job runs with dev dependencies installed, which can hide a
+  # runtime import that isn't declared. Import the built wheel on its own.
+  clean-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Build the wheel
+        run: uv build --wheel -o dist
+
+      - name: Import it with only its declared dependencies
+        run: uv run --isolated --no-project --with dist/*.whl python -c "import confkit"
