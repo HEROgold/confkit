@@ -79,7 +79,7 @@ class Config(Generic[VT]):
 
     def __init__(
         self,
-        default: VT | None | BaseDataType[VT] = UNSET,
+        default: VT | BaseDataType[VT] | None = UNSET,
         *,
         optional: bool = False,
     ) -> None:
@@ -296,7 +296,7 @@ class Config(Generic[VT]):
             return inner
         return wrapper
 
-    def _initialize_data_type(self, default: VT | None | BaseDataType[VT]) -> None:
+    def _initialize_data_type(self, default: VT | BaseDataType[VT] | None) -> None:
         """Initialize the data type based on the default value."""
         if not self.optional and default is not None:
             self._data_type = BaseDataType[VT].cast(default)

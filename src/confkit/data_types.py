@@ -69,7 +69,7 @@ class BaseDataType(ABC, Generic[T]):
         raise TypeError(msg)
 
     @staticmethod
-    def cast_optional(default: T | None | BaseDataType[T]) -> BaseDataType[T | None]:
+    def cast_optional(default: T | BaseDataType[T] | None) -> BaseDataType[T | None]:
         """Convert the default value to an Optional data type."""
         if default is None:
             return cast("BaseDataType[T | None]", NoneType())
