@@ -6,7 +6,7 @@ default_install_hook_types:
 
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.9.26
+    rev: 0.13.5
     hooks:
       - id: uv-lock
         stages:
@@ -51,19 +51,19 @@ repos:
 
   # Security scanning
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.24.2
+    rev: v8.30.0
     hooks:
       - id: gitleaks
 
   # Validate packaging metadata early
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.24.1
+    rev: v0.27
     hooks:
       - id: validate-pyproject
         stages: [pre-push, pre-commit]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.14
+    rev: v0.17.2
     hooks:
       - id: ruff
         name: ruff lint
@@ -97,7 +97,7 @@ repos:
 
   # Spell checking (global)
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: v0.11.0.1-1
     hooks:
       - id: shellcheck
         stages: [pre-push, pre-commit]
