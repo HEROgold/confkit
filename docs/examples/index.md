@@ -29,5 +29,6 @@ uv run python examples/basic.py
 | Enums | [Enums](enums.md) | StrEnum, IntEnum, IntFlag, optional enum values |
 | Decorators | [Decorators](decorators.md) | Injecting config into functions |
 | argparse Integration | [Argparse](argparse.md) | CLI defaults + config separation |
+| Delegates | [Delegate](delegate.md) | Reading and writing a setting in another file |
 
 Select an example in the navigation to dive in.

@@ -19,6 +19,7 @@ nav = [
     { "Enums" = "examples/enums.md" },
     { "Custom Data Type" = "examples/custom_data_type.md" },
     { "Argparse Integration" = "examples/argparse.md" },
+    { "Delegates" = "examples/delegate.md" },
   ] },
   { "API Reference" = [
     { "Config" = "reference/config.md" },
