@@ -1,11 +1,11 @@
 name: Coverage
 
+# Called from ci.yml on pushes to master. Informational, so nothing waits on it.
 on:
-  workflow_run:
-    workflows: ["Test"]
-    branches: [master]
-    types:
-      - completed
+  workflow_call:
+    secrets:
+      COVERALLS_REPO_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -13,25 +13,29 @@ permissions:
 jobs:
   coveralls-upload:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      # A hit means coverage for these exact inputs is already on Coveralls.
+      - name: Cache coverage result
+        id: cache-coverage
+        uses: actions/cache@v4
         with:
-          enable-cache: true
+          path: .coverage_cache
+          key: ${{ runner.os }}-coverage-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock') }}
 
-      - name: Set up Python 3.13
-        run: uv python install 3.13
-
-      - name: Install dependencies
-        run: uv sync --group dev
+      - name: Set up the project
+        if: steps.cache-coverage.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup
+        with:
+          sync-args: --group dev
 
       - name: Run tests with coverage
+        if: steps.cache-coverage.outputs.cache-hit != 'true'
         run: uv run coverage run --source=. -m pytest tests/
 
       - name: Upload coverage data to coveralls.io
+        if: steps.cache-coverage.outputs.cache-hit != 'true' && !env.ACT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -40,7 +44,12 @@ jobs:
         run: uvx coveralls --service=github
 
       - name: Coveralls Finished
+        if: steps.cache-coverage.outputs.cache-hit != 'true' && !env.ACT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: uvx coveralls --finish
+
+      - name: Record the upload
+        if: steps.cache-coverage.outputs.cache-hit != 'true'
+        run: mkdir -p .coverage_cache && touch .coverage_cache/done

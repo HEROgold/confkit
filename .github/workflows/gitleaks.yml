@@ -1,14 +1,10 @@
 name: Gitleaks
 
+# Called from ci.yml on every push and PR, with no path filter: a leaked
+# secret can land in any file.
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  workflow_dispatch:
   workflow_call:
-
-concurrency: gitleaks-${{ github.ref }}
+  workflow_dispatch:
 
 permissions:
   contents: read

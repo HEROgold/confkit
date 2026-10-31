@@ -1,66 +1,62 @@
-name: Lint & Type Check
+name: Lint
 
+# Called from ci.yml twice: once for the package and once for the public API
+# as the examples use it.
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-  workflow_dispatch:
   workflow_call:
-
-concurrency: lint-${{ github.ref }}
+    inputs:
+      name:
+        description: Cache key prefix that keeps the two callers apart.
+        required: true
+        type: string
+      tools:
+        description: JSON list of {"tool", "args"} objects, one matrix entry each.
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Cache key prefix that keeps the two callers apart.
+        default: lint
+        type: string
+      tools:
+        description: JSON list of {"tool", "args"} objects, one matrix entry each.
+        default: '[{"tool": "ruff", "args": "check ."}]'
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-
-      - name : Install dependencies
-        run: uv sync --dev
-
-  lint-and-check:
-    needs: setup
+  lint:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - tool: ruff
-            args: "check ."
-            cache_path: ".ruff_cache"
-          - tool: ty
-            args: "check . --ignore no-matching-overload"
-            cache_path: ".ty_cache"
-          - tool: undersort
-            args: ". --check"
-            cache_path: ".undersort_cache"
+        include: ${{ fromJSON(inputs.tools) }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache lint results
+      # The lint group in uv.lock pins every tool, so a tool upgrade changes
+      # the key. A hit means this tool already passed on these exact inputs.
+      - name: Cache lint result
         id: cache-lint
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-${{ matrix.tool }}-${{ hashFiles('**/tests/**/*.py', 'src/**') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.tool }}-
+          key: ${{ runner.os }}-${{ inputs.name }}-${{ matrix.tool }}-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', 'ruff.toml') }}
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Set up the project
+        if: steps.cache-lint.outputs.cache-hit != 'true'
+        uses: ./.github/actions/setup
         with:
-          enable-cache: true
+          sync-args: --group dev --group lint
 
       - name: Run ${{ matrix.tool }}
-        run: uv add ${{ matrix.tool }} && uv run ${{ matrix.tool }} ${{ matrix.args }}
+        if: steps.cache-lint.outputs.cache-hit != 'true'
+        run: uv run ${{ matrix.tool }} ${{ matrix.args }}
+
+      - name: Record the pass
+        if: steps.cache-lint.outputs.cache-hit != 'true'
+        run: mkdir -p .lint_cache && touch ".lint_cache/${{ matrix.tool }}"

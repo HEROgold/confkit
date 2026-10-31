@@ -1,0 +1,46 @@
+name: Coverage (variant B)
+
+# Runs when the Test workflow actually ran tests, rather than keeping a cache of its own.
+on:
+  workflow_call:
+    inputs:
+      tests-ran:
+        required: true
+        type: string
+    secrets:
+      COVERALLS_REPO_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  coveralls-upload:
+    if: inputs.tests-ran == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up the project
+        uses: ./.github/actions/setup
+        with:
+          sync-args: --group dev
+
+      - name: Run tests with coverage
+        run: uv run coverage run --source=. -m pytest tests/
+
+      - name: Upload coverage data to coveralls.io
+        if: ${{ !env.ACT }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          COVERALLS_SERVICE_NAME: github-actions
+          COVERALLS_PARALLEL: true
+        run: uvx coveralls --service=github
+
+      - name: Coveralls Finished
+        if: ${{ !env.ACT }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: uvx coveralls --finish
