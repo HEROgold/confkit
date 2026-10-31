@@ -3,7 +3,7 @@ target-version = "py311"
 
 [lint]
 select = ["ALL"]
-ignore = ["D203", "G004"]
+ignore = ["D203", "G004", "CPY001"]  # confkit files carry no copyright header
 
 [lint.isort]
 required-imports = ["from __future__ import annotations"]
