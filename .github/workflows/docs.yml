@@ -63,7 +63,6 @@ jobs:
           path: site
 
       - name: Deploy the PR preview
-        if: ${{ !env.ACT }}
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: site
@@ -85,7 +84,6 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Remove the PR preview
-        if: ${{ !env.ACT }}
         uses: rossjrw/pr-preview-action@v1
         with:
           preview-branch: gh-pages
@@ -108,7 +106,6 @@ jobs:
           path: site
 
       - name: Publish to the gh-pages root
-        if: ${{ !env.ACT }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: site

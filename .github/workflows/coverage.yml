@@ -35,7 +35,7 @@ jobs:
         run: uv run coverage run --source=. -m pytest tests/
 
       - name: Upload coverage data to coveralls.io
-        if: steps.cache-coverage.outputs.cache-hit != 'true' && !env.ACT
+        if: steps.cache-coverage.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
         run: uvx coveralls --service=github
 
       - name: Coveralls Finished
-        if: steps.cache-coverage.outputs.cache-hit != 'true' && !env.ACT
+        if: steps.cache-coverage.outputs.cache-hit != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
