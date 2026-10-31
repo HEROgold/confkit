@@ -11,7 +11,8 @@ Every check runs from one workflow, `.github/workflows/ci.yml`. Its first job, `
 | `lint.yml` (lint) | Runs ruff, ty and undersort on the package. | `src/`, `tests/`, `examples/`, `ruff.toml`, `pyproject.toml`, `uv.lock` |
 | `lint.yml` (lint-public) | Runs ruff, ty, pyrefly, zuban, mypy and pyright on `examples/`, the way users call the public API. | `src/`, `examples/`, `ruff.toml`, `pyproject.toml`, `uv.lock` |
 | `gitleaks.yml` | Scans the history for leaked secrets. | Every push and PR |
-| `docs.yml` | Builds this site, publishes PR previews and deploys `master`. | `src/`, `docs/`, `zensical.toml`, `mkdocs.yml`, `pyproject.toml`, `uv.lock` |
+| `docs.yml` | Builds this site. | `src/`, `docs/`, `zensical.toml`, `mkdocs.yml`, `pyproject.toml`, `uv.lock` |
+| `docs-publish.yml` | Publishes the built site, as a PR preview or to the root for `master`. It isn't a check, so `all-checks` doesn't wait on it. | Whenever the docs build passed, and when a PR closes |
 | `coverage.yml` | Uploads coverage to Coveralls. It's informational, so nothing waits on it. | `src/`, `tests/`, `examples/`, `pyproject.toml`, `uv.lock` |
 | `bump-version-by-labels.yml` | Opens a version bump PR from the merged PR's `Major`, `Minor` or `Patch` label. | Pushes to `master` |
 | `release.yml` | Tags and releases a version that has no tag yet, then triggers `pypi.yml`. | Pushes to `master` |
@@ -31,7 +32,7 @@ flowchart TD
     changes -->|lint inputs changed| lint[lint: ruff, ty, undersort]
     changes -->|lint-public inputs changed| lintpub[lint-public: six type checkers on examples]
     changes -->|docs inputs changed| build[docs build]
-    build -->|PR from this repo| preview[preview: publish to gh-pages/pr-previews/pr-n and comment the link]
+    build -->|PR from this repo| preview[docs-publish: preview at gh-pages/pr-previews/pr-n, link in a comment]
     test --> all[all-checks]
     lint --> all
     lintpub --> all
@@ -44,11 +45,13 @@ A check whose inputs didn't change is skipped, and `all-checks` counts a skipped
 
 A newer push to the same PR cancels the older run. PRs from forks build the docs but get no preview, because their token can't push to `gh-pages`.
 
+Publishing runs in one concurrency group per PR and one for `master`, so each PR's preview and the main docs never cancel each other. Previews only write inside `pr-previews/`, so they never change the main docs.
+
 ## When a PR is closed
 
 ```mermaid
 flowchart TD
-    closed([PR closed or merged]) --> remove[docs remove-preview: delete gh-pages/pr-previews/pr-n]
+    closed([PR closed or merged]) --> remove[docs-publish: delete gh-pages/pr-previews/pr-n]
 ```
 
 No checks run on close. A merged PR also starts the push flow below.
@@ -64,7 +67,7 @@ flowchart TD
     changes -->|lint-public inputs changed| lintpub[lint-public]
     changes -->|docs inputs changed| build[docs build]
     changes -->|coverage inputs changed| coverage[coverage: upload to Coveralls]
-    build --> deploy[docs deploy: publish to the gh-pages root, keeping pr-previews]
+    build --> deploy[docs-publish: publish to the gh-pages root, keeping pr-previews]
     test --> all[all-checks]
     lint --> all
     lintpub --> all
