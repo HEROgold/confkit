@@ -24,7 +24,6 @@ jobs:
 
       # v4.1.0 is the first release that reads labels on push events.
       - name: Bump by labels
-        if: ${{ !env.ACT }}
         uses: HEROgold/bump-by-label@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
