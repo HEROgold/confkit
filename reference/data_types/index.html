@@ -13,6 +13,7 @@
         <link rel="canonical" href="https://herogold.github.io/confkit/reference/data_types/">
       
       
+      
         <link rel="prev" href="../config/">
       
       
@@ -23,7 +24,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="zensical-0.0.74">
     
     
       
@@ -31,7 +32,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.4ab2de0c.min.css">
       
       
 
@@ -45,14 +49,12 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
-    
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -66,14 +68,11 @@
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
+    <label class="md-overlay" for="__drawer" aria-hidden="true"></label>
     <div data-md-component="skip">
-      
-        
-        <a href="#data-types" class="md-skip">
-          Skip to content
-        </a>
-      
+      <a href="#__skip" class="md-skip">
+        Skip to content
+      </a>
     </div>
     <div data-md-component="announce">
       
@@ -89,12 +88,13 @@
     <a href="../.." title="confkit" class="md-header__button md-logo" aria-label="confkit" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+      <span class="md-visually-hidden">Navigation</span>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -122,55 +122,29 @@
       
         <label class="md-header__button md-icon" for="__search">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+          <span class="md-visually-hidden">Search</span>
         </label>
-        <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list" role="presentation"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
 </div>
       
     
-    
-      <div class="md-header__source">
+    <div class="md-header__source">
+      
         <a href="https://github.com/HEROgold/confkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     HEROgold/confkit
   </div>
 </a>
-      </div>
-    
+      
+    </div>
   </nav>
   
 </header>
@@ -199,7 +173,7 @@
     <a href="../.." title="confkit" class="md-nav__button md-logo" aria-label="confkit" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
 
     </a>
     confkit
@@ -209,7 +183,7 @@
       <a href="https://github.com/HEROgold/confkit" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     HEROgold/confkit
@@ -233,8 +207,7 @@
   <span class="md-ellipsis">
     
   
-    Home
-  
+  Home
 
     
   </span>
@@ -260,8 +233,7 @@
   <span class="md-ellipsis">
     
   
-    Usage
-  
+  Usage
 
     
   </span>
@@ -284,6 +256,8 @@
       
         
           
+        
+      
         
       
         
@@ -326,8 +300,7 @@
   <span class="md-ellipsis">
     
   
-    Examples
-  
+  Examples
 
     
   </span>
@@ -343,21 +316,21 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Examples
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+            <label class="md-nav__title" for="__nav_3">
+              <span class="md-nav__icon md-icon"></span>
               
-            
+  
+  Examples
+
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+              
+                
+                  
   
   
   
@@ -370,8 +343,7 @@
   <span class="md-ellipsis">
     
   
-    Basic
-  
+  Basic
 
     
   </span>
@@ -382,10 +354,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -398,8 +370,7 @@
   <span class="md-ellipsis">
     
   
-    Optional Values
-  
+  Optional Values
 
     
   </span>
@@ -410,10 +381,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -426,8 +397,7 @@
   <span class="md-ellipsis">
     
   
-    Decorators
-  
+  Decorators
 
     
   </span>
@@ -438,10 +408,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -454,8 +424,7 @@
   <span class="md-ellipsis">
     
   
-    Data Types
-  
+  Data Types
 
     
   </span>
@@ -466,10 +435,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -482,8 +451,7 @@
   <span class="md-ellipsis">
     
   
-    Lists
-  
+  Lists
 
     
   </span>
@@ -494,10 +462,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -510,8 +478,7 @@
   <span class="md-ellipsis">
     
   
-    Enums
-  
+  Enums
 
     
   </span>
@@ -522,10 +489,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -538,8 +505,7 @@
   <span class="md-ellipsis">
     
   
-    Custom Data Type
-  
+  Custom Data Type
 
     
   </span>
@@ -550,10 +516,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -566,8 +532,7 @@
   <span class="md-ellipsis">
     
   
-    Argparse Integration
-  
+  Argparse Integration
 
     
   </span>
@@ -578,10 +543,38 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+                
+                  
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/delegate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Delegates
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+                
+              
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -627,8 +620,7 @@
   <span class="md-ellipsis">
     
   
-    API Reference
-  
+  API Reference
 
     
   </span>
@@ -638,19 +630,19 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
+        
+          <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+            <label class="md-nav__title" for="__nav_4">
+              <span class="md-nav__icon md-icon"></span>
+              
   
-    API Reference
-  
+  API Reference
 
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
+            </label>
+            <ul class="md-nav__list" data-md-scrollfix>
               
                 
+                  
   
   
   
@@ -663,8 +655,7 @@
   <span class="md-ellipsis">
     
   
-    Config
-  
+  Config
 
     
   </span>
@@ -675,10 +666,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
     
@@ -687,7 +678,7 @@
   
     <li class="md-nav__item md-nav__item--active">
       
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
       
       
         
@@ -700,8 +691,7 @@
   <span class="md-ellipsis">
     
   
-    Data Types
-  
+  Data Types
 
     
   </span>
@@ -711,15 +701,14 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="./" class="md-nav__link md-nav__link--active">
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
     
   
-    Data Types
-  
+  Data Types
 
     
   </span>
@@ -730,7 +719,8 @@
       
         
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -739,16 +729,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#base-type" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Base Type
-      
+      </span>
     </span>
   </a>
   
@@ -757,9 +747,9 @@
         <li class="md-nav__item">
   <a href="#primitive-converters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Primitive Converters
-      
+      </span>
     </span>
   </a>
   
@@ -768,9 +758,9 @@
         <li class="md-nav__item">
   <a href="#enum-converters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Enum Converters
-      
+      </span>
     </span>
   </a>
   
@@ -779,9 +769,9 @@
         <li class="md-nav__item">
   <a href="#number-representation-helpers" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Number Representation Helpers
-      
+      </span>
     </span>
   </a>
   
@@ -790,9 +780,9 @@
         <li class="md-nav__item">
   <a href="#optional-composite" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Optional &amp; Composite
-      
+      </span>
     </span>
   </a>
   
@@ -801,9 +791,9 @@
         <li class="md-nav__item">
   <a href="#collections" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Collections
-      
+      </span>
     </span>
   </a>
   
@@ -812,9 +802,9 @@
         <li class="md-nav__item">
   <a href="#date-time" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Date &amp; Time
-      
+      </span>
     </span>
   </a>
   
@@ -823,9 +813,9 @@
         <li class="md-nav__item">
   <a href="#custom-type-example" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Custom Type Example
-      
+      </span>
     </span>
   </a>
   
@@ -838,10 +828,10 @@
     </li>
   
 
-              
-            
+                
               
                 
+                  
   
   
   
@@ -854,8 +844,7 @@
   <span class="md-ellipsis">
     
   
-    Exceptions
-  
+  Exceptions
 
     
   </span>
@@ -866,10 +855,11 @@
     </li>
   
 
+                
               
-            
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        
       
     </li>
   
@@ -885,10 +875,24 @@
               
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
   
   
   
@@ -897,16 +901,16 @@
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
-      Table of contents
+      On this page
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
   <a href="#base-type" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Base Type
-      
+      </span>
     </span>
   </a>
   
@@ -915,9 +919,9 @@
         <li class="md-nav__item">
   <a href="#primitive-converters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Primitive Converters
-      
+      </span>
     </span>
   </a>
   
@@ -926,9 +930,9 @@
         <li class="md-nav__item">
   <a href="#enum-converters" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Enum Converters
-      
+      </span>
     </span>
   </a>
   
@@ -937,9 +941,9 @@
         <li class="md-nav__item">
   <a href="#number-representation-helpers" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Number Representation Helpers
-      
+      </span>
     </span>
   </a>
   
@@ -948,9 +952,9 @@
         <li class="md-nav__item">
   <a href="#optional-composite" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Optional &amp; Composite
-      
+      </span>
     </span>
   </a>
   
@@ -959,9 +963,9 @@
         <li class="md-nav__item">
   <a href="#collections" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Collections
-      
+      </span>
     </span>
   </a>
   
@@ -970,9 +974,9 @@
         <li class="md-nav__item">
   <a href="#date-time" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Date &amp; Time
-      
+      </span>
     </span>
   </a>
   
@@ -981,9 +985,9 @@
         <li class="md-nav__item">
   <a href="#custom-type-example" class="md-nav__link">
     <span class="md-ellipsis">
-      
+      <span class="md-typeset">
         Custom Type Example
-      
+      </span>
     </span>
   </a>
   
@@ -1001,9 +1005,9 @@
             <div class="md-content" data-md-component="content">
               
               <article class="md-content__inner md-typeset">
+                <a id="__skip" tabindex="-1"></a>
                 
                   
-
 
   
   
@@ -1013,26 +1017,26 @@
 <p>confkit uses a family of small converter classes to provide type safety and round‑trip serialization.</p>
 <h2 id="base-type">Base Type<a class="headerlink" href="#base-type" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType"><code>BaseDataType</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType.convert"><code>BaseDataType.convert</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType.validate"><code>BaseDataType.validate</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType.cast"><code>BaseDataType.cast</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType.cast_optional"><code>BaseDataType.cast_optional</code></a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType">BaseDataType</a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType.convert">BaseDataType.convert</a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType.validate">BaseDataType.validate</a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType.cast">BaseDataType.cast</a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType.cast_optional">BaseDataType.cast_optional</a></li>
 </ul>
 <h2 id="primitive-converters">Primitive Converters<a class="headerlink" href="#primitive-converters" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#String"><code>String</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Integer"><code>Integer</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Float"><code>Float</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Boolean"><code>Boolean</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#NoneType"><code>NoneType</code></a></li>
+<li><a href="/confkit/api/confkit.html#String">String</a></li>
+<li><a href="/confkit/api/confkit.html#Integer">Integer</a></li>
+<li><a href="/confkit/api/confkit.html#Float">Float</a></li>
+<li><a href="/confkit/api/confkit.html#Boolean">Boolean</a></li>
+<li><a href="/confkit/api/confkit.html#NoneType">NoneType</a></li>
 </ul>
 <h2 id="enum-converters">Enum Converters<a class="headerlink" href="#enum-converters" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Enum"><code>Enum</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#StrEnum"><code>StrEnum</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#IntEnum"><code>IntEnum</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#IntFlag"><code>IntFlag</code></a></li>
+<li><a href="/confkit/api/confkit.html#Enum">Enum</a></li>
+<li><a href="/confkit/api/confkit.html#StrEnum">StrEnum</a></li>
+<li><a href="/confkit/api/confkit.html#IntEnum">IntEnum</a></li>
+<li><a href="/confkit/api/confkit.html#IntFlag">IntFlag</a></li>
 </ul>
 <p>All enum types automatically display allowed values as inline comments in the config file, making them self-documenting for end-users. For example:</p>
 <div class="highlight"><pre><span></span><code><span class="na">log_level</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">info</span><span class="w">  </span><span class="c1"># allowed: debug, info, warning, error</span>
@@ -1044,37 +1048,39 @@
 <p>Comments are automatically stripped when reading values, ensuring they don't interfere with parsing.</p>
 <h2 id="number-representation-helpers">Number Representation Helpers<a class="headerlink" href="#number-representation-helpers" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Hex"><code>Hex</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Octal"><code>Octal</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Binary"><code>Binary</code></a></li>
+<li><a href="/confkit/api/confkit.html#Hex">Hex</a></li>
+<li><a href="/confkit/api/confkit.html#Octal">Octal</a></li>
+<li><a href="/confkit/api/confkit.html#Binary">Binary</a></li>
 </ul>
 <h2 id="optional-composite">Optional &amp; Composite<a class="headerlink" href="#optional-composite" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Optional"><code>Optional</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#List"><code>List</code></a></li>
+<li><a href="/confkit/api/confkit.html#Optional">Optional</a></li>
+<li><a href="/confkit/api/confkit.html#List">List</a></li>
 </ul>
 <blockquote>
 <p>Design note: <code>Optional</code> wraps another <code>BaseDataType</code> and returns <code>None</code> when a null sentinel is parsed.</p>
 </blockquote>
 <h2 id="collections">Collections<a class="headerlink" href="#collections" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Tuple"><code>Tuple</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Set"><code>Set</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Dict"><code>Dict</code></a></li>
+<li><a href="/confkit/api/confkit.html#Tuple">Tuple</a></li>
+<li><a href="/confkit/api/confkit.html#Set">Set</a></li>
+<li><a href="/confkit/api/confkit.html#Dict">Dict</a></li>
 </ul>
-<p><code>Tuple</code>, <code>Set</code>, and <code>Dict</code> mirror their built‑in counterparts. Allowing for collections to be stored in INI files.</p>
+<p><code>Tuple</code>, <code>Set</code>, and <code>Dict</code> mirror their built‑in counterparts. Allowing for collections to be stored in configuration files.</p>
 <h2 id="date-time">Date &amp; Time<a class="headerlink" href="#date-time" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#DateTime"><code>DateTime</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Date"><code>Date</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#Time"><code>Time</code></a></li>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#TimeDelta"><code>TimeDelta</code></a></li>
+<li><a href="/confkit/api/confkit.html#DateTime">DateTime</a></li>
+<li><a href="/confkit/api/confkit.html#Date">Date</a></li>
+<li><a href="/confkit/api/confkit.html#Time">Time</a></li>
+<li><a href="/confkit/api/confkit.html#TimeDelta">TimeDelta</a></li>
 </ul>
-<p><code>DateTime</code>, <code>Date</code>, <code>Time</code> and <code>TimeDelta</code> mirror their built-in counterparts. Allowing to store date information in INI files.</p>
+<p><code>DateTime</code>, <code>Date</code>, <code>Time</code> and <code>TimeDelta</code> mirror their built-in counterparts. Allowing to store date information in configuration files.</p>
 <h2 id="custom-type-example">Custom Type Example<a class="headerlink" href="#custom-type-example" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="https://herogold.github.io/confkit/api/confkit.html#BaseDataType"><code>BaseDataType</code></a></li>
+<li><a href="/confkit/api/confkit.html#BaseDataType">BaseDataType</a></li>
 </ul>
+
+
 
 
 
@@ -1100,7 +1106,7 @@
         
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
   Back to top
 </button>
         
@@ -1114,8 +1120,8 @@
   
   
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
     </a>
   
 </div>
@@ -1131,7 +1137,7 @@
       
     
     <a href="https://github.com/HEROgold/confkit" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
     </a>
   
 </div>
@@ -1141,7 +1147,7 @@
 </footer>
       
     </div>
-    <div class="md-dialog" data-md-component="dialog">
+    <div class="md-dialog" data-md-component="dialog" role="status" aria-atomic="true">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
@@ -1149,10 +1155,14 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.annotate", "navigation.indexes", "navigation.sections", "navigation.top", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      
+      
+        
+        
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.code.copy","content.code.annotate","navigation.indexes","navigation.sections","navigation.top","toc.follow"],"redirect":null,"search":"../../assets/javascripts/workers/search.719e0d91.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","clipboard.error":"Could not copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.d31f0ffa.min.js"></script>
       
     
   </body>
