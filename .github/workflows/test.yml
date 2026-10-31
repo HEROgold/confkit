@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .pytest_cache
-          key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('src/**', 'tests/**', 'pyproject.toml', 'uv.lock') }}
+          key: ${{ runner.os }}-pytest-${{ matrix.python-version }}-${{ hashFiles('src/**', 'tests/**', 'pyproject.toml', 'uv.lock', '.github/workflows/test.yml', '.github/actions/setup/**') }}
 
       - name: Set up the project
         if: steps.cache-pytest.outputs.cache-hit != 'true'

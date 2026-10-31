@@ -24,3 +24,11 @@ runs:
     - name: Install dependencies
       shell: bash
       run: uv sync --locked --python ${{ inputs.python-version }} ${{ inputs.sync-args }}
+
+    # Without these, a later `uv run` follows .python-version back to 3.11
+    # and re-syncs only the default groups, dropping the ones synced above.
+    - name: Keep later uv commands on this environment
+      shell: bash
+      run: |
+        echo "UV_PYTHON=${{ inputs.python-version }}" >> "$GITHUB_ENV"
+        echo "UV_NO_SYNC=1" >> "$GITHUB_ENV"

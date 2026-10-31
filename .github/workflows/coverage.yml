@@ -22,7 +22,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .coverage_cache
-          key: ${{ runner.os }}-coverage-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock') }}
+          key: ${{ runner.os }}-coverage-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', '.github/workflows/coverage.yml', '.github/actions/setup/**') }}
 
       - name: Set up the project
         if: steps.cache-coverage.outputs.cache-hit != 'true'

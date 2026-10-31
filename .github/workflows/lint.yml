@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-${{ inputs.name }}-${{ matrix.tool }}-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', 'ruff.toml') }}
+          key: ${{ runner.os }}-${{ inputs.name }}-${{ matrix.tool }}-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', 'ruff.toml', '.github/workflows/ci.yml', '.github/workflows/lint.yml', '.github/actions/setup/**') }}
 
       - name: Set up the project
         if: steps.cache-lint.outputs.cache-hit != 'true'
