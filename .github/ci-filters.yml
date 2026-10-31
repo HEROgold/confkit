@@ -44,6 +44,7 @@ docs:
   - *ci
   - *deps
   - .github/workflows/docs.yml
+  - .github/workflows/docs-publish.yml
   - zensical.toml
   - mkdocs.yml
   - src/**

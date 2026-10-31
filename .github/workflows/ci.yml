@@ -90,9 +90,19 @@ jobs:
 
   docs:
     needs: changes
-    # Always runs on closed, so the preview gets removed even when no docs input changed.
-    if: always() && (github.event.action == 'closed' || needs.changes.outputs.docs == 'true')
+    if: needs.changes.outputs.docs == 'true'
     uses: ./.github/workflows/docs.yml
+
+  # Not a check, so all-checks doesn't wait on it. Each PR and master get their
+  # own group. A newer run waiting in the group replaces an older waiting one,
+  # so the newest docs always win.
+  docs-publish:
+    needs: docs
+    # Always runs on closed, so the preview gets removed even when no docs input changed.
+    if: always() && (github.event.action == 'closed' || needs.docs.result == 'success')
+    concurrency:
+      group: gh-pages-${{ github.event.pull_request.number || 'master' }}
+    uses: ./.github/workflows/docs-publish.yml
     permissions:
       contents: write
       pull-requests: write
