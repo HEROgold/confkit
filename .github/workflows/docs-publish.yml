@@ -68,6 +68,11 @@ jobs:
           name: site
           path: site
 
+      # Only the root needs .nojekyll. In a preview it would outlive the
+      # preview's removal, which skips hidden files.
+      - name: Keep Pages from running Jekyll
+        run: touch site/.nojekyll
+
       - name: Publish to the gh-pages root
         uses: JamesIves/github-pages-deploy-action@v4
         with:

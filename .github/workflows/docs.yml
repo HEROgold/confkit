@@ -34,11 +34,9 @@ jobs:
         run: |
           uv run pdoc confkit -o docs/api
           uv run zensical build --clean
-          touch site/.nojekyll
 
       - uses: actions/upload-artifact@v4
         with:
           name: site
           path: site
-          include-hidden-files: true
 
