@@ -19,7 +19,7 @@ jobs:
       version_changed: ${{ steps.version-check.outputs.version_changed }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0  # Needed to get all tags for version comparison
 

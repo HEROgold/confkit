@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # A hit means these exact inputs already passed on this Python version.
       # The cache only saves when the job succeeds, so a failure never hits.
@@ -45,7 +45,7 @@ jobs:
   clean-install:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7

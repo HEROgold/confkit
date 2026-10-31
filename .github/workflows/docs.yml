@@ -1,6 +1,6 @@
 name: Documentation
 
-# Called from ci.yml. Pages serves the gh-pages branch: master publishes to its
+# Called from ci.yml. Pages serves the gh-pages branch. Master publishes to its
 # root, and each PR from this repo gets a preview under pr-previews/pr-<n>/.
 # Fork PRs only build, because their token can't push to gh-pages.
 on:
@@ -15,14 +15,24 @@ jobs:
     if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
+      # A hit means the site for these exact inputs is already built.
+      - name: Cache the built site
+        id: cache-site
+        uses: actions/cache@v4
+        with:
+          path: site
+          key: ${{ runner.os }}-site-${{ hashFiles('src/**', 'docs/**', 'zensical.toml', 'mkdocs.yml', 'pyproject.toml', 'uv.lock', '.github/workflows/docs.yml', '.github/actions/setup/**') }}
 
       - name: Set up the project
+        if: steps.cache-site.outputs.cache-hit != 'true'
         uses: ./.github/actions/setup
         with:
           sync-args: --group docs
 
       - name: Build the site
+        if: steps.cache-site.outputs.cache-hit != 'true'
         run: |
           uv run pdoc confkit -o docs/api
           uv run zensical build --clean
@@ -42,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: gh-pages
     permissions:
-      contents: write       # push the preview to gh-pages
-      pull-requests: write  # comment the preview link on the PR
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:
@@ -72,7 +82,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Remove the PR preview
         if: ${{ !env.ACT }}
@@ -90,7 +100,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:

@@ -17,8 +17,11 @@ on:
     types: [opened, synchronize, reopened, closed]
   workflow_dispatch:
 
+# A newer push to a PR cancels its older run. Pushes to master each get their
+# own group, because GitHub keeps only one pending run per group and would
+# drop a merge's run, along with its version bump.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.event_name == 'push' && github.run_id || format('ci-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -39,7 +42,7 @@ jobs:
       coverage: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.coverage == 'true' }}
       docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v3
         id: filter
@@ -57,7 +60,7 @@ jobs:
     if: needs.changes.outputs.lint == 'true'
     uses: ./.github/workflows/lint.yml
     with:
-      name: lint
+      cache-prefix: lint
       tools: >-
         [
           {"tool": "ruff", "args": "check ."},
@@ -70,7 +73,7 @@ jobs:
     if: needs.changes.outputs.lint-public == 'true'
     uses: ./.github/workflows/lint.yml
     with:
-      name: lint-public
+      cache-prefix: lint-public
       tools: >-
         [
           {"tool": "ruff", "args": "check ./examples"},

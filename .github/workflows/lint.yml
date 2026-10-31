@@ -5,23 +5,13 @@ name: Lint
 on:
   workflow_call:
     inputs:
-      name:
+      cache-prefix:
         description: Cache key prefix that keeps the two callers apart.
         required: true
         type: string
       tools:
         description: JSON list of {"tool", "args"} objects, one matrix entry each.
         required: true
-        type: string
-  workflow_dispatch:
-    inputs:
-      name:
-        description: Cache key prefix that keeps the two callers apart.
-        default: lint
-        type: string
-      tools:
-        description: JSON list of {"tool", "args"} objects, one matrix entry each.
-        default: '[{"tool": "ruff", "args": "check ."}]'
         type: string
 
 permissions:
@@ -36,7 +26,7 @@ jobs:
         include: ${{ fromJSON(inputs.tools) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The lint group in uv.lock pins every tool, so a tool upgrade changes
       # the key. A hit means this tool already passed on these exact inputs.
@@ -45,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .lint_cache
-          key: ${{ runner.os }}-${{ inputs.name }}-${{ matrix.tool }}-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', 'ruff.toml', '.github/workflows/ci.yml', '.github/workflows/lint.yml', '.github/actions/setup/**') }}
+          key: ${{ runner.os }}-${{ inputs.cache-prefix }}-${{ matrix.tool }}-${{ hashFiles('src/**', 'tests/**', 'examples/**', 'pyproject.toml', 'uv.lock', 'ruff.toml', '.github/workflows/ci.yml', '.github/workflows/lint.yml', '.github/actions/setup/**') }}
 
       - name: Set up the project
         if: steps.cache-lint.outputs.cache-hit != 'true'

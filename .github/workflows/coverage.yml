@@ -14,7 +14,7 @@ jobs:
   coveralls-upload:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # A hit means coverage for these exact inputs is already on Coveralls.
       - name: Cache coverage result

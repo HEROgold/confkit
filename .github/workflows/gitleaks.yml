@@ -1,7 +1,7 @@
 name: Gitleaks
 
-# Called from ci.yml on every push and PR, with no path filter: a leaked
-# secret can land in any file.
+# Called from ci.yml on every push and PR, with no path filter, because a
+# leaked secret can land in any file.
 on:
   workflow_call:
   workflow_dispatch:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
