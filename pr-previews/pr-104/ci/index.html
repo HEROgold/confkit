@@ -1008,8 +1008,13 @@
 </tr>
 <tr>
 <td><code>docs.yml</code></td>
-<td>Builds this site, publishes PR previews and deploys <code>master</code>.</td>
+<td>Builds this site.</td>
 <td><code>src/</code>, <code>docs/</code>, <code>zensical.toml</code>, <code>mkdocs.yml</code>, <code>pyproject.toml</code>, <code>uv.lock</code></td>
+</tr>
+<tr>
+<td><code>docs-publish.yml</code></td>
+<td>Publishes the built site, as a PR preview or to the root for <code>master</code>. It isn't a check, so <code>all-checks</code> doesn't wait on it.</td>
+<td>Whenever the docs build passed, and when a PR closes</td>
 </tr>
 <tr>
 <td><code>coverage.yml</code></td>
@@ -1043,7 +1048,7 @@
     changes --&gt;|lint inputs changed| lint[lint: ruff, ty, undersort]
     changes --&gt;|lint-public inputs changed| lintpub[lint-public: six type checkers on examples]
     changes --&gt;|docs inputs changed| build[docs build]
-    build --&gt;|PR from this repo| preview[preview: publish to gh-pages/pr-previews/pr-n and comment the link]
+    build --&gt;|PR from this repo| preview[docs-publish: preview at gh-pages/pr-previews/pr-n, link in a comment]
     test --&gt; all[all-checks]
     lint --&gt; all
     lintpub --&gt; all
@@ -1052,9 +1057,10 @@
     all --&gt; result([PR shows pass or fail])</code></pre>
 <p>A check whose inputs didn't change is skipped, and <code>all-checks</code> counts a skipped check as passed. <code>all-checks</code> fails only when a check failed or was cancelled, which makes it the one check to require in branch protection.</p>
 <p>A newer push to the same PR cancels the older run. PRs from forks build the docs but get no preview, because their token can't push to <code>gh-pages</code>.</p>
+<p>Publishing runs in one concurrency group per PR and one for <code>master</code>, so each PR's preview and the main docs never cancel each other. Previews only write inside <code>pr-previews/</code>, so they never change the main docs.</p>
 <h2 id="when-a-pr-is-closed">When a PR is closed<a class="headerlink" href="#when-a-pr-is-closed" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
-    closed([PR closed or merged]) --&gt; remove[docs remove-preview: delete gh-pages/pr-previews/pr-n]</code></pre>
+    closed([PR closed or merged]) --&gt; remove[docs-publish: delete gh-pages/pr-previews/pr-n]</code></pre>
 <p>No checks run on close. A merged PR also starts the push flow below.</p>
 <h2 id="when-a-pr-is-merged-to-master">When a PR is merged to master<a class="headerlink" href="#when-a-pr-is-merged-to-master" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>flowchart TD
@@ -1065,7 +1071,7 @@
     changes --&gt;|lint-public inputs changed| lintpub[lint-public]
     changes --&gt;|docs inputs changed| build[docs build]
     changes --&gt;|coverage inputs changed| coverage[coverage: upload to Coveralls]
-    build --&gt; deploy[docs deploy: publish to the gh-pages root, keeping pr-previews]
+    build --&gt; deploy[docs-publish: publish to the gh-pages root, keeping pr-previews]
     test --&gt; all[all-checks]
     lint --&gt; all
     lintpub --&gt; all
