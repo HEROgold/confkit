@@ -1,0 +1,126 @@
+name: CI
+
+# One entry point for every check. The changes job compares the push or PR
+# against .github/ci-filters.yml, and each check only runs when its inputs
+# changed. release.yml triggers on this workflow's runs on master.
+#
+# The master ruleset requires none of these checks. To require them, require
+# the all-checks job only. A called workflow's check names change with whether
+# it ran ("test / test (3.13)") or was skipped ("test"), so neither name works
+# as a required check on its own.
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+    # closed only removes the docs preview.
+    types: [opened, synchronize, reopened, closed]
+  workflow_dispatch:
+
+# A newer push to a PR cancels its older run. Pushes to master each get their
+# own group, because GitHub keeps only one pending run per group and would
+# drop a merge's run, along with its version bump.
+concurrency:
+  group: ${{ github.event_name == 'push' && github.run_id || format('ci-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      # A manual run checks everything.
+      test: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.test == 'true' }}
+      lint: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.lint == 'true' }}
+      lint-public: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.lint-public == 'true' }}
+      coverage: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.coverage == 'true' }}
+      docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          filters: .github/ci-filters.yml
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.test == 'true'
+    uses: ./.github/workflows/test.yml
+
+  lint:
+    needs: changes
+    if: needs.changes.outputs.lint == 'true'
+    uses: ./.github/workflows/lint.yml
+    with:
+      cache-prefix: lint
+      tools: >-
+        [
+          {"tool": "ruff", "args": "check ."},
+          {"tool": "ty", "args": "check . --ignore no-matching-overload"},
+          {"tool": "undersort", "args": ". --check"}
+        ]
+
+  lint-public:
+    needs: changes
+    if: needs.changes.outputs.lint-public == 'true'
+    uses: ./.github/workflows/lint.yml
+    with:
+      cache-prefix: lint-public
+      tools: >-
+        [
+          {"tool": "ruff", "args": "check ./examples"},
+          {"tool": "ty", "args": "check ./examples --ignore no-matching-overload"},
+          {"tool": "pyrefly", "args": "check ./examples"},
+          {"tool": "zuban", "args": "check ./examples"},
+          {"tool": "mypy", "args": "./examples"},
+          {"tool": "pyright", "args": "./examples"}
+        ]
+
+  gitleaks:
+    if: github.event.action != 'closed'
+    uses: ./.github/workflows/gitleaks.yml
+
+  docs:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    uses: ./.github/workflows/docs.yml
+
+  # Not a check, so all-checks doesn't wait on it. Each PR and master get their
+  # own group. A newer run waiting in the group replaces an older waiting one,
+  # so the newest docs always win.
+  docs-publish:
+    needs: docs
+    # Always runs on closed, so the preview gets removed even when no docs input changed.
+    if: always() && (github.event.action == 'closed' || needs.docs.result == 'success')
+    concurrency:
+      group: gh-pages-${{ github.event.pull_request.number || 'master' }}
+    uses: ./.github/workflows/docs-publish.yml
+    permissions:
+      contents: write
+      pull-requests: write
+
+  coverage:
+    needs: changes
+    if: github.event_name == 'push' && needs.changes.outputs.coverage == 'true'
+    uses: ./.github/workflows/coverage.yml
+    secrets:
+      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
+  # Passes when every check passed or was skipped because its inputs didn't
+  # change. Coverage is informational, so it isn't listed.
+  all-checks:
+    if: always() && github.event.action != 'closed'
+    needs: [changes, test, lint, lint-public, gitleaks, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if a check failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

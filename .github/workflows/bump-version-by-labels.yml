@@ -16,7 +16,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -26,7 +26,7 @@ jobs:
           version: "latest"
 
       - name: Bump by labels
-        uses: HEROgold/bump-by-label@v4.0.0
+        uses: HEROgold/bump-by-label@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           command: "uv version --bump"

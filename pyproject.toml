@@ -49,6 +49,15 @@ docs = [
     "pdoc>=16.0.0",
     "zensical>=0.0.73",
 ]
+lint = [
+    "mypy>=2.4.1",
+    "pyrefly>=1.4.0",
+    "pyright>=1.1.414",
+    "ruff>=0.17.3",
+    "ty>=0.0.95",
+    "undersort>=0.1.6",
+    "zuban>=0.10.2",
+]
 
 [[tool.pyright.executionEnvironments]]
 root = "."

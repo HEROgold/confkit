@@ -1,0 +1,51 @@
+# Inputs for each check that ci.yml runs. A check only runs when one of its
+# inputs changed. Editing CI itself reruns every check.
+ci: &ci
+  - .github/workflows/ci.yml
+  - .github/ci-filters.yml
+  - .github/actions/setup/**
+deps: &deps
+  - pyproject.toml
+  - uv.lock
+
+test:
+  - *ci
+  - *deps
+  - .github/workflows/test.yml
+  - src/**
+  - tests/**
+
+lint:
+  - *ci
+  - *deps
+  - .github/workflows/lint.yml
+  - ruff.toml
+  - src/**
+  - tests/**
+  - examples/**
+
+lint-public:
+  - *ci
+  - *deps
+  - .github/workflows/lint.yml
+  - ruff.toml
+  - src/**
+  - examples/**
+
+coverage:
+  - *ci
+  - *deps
+  - .github/workflows/coverage.yml
+  - src/**
+  - tests/**
+  - examples/**
+
+docs:
+  - *ci
+  - *deps
+  - .github/workflows/docs.yml
+  - .github/workflows/docs-publish.yml
+  - zensical.toml
+  - mkdocs.yml
+  - src/**
+  - docs/**
