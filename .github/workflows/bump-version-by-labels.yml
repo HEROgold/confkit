@@ -1,15 +1,14 @@
 name: Bump Version By Labels
 
+# Called from ci.yml once all-checks passes on a push to master. The action
+# looks up the merged PR for the pushed commit and opens a bump PR from its
+# Major, Minor or Patch label. Merging the bump PR runs CI again, and that
+# run's release job publishes the new version.
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-      - master
+  workflow_call:
 
 jobs:
   bump-version:
-    if: github.event.pull_request.merged == true && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,14 +20,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
-        with:
-          version: "latest"
+        uses: astral-sh/setup-uv@v7
 
+      # v4.1.0 is the first release that reads labels on push events.
       - name: Bump by labels
         uses: HEROgold/bump-by-label@v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           command: "uv version --bump"
           validate: "uv version"
-          base_branch: ${{ github.event.pull_request.base.ref }}
+          base_branch: master

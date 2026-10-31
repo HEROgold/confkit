@@ -2,7 +2,9 @@ name: CI
 
 # One entry point for every check. The changes job compares the push or PR
 # against .github/ci-filters.yml, and each check only runs when its inputs
-# changed. release.yml triggers on this workflow's runs on master.
+# changed. On pushes to master the chain continues once all-checks passes.
+# Bump opens a version bump PR, then release tags and publishes any version
+# that has no tag yet. Coverage stays outside the chain.
 #
 # The master ruleset requires none of these checks. To require them, require
 # the all-checks job only. A called workflow's check names change with whether
@@ -124,3 +126,22 @@ jobs:
       - name: Fail if a check failed or was cancelled
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1
+
+  # always() is needed even though all-checks passed. Without it, GitHub's
+  # implicit success() also looks at the checks all-checks needs, and skips
+  # this job whenever one of them was skipped.
+  bump:
+    needs: all-checks
+    if: always() && github.event_name == 'push' && needs.all-checks.result == 'success'
+    uses: ./.github/workflows/bump-version-by-labels.yml
+    permissions:
+      contents: write
+      pull-requests: write
+
+  release:
+    needs: bump
+    if: always() && needs.bump.result == 'success'
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+    secrets: inherit
