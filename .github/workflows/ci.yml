@@ -4,11 +4,10 @@ name: CI
 # against .github/ci-filters.yml, and each check only runs when its inputs
 # changed. release.yml triggers on this workflow's runs on master.
 #
-# The master ruleset requires none of these checks. GitHub reports a job that
-# an `if:` skipped as passing, so a required check stays mergeable when its
-# inputs didn't change. If you add required checks, require these job names
-# (for example "test / test (3.13)"), not a path-filtered workflow, which
-# never reports at all when it's skipped.
+# The master ruleset requires none of these checks. To require them, require
+# the all-checks job only. A called workflow's check names change with whether
+# it ran ("test / test (3.13)") or was skipped ("test"), so neither name works
+# as a required check on its own.
 on:
   push:
     branches: [master]
@@ -102,3 +101,13 @@ jobs:
     secrets:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
+  # Passes when every check passed or was skipped because its inputs didn't
+  # change. Coverage is informational, so it isn't listed.
+  all-checks:
+    if: always() && github.event.action != 'closed'
+    needs: [changes, test, lint, lint-public, gitleaks, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if a check failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
