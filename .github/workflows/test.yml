@@ -3,10 +3,6 @@ name: Test
 # Called from ci.yml, which decides whether the inputs below changed.
 on:
   workflow_call:
-    outputs:
-      ran:
-        description: "'true' when at least one matrix entry ran the tests instead of hitting the cache."
-        value: ${{ jobs.test.outputs.ran }}
   workflow_dispatch:
 
 permissions:
@@ -19,8 +15,6 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12", "3.13", "3.14"]
       fail-fast: false
-    outputs:
-      ran: ${{ steps.ran.outputs.ran }}
 
     steps:
       - uses: actions/checkout@v4
@@ -45,12 +39,6 @@ jobs:
         if: steps.cache-pytest.outputs.cache-hit != 'true'
         # Avoid executing examples in CI; they could run untrusted code from PRs
         run: uv run pytest . --ignore=tests/test_examples_run.py
-
-      # Matrix entries share one output, so only a run that tested writes it.
-      - name: Record that the tests ran
-        id: ran
-        if: steps.cache-pytest.outputs.cache-hit != 'true'
-        run: echo "ran=true" >> "$GITHUB_OUTPUT"
 
   # The test job runs with dev dependencies installed, which can hide a
   # runtime import that isn't declared. Import the built wheel on its own.

@@ -2,12 +2,13 @@ name: CI
 
 # One entry point for every check. The changes job compares the push or PR
 # against .github/ci-filters.yml, and each check only runs when its inputs
-# changed. Release and Coverage hang off this workflow's runs on master.
+# changed. release.yml triggers on this workflow's runs on master.
 #
-# None of these checks is required by the master ruleset. If one becomes
-# required, a skipped job reports as skipped, which GitHub counts as passing
-# for jobs but not for a required workflow-level check. Require the job names
-# below (for example "test / test (3.13)"), not a whole workflow.
+# The master ruleset requires none of these checks. GitHub reports a job that
+# an `if:` skipped as passing, so a required check stays mergeable when its
+# inputs didn't change. If you add required checks, require these job names
+# (for example "test / test (3.13)"), not a path-filtered workflow, which
+# never reports at all when it's skipped.
 on:
   push:
     branches: [master]
@@ -101,11 +102,3 @@ jobs:
     secrets:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
-  coverage-b:
-    needs: [changes, test]
-    if: always() && github.event_name == 'push' && needs.test.result == 'success'
-    uses: ./.github/workflows/coverage-b.yml
-    with:
-      tests-ran: ${{ needs.test.outputs.ran }}
-    secrets:
-      COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
