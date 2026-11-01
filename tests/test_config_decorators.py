@@ -13,6 +13,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from confkit.config import Config as OG
+from confkit.exceptions import InvalidKeyError
 from confkit.parsers import IniParser
 from confkit.sentinels import UNSET
 
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
 
 F = TypeVar("F")
 P = ParamSpec("P")
+
+valid_ini_keys = st.text(min_size=1).filter(lambda s: not set(s) & set("=:\r\n"))
 
 class Config(OG):
     """Subclass of Config to set test-specific parameters."""
@@ -41,7 +44,7 @@ def config_new(func: Callable[P, F]) -> Callable[P, F]:
     return inner
 
 @config_new
-@given(st.text(min_size=1), st.text(min_size=1), st.text())
+@given(st.text(min_size=1), valid_ini_keys, st.text())
 def test_config_set_decorator(section: str, setting: str, value: str) -> None:
     """Test the Config.set decorator with various section/setting/value combinations."""
     # Ensure section exists
@@ -57,7 +60,7 @@ def test_config_set_decorator(section: str, setting: str, value: str) -> None:
     assert Config._parser.get(section, setting) == value
 
 @config_new
-@given(st.text(min_size=1), st.text(min_size=1), st.one_of(st.text(), st.none()), st.text())
+@given(st.text(min_size=1), valid_ini_keys, st.one_of(st.text(), st.none()), st.text())
 def test_config_with_kwarg_with_default(section: str, setting: str, custom_name: str | None, default_value: str) -> None:
     """Test Config.with_kwarg with various default values."""
     @Config.with_kwarg(section, setting, custom_name, default_value)
@@ -69,7 +72,7 @@ def test_config_with_kwarg_with_default(section: str, setting: str, custom_name:
 
 
 @config_new
-@given(st.text(min_size=1), st.text(min_size=1), st.text())
+@given(st.text(min_size=1), valid_ini_keys, st.text())
 def test_config_default_decorator(section: str, setting: str, value: str) -> None:
     """Test the Config.default decorator with various section/setting/value combinations."""
     # Ensure section exists and remove any existing value
@@ -117,7 +120,7 @@ def test_config_with_kwarg_no_name() -> None:
     assert result is not None
 
 @config_new
-@given(st.text(min_size=1), st.text(min_size=1), st.text(), st.text())
+@given(st.text(min_size=1), valid_ini_keys, st.text(), st.text())
 def test_kwarg(section: str, setting: str, name: str, default: str) -> None:
     """Test Config.with_kwarg decorator with various parameters."""
     @Config.with_kwarg(section, setting, name, default)
@@ -133,3 +136,14 @@ def test_with_kwarg_no_default_no_section() -> None:
     """Test Config.with_kwarg decorator without any section or default value."""
     with pytest.raises(ValueError, match=r"Config value section='' setting='' is not set. and no default value is given."):
         Config.with_kwarg("", "", "", UNSET)
+
+@config_new
+def test_config_set_rejects_ini_delimiter_keys() -> None:
+    """INI keys containing a delimiter or line break raise InvalidKeyError on every Python version."""
+    for setting in ["a=b", "a:b", "a\nb", "a\rb"]:
+        @Config.set("Section", setting, "value")
+        def test_func() -> str:
+            return "executed"
+
+        with pytest.raises(InvalidKeyError):
+            test_func()

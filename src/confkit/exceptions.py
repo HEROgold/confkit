@@ -17,3 +17,7 @@ class ConfigPathConflictError(ValueError):
     For example, if "Parent.Value" is a scalar, attempting to set "Parent.Value.Child"
     would cause this error.
     """
+
+
+class InvalidKeyError(ValueError):
+    """Raised when a key can't be stored in the config file format, such as an INI key containing `=`, `:` or a line break."""

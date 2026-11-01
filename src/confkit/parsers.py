@@ -15,6 +15,7 @@ import sys
 from configparser import ConfigParser
 from typing import TYPE_CHECKING
 
+from confkit.exceptions import InvalidKeyError
 from confkit.sentinels import UNSET
 
 if sys.version_info >= (3, 12):
@@ -25,6 +26,9 @@ else:
 if TYPE_CHECKING:
     from io import TextIOWrapper, _WrappedBuffer
     from pathlib import Path
+
+
+_INI_FORBIDDEN_KEY_CHARS = frozenset("=:\r\n")
 
 
 class ConfkitParser(Protocol):
@@ -100,6 +104,9 @@ class IniParser(ConfkitParser):
 
     @override
     def set(self, section: str, option: str, value: object) -> None:
+        if set(option) & _INI_FORBIDDEN_KEY_CHARS:
+            msg = f"INI key {option!r} can't contain '=', ':' or a line break."
+            raise InvalidKeyError(msg)
         # ConfigParser requires strings; escape % signs for interpolation
         str_value = str(value).replace("%", "%%")
         self.parser.set(section, option, str_value)
