@@ -25,6 +25,8 @@ class AppConfig:
 print(AppConfig.port)
 ```
 
+INI keys can't contain `=`, `:` or line breaks. confkit raises `InvalidKeyError` when you set a key with one of these characters.
+
 ## Adding a New Data Type
 
 1. Subclass `BaseDataType[T]`
