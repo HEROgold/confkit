@@ -989,6 +989,7 @@
 <span class="c1"># (this value came from the .ini file!) </span>
 <span class="nb">print</span><span class="p">(</span><span class="n">AppConfig</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
 </code></pre></div>
+<p>INI keys can't contain <code>=</code>, <code>:</code> or line breaks. confkit raises <code>InvalidKeyError</code> when you set a key with one of these characters.</p>
 <h2 id="adding-a-new-data-type">Adding a New Data Type<a class="headerlink" href="#adding-a-new-data-type" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Subclass <code>BaseDataType[T]</code></li>
