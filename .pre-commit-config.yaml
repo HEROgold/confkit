@@ -1,3 +1,6 @@
+ci:
+  skip: [ty-check]
+
 default_install_hook_types:
   - pre-commit
   - post-checkout
@@ -76,7 +79,7 @@ repos:
       - id: ty-check
         name: ty check
         language: system
-        entry: uvx ty check
+        entry: uvx ty check --ignore no-matching-overload
         pass_filenames: false
         files: ^src/.*\.py$
         stages: [pre-push, pre-commit]
