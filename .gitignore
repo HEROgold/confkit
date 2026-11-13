@@ -207,3 +207,4 @@ __marimo__/
 *test.ini
 .secrets
 docs/api/
+.claude/worktrees/

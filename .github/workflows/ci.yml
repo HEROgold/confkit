@@ -2,9 +2,10 @@ name: CI
 
 # One entry point for every check. The changes job compares the push or PR
 # against .github/ci-filters.yml, and each check only runs when its inputs
-# changed. On pushes to master the chain continues once all-checks passes.
-# Bump opens a version bump PR, then release tags and publishes any version
-# that has no tag yet. Coverage stays outside the chain.
+# changed. Version labels bump the PR's own branch through bump.yml. On a
+# push to master that passes all-checks, the release job releases any version
+# that has no tag yet, then dispatches new-release-created, which starts
+# pypi.yml. Coverage stays outside the chain.
 #
 # The master ruleset requires none of these checks. To require them, require
 # the all-checks job only. A called workflow's check names change with whether
@@ -21,13 +22,12 @@ on:
 
 # A newer push to a PR cancels its older run. Pushes to master each get their
 # own group, because GitHub keeps only one pending run per group and would
-# drop a merge's run, along with its version bump.
+# drop a merge's run, along with its release.
 concurrency:
   group: ${{ github.event_name == 'push' && github.run_id || format('ci-{0}', github.ref) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   changes:
@@ -40,13 +40,15 @@ jobs:
       # A manual run checks everything.
       test: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.test == 'true' }}
       lint: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.lint == 'true' }}
-      lint-public: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.lint-public == 'true' }}
+      public-api: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.public-api == 'true' }}
       coverage: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.coverage == 'true' }}
       docs: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.docs == 'true' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         if: github.event_name != 'workflow_dispatch'
         with:
@@ -55,14 +57,32 @@ jobs:
   test:
     needs: changes
     if: needs.changes.outputs.test == 'true'
-    uses: ./.github/workflows/test.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+    uses: HEROgold/workflows/.github/workflows/test.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
+    with:
+      python-version: ${{ matrix.python-version }}
+      sync-args: --group dev
+      pytest-args: . --ignore=tests/test_examples_run.py
+      import-check: confkit
 
   lint:
     needs: changes
     if: needs.changes.outputs.lint == 'true'
-    uses: ./.github/workflows/lint.yml
+    uses: HEROgold/workflows/.github/workflows/lint.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
     with:
       cache-prefix: lint
+      sync-args: --group dev --group lint
       tools: >-
         [
           {"tool": "ruff", "args": "check ."},
@@ -70,30 +90,35 @@ jobs:
           {"tool": "undersort", "args": ". --check"}
         ]
 
-  lint-public:
+  public-api:
     needs: changes
-    if: needs.changes.outputs.lint-public == 'true'
-    uses: ./.github/workflows/lint.yml
+    if: needs.changes.outputs.public-api == 'true'
+    uses: HEROgold/workflows/.github/workflows/public-api.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
     with:
-      cache-prefix: lint-public
-      tools: >-
-        [
-          {"tool": "ruff", "args": "check ./examples"},
-          {"tool": "ty", "args": "check ./examples --ignore no-matching-overload"},
-          {"tool": "pyrefly", "args": "check ./examples"},
-          {"tool": "zuban", "args": "check ./examples"},
-          {"tool": "mypy", "args": "./examples"},
-          {"tool": "pyright", "args": "./examples"}
-        ]
+      paths: examples
+      blocking: true
+      sync-args: --group dev --group lint
 
   gitleaks:
     if: github.event.action != 'closed'
-    uses: ./.github/workflows/gitleaks.yml
+    uses: HEROgold/workflows/.github/workflows/gitleaks.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
+
+  workflow-lint:
+    if: github.event.action != 'closed'
+    uses: HEROgold/workflows/.github/workflows/workflow-lint.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
 
   docs:
     needs: changes
     if: needs.changes.outputs.docs == 'true'
-    uses: ./.github/workflows/docs.yml
+    uses: HEROgold/workflows/.github/workflows/docs.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
 
   # Not a check, so all-checks doesn't wait on it. Each PR and master get their
   # own group. A newer run waiting in the group replaces an older waiting one,
@@ -104,15 +129,22 @@ jobs:
     if: always() && (github.event.action == 'closed' || needs.docs.result == 'success')
     concurrency:
       group: gh-pages-${{ github.event.pull_request.number || 'master' }}
-    uses: ./.github/workflows/docs-publish.yml
+    uses: HEROgold/workflows/.github/workflows/docs-publish.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
     permissions:
       contents: write
       pull-requests: write
+    with:
+      default-branch: master
 
   coverage:
     needs: changes
     if: github.event_name == 'push' && needs.changes.outputs.coverage == 'true'
-    uses: ./.github/workflows/coverage.yml
+    uses: HEROgold/workflows/.github/workflows/coverage.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
+    permissions:
+      contents: read
+    with:
+      sync-args: --group dev
+      pytest-args: tests/
     secrets:
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
@@ -120,8 +152,10 @@ jobs:
   # change. Coverage is informational, so it isn't listed.
   all-checks:
     if: always() && github.event.action != 'closed'
-    needs: [changes, test, lint, lint-public, gitleaks, docs]
+    needs: [changes, test, lint, public-api, gitleaks, workflow-lint, docs]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
     steps:
       - name: Fail if a check failed or was cancelled
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -130,18 +164,17 @@ jobs:
   # always() is needed even though all-checks passed. Without it, GitHub's
   # implicit success() also looks at the checks all-checks needs, and skips
   # this job whenever one of them was skipped.
-  bump:
+  release:
     needs: all-checks
     if: always() && github.event_name == 'push' && needs.all-checks.result == 'success'
-    uses: ./.github/workflows/bump-version-by-labels.yml
+    uses: HEROgold/workflows/.github/workflows/release.yml@7fa83832879872517776e70f2b5c18f180e21421 # v1.0.0
     permissions:
       contents: write
-      pull-requests: write
-
-  release:
-    needs: bump
-    if: always() && needs.bump.result == 'success'
-    uses: ./.github/workflows/release.yml
-    permissions:
-      contents: write
-    secrets: inherit
+    with:
+      version-command: uv version --short
+      version-file: pyproject.toml
+      sentry: true
+    secrets:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}

@@ -1,0 +1,33 @@
+name: Bump
+
+# A Major, Minor or Patch label on a PR sets the version on the PR's own
+# branch to master's version plus that label, straight away. Removing the
+# label resets it. The bump commit is pushed with GITHUB_TOKEN, so its CI run
+# waits for approval. This is a separate workflow so label events never start
+# ci.yml, whose skipped checks would count as passing.
+on:
+  pull_request:
+    types: [opened, reopened, labeled, unlabeled, synchronize]
+
+concurrency:
+  group: bump-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # pushes the bump commit to the PR branch
+      issues: write # bump-by-label creates the Major, Minor and Patch labels when missing
+    steps:
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Bump by label
+        uses: HEROgold/bump-by-label@BUMP_BY_LABEL_SHA # v5.1.0
+        with:
+          mode: branch
+          command: uv version --no-sync --bump
+          validate: uv version --short
