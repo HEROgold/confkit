@@ -2,11 +2,10 @@ name: CI
 
 # One entry point for every check. The changes job compares the push or PR
 # against .github/ci-filters.yml, and each check only runs when its inputs
-# changed. On pushes to master the release job runs once all-checks passes.
-# Version labels bump the PR's own branch through bump.yml. On a push to
-# master the release job releases any version that has no tag yet, then
-# dispatches new-release-created, which starts pypi.yml. Coverage stays
-# outside the chain.
+# changed. Version labels bump the PR's own branch through bump.yml. On a
+# push to master that passes all-checks, the release job releases any version
+# that has no tag yet, then dispatches new-release-created, which starts
+# pypi.yml. Coverage stays outside the chain.
 #
 # The master ruleset requires none of these checks. To require them, require
 # the all-checks job only. A called workflow's check names change with whether
